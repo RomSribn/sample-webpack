@@ -1,11 +1,16 @@
 {
   "name": "ze",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "workers/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*",
+      "workers/*"
+    ],
+    "nohoist": [
+      "**/@cloudflare/workers-types"
+    ]
+  },
   "description": "",
   "scripts": {},
   "author": "valorkin",

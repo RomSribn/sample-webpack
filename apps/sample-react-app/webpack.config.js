@@ -16,18 +16,25 @@ const ze_dev_env = {
 const ze_branch = [
   {key: 'latest', value: 'snapshot_id'},
   {key: 'latest+valorkin@gmail.com', value: 'snapshot_id'},
+  {key: 'current', value: 'snapshot_id'},
 ]
 
 // todo: ze snapshot sample
 const ze_snapshot = {
   id: '1234567890',
+  // date.now
+  created: '1696958761394',
   creator: {
     name: 'Dmitriy Shekhovtsov',
     email: 'valorkin@gmail.com'
   },
-  // date.now
+  assets: {
+    filepath: {
+      // sha256 content hash
+      hash: '1234567890',
 
-  created: '2021-10-10T10:10:10.000Z',
+    }
+  }
 };
 
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
