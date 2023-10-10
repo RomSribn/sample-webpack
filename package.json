@@ -1,0 +1,16 @@
+{
+  "name": "ze",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
+  "description": "",
+  "scripts": {},
+  "author": "valorkin",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "wrangler": "^3.11.0"
+  }
+}
