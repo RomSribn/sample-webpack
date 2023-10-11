@@ -1,5 +1,12 @@
 {
-	"compilerOptions": {
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "tmp"],
+  "compilerOptions": {
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
 		/* Projects */
