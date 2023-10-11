@@ -9,5 +9,6 @@ const root = ReactDOM.createRoot(
 root.render(
   <StrictMode>
     <App />
+    <p>React version: 123</p>
   </StrictMode>
 );

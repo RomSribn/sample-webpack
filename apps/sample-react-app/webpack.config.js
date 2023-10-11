@@ -47,20 +47,21 @@ const pluginName = 'ConsoleLogOnBuildWebpackPlugin';
 class ConsoleLogOnBuildWebpackPlugin {
   apply(compiler) {
     const { createHash } = require('node:crypto');
-    compiler.hooks.done.tapAsync(pluginName, async (stats) => {
-      console.log('Hello World!');
-    });
+    // compiler.hooks.done.tapAsync(pluginName, async (stats) => {
+      // console.log('Hello World!');
+    // });
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
-      compilation.hooks.processAssets.tap(
+      compilation.hooks.processAssets.tapPromise(
         {
           name: pluginName,
           stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
           // additionalAssets: true,
         },
-        (assets) => {
+        async (assets) => {
+          const trackZeTime = Date.now();
           const uploadableAssets = {};
-          const snapshotHashs = Object.keys(assets)
+          const snapshotHashes = Object.keys(assets)
             .map((key) => {
               const asset = assets[key];
               const className = asset.constructor.name;
@@ -90,7 +91,7 @@ class ConsoleLogOnBuildWebpackPlugin {
             .filter(Boolean);
 
           const snapshotId = createHash('sha256')
-            .update(snapshotHashs.sort().join(''))
+            .update(snapshotHashes.sort().join(''))
             .digest('hex');
 
           const snapshot = {
@@ -104,13 +105,22 @@ class ConsoleLogOnBuildWebpackPlugin {
             created: Date.now(),
             // todo: implement later
             creator: ze_dev_env.git,
-            assets: snapshotHashs
+            assets: snapshotHashes
           };
 
           // todo: add support for buffer uploads
-          console.log('uploading snapshot', snapshot);
-          upload('snapshot', snapshot);
+          const edgeTodo = await upload('snapshot', snapshot);
+          console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`)
+          if (Array.isArray(edgeTodo.assets)) {
+            // todo: remove when debug is done
+            // edgeTodo.assets.length = 1;
+            const responses = await Promise.all(
+              edgeTodo.assets.map((asset) => upload('file', uploadableAssets[asset]))
+            );
 
+            responses.forEach((response) => console.log(response));
+            console.log(`ZE: ${edgeTodo.assets.length} chunks deployed in ${(Date.now() - trackZeTime)}ms`);
+          }
         }
       );
     });
@@ -122,50 +132,62 @@ class ConsoleLogOnBuildWebpackPlugin {
 module.exports = composePlugins(withNx(), withReact(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
+  config.watch = true;
   config.optimization.realContentHash = true;
   config.plugins.push(new CompressionWebpackPlugin());
   config.plugins.push(new ConsoleLogOnBuildWebpackPlugin());
   return config;
 });
 
-function upload(type, body) {
-  const isDev = true;
-  const https = isDev ? require('node:http') : require('node:https');
+async function upload(type, body) {
+  return new Promise((resolve, reject) => {
+    const isDev = true;
+    const https = isDev ? require('node:http') : require('node:https');
 
-  const port = isDev ? 8787 : 443;
-  const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
+    const port = isDev ? 8787 : 443;
+    const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
 
-  // snapshot or file
-  const data = type === 'snapshot' ? JSON.stringify(body) : body.buffer;
+    // snapshot or file
+    const data = type === 'snapshot' ? JSON.stringify(body) : body.buffer;
 
-  const options = {
-    hostname,
-    port,
-    path: `/upload?type=${type}&id=${body.id}`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': data.length
+    const options = {
+      hostname,
+      port,
+      path: `/upload?type=${type}&id=${body.id}`,
+      method: 'POST',
+      headers: {
+        'Content-Length': data.length
+      }
+    };
+
+    if (type === 'snapshot') {
+      options.headers['Content-Type'] = 'application/json';
+    } else if (type === 'file') {
+      options.headers['Content-Type'] = 'application/octet';
+      options.headers['x-file-path'] = body.filepath;
     }
-  };
 
-  const req = https.request(options, (res) => {
-    console.log('statusCode:', res.statusCode);
-    console.log('headers:', res.headers);
+    const req = https.request(options, (res) => {
 
-    res.on('data', (d) => {
-      process.stdout.write(d);
+      res.on('data', (d) => {
+        const response = d?.toString();
+        try {
+          resolve(JSON.parse(response))
+        } catch {
+          resolve({message: response})
+        }
+
+      });
+      // todo: add support for multiple chunks of data
+      // res.on('end', () => console.log('\nNo more data in response.'));
     });
 
-    res.on('end', () => {
-      console.log('\nNo more data in response.');
+    req.on('error', (e) => {
+      console.error(e);
+      return reject(e);
     });
-  });
 
-  req.on('error', (e) => {
-    console.error(e);
+    req.write(data);
+    req.end();
   });
-
-  req.write();
-  req.end();
 }
