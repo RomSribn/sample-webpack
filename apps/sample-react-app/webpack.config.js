@@ -61,7 +61,7 @@ class ConsoleLogOnBuildWebpackPlugin {
         async (assets) => {
           const trackZeTime = Date.now();
           const uploadableAssets = {};
-          const snapshotHashes = Object.keys(assets)
+          const snapshotAssets = Object.keys(assets)
             .map((key) => {
               const asset = assets[key];
               const className = asset.constructor.name;
@@ -86,26 +86,29 @@ class ConsoleLogOnBuildWebpackPlugin {
                 filepath: key,
                 buffer: buffer
               };
-              return hash;
+              return {
+                id: hash,
+                filepath: key
+              };
             })
             .filter(Boolean);
 
           const snapshotId = createHash('sha256')
-            .update(snapshotHashes.sort().join(''))
+            .update(snapshotAssets
+              .map(asset => asset.id).sort().join(''))
             .digest('hex');
+          console.log(`snapshot id: ${snapshotId}`);
 
           const snapshot = {
-            // 3a7c8912d49d3a61b61b1a99def03e43719e8331ca62346ccb5d4cb612782fb1
             type: 'snapshot',
             id: snapshotId,
-
 
             // todo: should I decide it in webpack plugin or in worker?
             tag: `latest+${ze_dev_env.git.email}`,
             created: Date.now(),
             // todo: implement later
             creator: ze_dev_env.git,
-            assets: snapshotHashes
+            assets: snapshotAssets
           };
 
           // todo: add support for buffer uploads
@@ -115,7 +118,7 @@ class ConsoleLogOnBuildWebpackPlugin {
             // todo: remove when debug is done
             // edgeTodo.assets.length = 1;
             const responses = await Promise.all(
-              edgeTodo.assets.map((asset) => upload('file', uploadableAssets[asset]))
+              edgeTodo.assets.map((asset) => upload('file', uploadableAssets[asset.id]))
             );
 
             responses.forEach((response) => console.log(response));
@@ -141,14 +144,14 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
 
 async function upload(type, body) {
   return new Promise((resolve, reject) => {
-    const isDev = true;
+    const isDev = false;
     const https = isDev ? require('node:http') : require('node:https');
 
     const port = isDev ? 8787 : 443;
     const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
 
     // snapshot or file
-    const data = type === 'snapshot' ? JSON.stringify(body) : body.buffer;
+    const data = type === 'snapshot' ? JSON.stringify(body) : body.buffer.toString();
 
     const options = {
       hostname,
@@ -163,7 +166,7 @@ async function upload(type, body) {
     if (type === 'snapshot') {
       options.headers['Content-Type'] = 'application/json';
     } else if (type === 'file') {
-      options.headers['Content-Type'] = 'application/octet';
+      options.headers['Content-Type'] = 'application/text';
       options.headers['x-file-path'] = body.filepath;
     }
 
