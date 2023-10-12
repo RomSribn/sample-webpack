@@ -8,6 +8,7 @@ out
 gen
 ### Node template
 # Logs
+tmp
 logs
 *.log
 npm-debug.log*

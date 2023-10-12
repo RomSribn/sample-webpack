@@ -47,7 +47,7 @@ export default {
           }
           const requestJson = await request.json();
           // 1. we got snapshot object from plugin
-          const response = {assets: [], message: ''};
+          const response = {id: '', assets: [], message: ''};
 
           // todo: use proper status codes
           const found = await env.ze_snapshots.get(id, {type: 'json'});
@@ -57,16 +57,18 @@ export default {
             // todo: get back here where you will have tags and list of versions
             // 3. if snapshot id in kv and different owner - make copy
             // todo: uncomment later
-            return new Response(JSON.stringify(response), { status: 200 });
+            // return new Response(JSON.stringify(response), { status: 200 });
           }
 
           // 4. if snapshot id not in kv - create snapshot in kv - hint json type
-          if (id && !found) {
+          // todo: use tags to store versions
+          if (id /*&& !found*/) {
+            console.log(`deploying snapshot ${id}`)
             await env.ze_snapshots.put(id, JSON.stringify(requestJson));
           }
 
 
-          if (Array.isArray(requestJson.assets)) {
+          if (id && Array.isArray(requestJson.assets)) {
             // 5. check that we have all file hashes in r2 or kv
             const knownFiles = await Promise
               .all(requestJson.assets.map(async (asset) => env.ze_files.head(asset.id)))
@@ -75,7 +77,8 @@ export default {
             response.assets = knownFiles
               .map((file, index) => file ? null : requestJson.assets[index])
               .filter(Boolean);
-            response.message = `Found ${response.assets.length} files to upload in snapshot ${id}`;
+
+            response.id = id;
             return new Response(JSON.stringify(response), { status: 200 });
           }
 
@@ -90,13 +93,14 @@ export default {
           const contentType = request.headers.get('content-type');
           const fileName = request.headers.get('x-file-path');
 
-          if (!contentType.includes('application/text')) {
-            return new Response('Invalid content type', { status: 400 });
-          }
+          // if (!contentType.includes('application/text')) {
+          //   return new Response('Invalid content type', { status: 400 });
+          // }
           // todo: check if file exists - do nothing
-          const reqText = await request.text();
+          const reader = await request.arrayBuffer();
+          // const reqText = await request.text();
           // todo: use html and custom tags to store file metadata for response headers and filename
-          await env.ze_files.put(id, reqText)
+          await env.ze_files.put(id, reader, {metadata: {filename: fileName}})
           return new Response(JSON.stringify({message: `file ${fileName} uploaded`}), {status: 200});
         }
 
@@ -114,20 +118,17 @@ export default {
             .filter(file => !!file?.key)
             .map(async file => await env.ze_files.delete(file.key));
 
-          return new Response('All snapshots deleted', { status: 200 });
+          return new Response(`Deleted ${allSnaps.keys.length} snapshots and ${allFiles.objects.length} files`, { status: 200 });
         }
 
         if (url.pathname === '/list') {
           const files = await env.ze_files.list();
-          const file = await env.ze_files.get(files.objects[3].key);
-
           return new Response(JSON.stringify(files), { status: 200 });
         }
 
         if (url.pathname === '/slist') {
-          const list = await env.ze_snapshots.list({limit: 1});
-          const snap = await env.ze_snapshots.get(list?.keys[0].name, {type: 'json'});
-          return new Response(JSON.stringify(snap), { status: 200 });
+          const list = await env.ze_snapshots.list();
+          return new Response(JSON.stringify(list), { status: 200 });
         }
 
         // 1. if have request for root with _ze_id = set cookie to consume some particular snapshot
@@ -137,11 +138,12 @@ export default {
         // 1. get snapshot id from headers
         // 2. get if not snapshot id from cookie choose latest snapshot and set cookie for it
         // 3. return file based on snapshot id and file path
-        const list = await env.ze_snapshots.list({limit: 1});
-        if (list?.keys?.length < 1) {
-          return new Response('Snapshots Not Found', { status: 404 });
-        }
-        const snapshot = await env.ze_snapshots.get(list.keys[0].name, {type: 'json'});
+        // const list = await env.ze_snapshots.list({limit: 1});
+        // if (list?.keys?.length < 1) {
+        //   return new Response('Snapshots Not Found', { status: 404 });
+        // }
+        // const snapshot = await env.ze_snapshots.get(list.keys[0].name, {type: 'json'});
+        const snapshot = await env.ze_snapshots.get('latest', {type: 'json'});
         if (!snapshot) {
           return new Response('Snapshot Not Found', { status: 404 });
         }
@@ -152,12 +154,31 @@ export default {
         const headers = new Headers();
 
         const fileAsset = snapshot.assets.find(asset => asset.filepath === pathname);
-        const file = await env.ze_files.get(fileAsset.id);
+        const gzFileAsset = snapshot.assets.find(asset => asset.filepath === `${pathname}.gz`);
+        const asset = gzFileAsset || fileAsset;
+        const file = await env.ze_files.get(asset.id)
 
+        console.log(`serving ${pathname} from ${asset.id} size ${file.size}`)
+
+        headers.set('Content-Length', file.size);
+        if (gzFileAsset) {
+          headers.set('Content-Encoding', 'gzip');
+        }
+        if (pathname.indexOf('.html') > -1) {
+          headers.set('Content-Type', 'text/html');
+        }
         if (pathname.indexOf('.js') > -1) {
           headers.set('Content-Type', 'application/javascript');
         }
-        return new Response(file.body, { status: 200, headers });
+        if (pathname.indexOf('.css') > -1) {
+          headers.set('Content-Type', 'text/css');
+        }
+
+        return new Response(file.body, {
+          status: 200,
+          encodeBody: gzFileAsset ? "manual" : "automatic",
+          headers
+        });
       default:
         return new Response('Method Not Allowed', {
           status: 405,

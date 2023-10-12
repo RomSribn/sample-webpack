@@ -48,7 +48,7 @@ class ConsoleLogOnBuildWebpackPlugin {
   apply(compiler) {
     const { createHash } = require('node:crypto');
     // compiler.hooks.done.tapAsync(pluginName, async (stats) => {
-      // console.log('Hello World!');
+    // console.log('Hello World!');
     // });
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
@@ -97,7 +97,20 @@ class ConsoleLogOnBuildWebpackPlugin {
             .update(snapshotAssets
               .map(asset => asset.id).sort().join(''))
             .digest('hex');
-          console.log(`snapshot id: ${snapshotId}`);
+
+          const allFilenames = snapshotAssets
+            .reduce((memo, asset) => {
+              memo[asset.filepath] = {
+                ...asset,
+                id: snapshotAssets[`${assets.filepath}.gz`]
+                  ? snapshotAssets[`${assets.filepath}.gz`].id
+                  : asset.id
+              };
+              return memo;
+            }, {});
+          // remove files which has .gz version
+          const dedupedAssets =
+            snapshotAssets.filter(assets => !(`${assets.filepath}.gz` in allFilenames));
 
           const snapshot = {
             type: 'snapshot',
@@ -108,22 +121,30 @@ class ConsoleLogOnBuildWebpackPlugin {
             created: Date.now(),
             // todo: implement later
             creator: ze_dev_env.git,
-            assets: snapshotAssets
+            assets: dedupedAssets
           };
 
-          // todo: add support for buffer uploads
           const edgeTodo = await upload('snapshot', snapshot);
-          console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`)
+          console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`);
           if (Array.isArray(edgeTodo.assets)) {
             // todo: remove when debug is done
             // edgeTodo.assets.length = 1;
             const responses = await Promise.all(
-              edgeTodo.assets.map((asset) => upload('file', uploadableAssets[asset.id]))
+              edgeTodo.assets.map((asset) => {
+                const start = Date.now();
+                return upload('file', uploadableAssets[asset.id])
+                  .then((response) => {
+                    console.log(`ZE: ${asset.filepath} deployed in ${(Date.now() - start)}ms`);
+                  });
+              })
             );
 
-            responses.forEach((response) => console.log(response));
             console.log(`ZE: ${edgeTodo.assets.length} chunks deployed in ${(Date.now() - trackZeTime)}ms`);
           }
+
+          const latest = await upload('snapshot', {...snapshot, id: 'latest'});
+          console.log(`latest upload result: ${JSON.stringify(latest)}`);
+          // todo: latest version to just deployed snapshot
         }
       );
     });
@@ -144,29 +165,29 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
 
 async function upload(type, body) {
   return new Promise((resolve, reject) => {
-    const isDev = false;
+    const isDev = true;
     const https = isDev ? require('node:http') : require('node:https');
 
     const port = isDev ? 8787 : 443;
     const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
 
     // snapshot or file
-    const data = type === 'snapshot' ? JSON.stringify(body) : body.buffer.toString();
+    const data = body.buffer || JSON.stringify(body);
 
     const options = {
       hostname,
       port,
-      path: `/upload?type=${type}&id=${body.id}`,
+      path: `/upload/${type}/${body.id}?type=${type}&id=${body.id}`,
       method: 'POST',
       headers: {
         'Content-Length': data.length
       }
     };
 
-    if (type === 'snapshot') {
+    if (!body.buffer) {
       options.headers['Content-Type'] = 'application/json';
-    } else if (type === 'file') {
-      options.headers['Content-Type'] = 'application/text';
+    } else {
+      options.headers['Content-Type'] = 'application/octet';
       options.headers['x-file-path'] = body.filepath;
     }
 
@@ -175,9 +196,9 @@ async function upload(type, body) {
       res.on('data', (d) => {
         const response = d?.toString();
         try {
-          resolve(JSON.parse(response))
+          resolve(JSON.parse(response));
         } catch {
-          resolve({message: response})
+          resolve(response);
         }
 
       });
