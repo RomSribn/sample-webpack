@@ -1,11 +1,11 @@
 {
-  "name": "ze-worker-for-static-upload",
+  "name": "ze-worker-for-static-serve",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --log-level=debug",
-    "start": "wrangler dev --log-level=debug --persist-to=../.wrangler"
+    "dev": "wrangler dev --log-level=debug --port=8888",
+    "start": "wrangler dev --log-level=debug --port=8888 --persist-to=../.wrangler"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230419.0",

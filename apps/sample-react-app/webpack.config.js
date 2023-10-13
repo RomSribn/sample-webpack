@@ -165,7 +165,7 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
 
 async function upload(type, body) {
   return new Promise((resolve, reject) => {
-    const isDev = true;
+    const isDev = false;
     const https = isDev ? require('node:http') : require('node:https');
 
     const port = isDev ? 8787 : 443;
@@ -192,18 +192,19 @@ async function upload(type, body) {
     }
 
     const req = https.request(options, (res) => {
-
+      let response = [];
       res.on('data', (d) => {
-        const response = d?.toString();
-        try {
-          resolve(JSON.parse(response));
-        } catch {
-          resolve(response);
-        }
-
+        response.push(d);
       });
-      // todo: add support for multiple chunks of data
-      // res.on('end', () => console.log('\nNo more data in response.'));
+
+      res.on('end', () => {
+        const _response = Buffer.concat(response)?.toString();
+        try {
+          resolve(JSON.parse(_response));
+        } catch {
+          resolve(_response);
+        }
+      });
     });
 
     req.on('error', (e) => {
