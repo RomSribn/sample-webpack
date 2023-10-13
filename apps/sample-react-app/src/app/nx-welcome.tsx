@@ -6,6 +6,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 export function NxWelcome({ title }: { title: string }) {
+  function blowMeUp() {
+    throw new Error(`Get me sentry rollbacks`)
+  }
+
   return (
     <>
       <style
@@ -421,6 +425,7 @@ export function NxWelcome({ title }: { title: string }) {
               <span> Zack 9</span>
               Welcome {title} 👋
             </h1>
+            <button className="button-pill" onClick={() => blowMeUp()}>Break the world</button>
           </div>
 
           <div id="hero" className="rounded">
