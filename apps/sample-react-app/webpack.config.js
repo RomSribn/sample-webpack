@@ -44,7 +44,7 @@ const { hostname } = require('os');
 
 const pluginName = 'ConsoleLogOnBuildWebpackPlugin';
 
-class ConsoleLogOnBuildWebpackPlugin {
+class ZeWebpackPlugin {
   apply(compiler) {
     const { createHash } = require('node:crypto');
     // compiler.hooks.done.tapAsync(pluginName, async (stats) => {
@@ -58,7 +58,8 @@ class ConsoleLogOnBuildWebpackPlugin {
           stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
           // additionalAssets: true,
         },
-        async (assets) => {
+        async (assets, ...rest) => {
+          console.log(rest);
           const trackZeTime = Date.now();
           const uploadableAssets = {};
           const snapshotAssets = Object.keys(assets)
@@ -109,8 +110,10 @@ class ConsoleLogOnBuildWebpackPlugin {
               return memo;
             }, {});
           // remove files which has .gz version
-          const dedupedAssets =
-            snapshotAssets.filter(assets => !(`${assets.filepath}.gz` in allFilenames));
+          // const dedupedAssets = snapshotAssets.filter(assets => !(`${assets.filepath}.gz` in allFilenames));
+          const dedupedAssets = snapshotAssets
+            .filter(assets => !(assets.filepath.indexOf('.gz') > -1 ));
+          // const dedupedAssets = snapshotAssets;
 
           const snapshot = {
             type: 'snapshot',
@@ -157,9 +160,9 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   config.watch = true;
-  config.optimization.realContentHash = true;
+  // config.optimization.realContentHash = true;
   config.plugins.push(new CompressionWebpackPlugin());
-  config.plugins.push(new ConsoleLogOnBuildWebpackPlugin());
+  config.plugins.push(new ZeWebpackPlugin());
   return config;
 });
 

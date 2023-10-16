@@ -26,15 +26,19 @@ compatibility_date = "2023-10-02"
  binding = "ze_kv"
  id = "8cc7cce8351c479f96a4b4314656b898"
 
+[[kv_namespaces]]
+binding = "ze_files"
+id = "5047da35f1bd46f094857cfb2c0ebe57"
+
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
- [[r2_buckets]]
- binding = "ze_files"
- bucket_name = "ze-files"
+# [[r2_buckets]]
+# binding = "ze_r2_files"
+# bucket_name = "ze-files"
 #
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/queues/get-started

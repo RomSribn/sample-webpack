@@ -5,7 +5,8 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --log-level=debug",
-    "start": "wrangler dev --log-level=debug --persist-to=../.wrangler"
+    "start": "wrangler dev --log-level=debug --persist-to=../.wrangler",
+    "log": "wrangler tail"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230419.0",

@@ -1,5 +1,9 @@
+function log(obj) {
+  console.log(`log ${JSON.stringify(obj)}`);
+}
+
 interface Env {
-  ze_files: R2Bucket;
+  ze_files: KVNamespace;
   ze_snapshots: KVNamespace;
   ze_tag_snapshot: DurableObject;
 }
@@ -34,14 +38,18 @@ export class ZeDurableObject implements DurableObject {
     // 1. restore state from kv
     this.state = state;
     this.env = env;
+    this.state.blockConcurrencyWhile(async () => {
+      this.snapshot = await this.state.storage.get('latest');
+    });
   }
 
   // 2. return r2 based on current in-memory snapshot
   async fetch(request: Request) {
     // await this.state.storage.delete('latest');
-    let snapshot = await this.state.storage.get('latest');
+    const snapTime = Date.now();
+    let snapshot = this.snapshot;
     if (!snapshot || (snapshot && snapshot.assetsMap?.length === 0)) {
-      const snapshot = await this.env.ze_snapshots.get('latest', { type: 'json' });
+      snapshot = await this.env.ze_snapshots.get('latest', { type: 'json' });
       if (!snapshot) {
         return new Response('Snapshot Not Found', { status: 404 });
       }
@@ -78,23 +86,27 @@ export class ZeDurableObject implements DurableObject {
     }
 
     const url = new URL(request.url);
+    console.log(`snapshot ${url.pathname} ${Date.now() - snapTime}ms`);
     const pathname = url.pathname === '/' || url.pathname === ''
       ? 'index.html'
       : url.pathname.substring(1);
 
-    const asset = snapshot.assetsMap[`${pathname}.gz`] || snapshot.assetsMap[pathname];
+    // const asset = snapshot.assetsMap[`${pathname}.gz`] || snapshot.assetsMap[pathname];
+    const asset = snapshot?.assetsMap[pathname];
     if (!asset) {
       return new Response('Asset Not Found', { status: 404 });
     }
 
-    const file = await this.env.ze_files.get(asset.id);
+    const fileTime = Date.now();
+    const file = await this.env.ze_files.get(asset.id, 'stream');
+    console.log(`file ${pathname} ${Date.now() - fileTime}ms`);
 
     const headers = new Headers(asset.headers);
-    headers.set('Content-Length', file.size);
+    // headers.set('Content-Length', file.size);
 
-    return new Response(file.body, {
+    return new Response(file, {
       status: 200,
-      encodeBody: asset.compressed ? 'manual' : 'automatic',
+      // encodeBody: asset.compressed ? 'manual' : 'automatic',
       headers
     });
   }
