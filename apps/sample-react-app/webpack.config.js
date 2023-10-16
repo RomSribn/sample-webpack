@@ -1,6 +1,8 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
+const isDev = false;
+
 // todo: ze wrapper should add:
 // CompressionWebpackPlugin
 
@@ -168,7 +170,7 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
 
 async function upload(type, body) {
   return new Promise((resolve, reject) => {
-    const isDev = false;
+
     const https = isDev ? require('node:http') : require('node:https');
 
     const port = isDev ? 8787 : 443;
