@@ -142,12 +142,15 @@ class ZeWebpackPlugin {
             assets: dedupedAssets
           };
 
-          logEvent({message: `build finished, snapshot ${snapshot.id} uploaded`});
+          logEvent({message: `build finished in ${Date.now() - buildStartedAt}ms`});
+          logEvent({message: `uploading snapshot ${snapshot.id}`});
+          const snapUploadMs = Date.now();
           const edgeTodo = await upload('snapshot', snapshot);
-          console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`);
+          edgeTodo && logEvent({message: `uploaded snapshot ${snapshot.id} in ${Date.now() - snapUploadMs}ms`});
+          edgeTodo && console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`);
 
           if (edgeTodo && Array.isArray(edgeTodo.assets)) {
-            logEvent({message: `uploading missing ${edgeTodo?.assets?.length} assets`});
+            logEvent({message: `uploading missing ${edgeTodo?.assets?.length} from ${assets.length} assets`});
             // todo: remove when debug is done
             // edgeTodo.assets.length = 1;
             let totalTime = 0;
@@ -162,7 +165,7 @@ class ZeWebpackPlugin {
                   });
               })
             );
-            logEvent({message: `uploaded missing ${edgeTodo?.assets?.length} assets in ${totalTime}`});
+            logEvent({message: `uploaded missing ${edgeTodo?.assets?.length} assets in ${totalTime}ms`});
             console.log(`ZE: ${edgeTodo.assets.length} chunks deployed in ${(Date.now() - trackZeTime)}ms`);
           }
 
@@ -170,7 +173,7 @@ class ZeWebpackPlugin {
           const latest = await upload('snapshot', {...snapshot, id: 'latest'});
           latest && logEvent({message: `deployed snapshot ${snapshot.id} as latest`});
           // todo: latest version to just deployed snapshot
-          logEvent({message: `build finished in ${Date.now() - buildStartedAt}ms`});
+          logEvent({message: `build deployed in ${Date.now() - snapUploadMs}ms`});
         }
       );
     });
@@ -200,7 +203,7 @@ function logEvent({author, logLevel, actionType, message, json, createdAt}) {
   createdAt ||= Date.now();
 
   const port = isDev ? 8855 : 443;
-  const hostname = isDev ? '127.0.0.1' : '';
+  const hostname = isDev ? '127.0.0.1' : 'ze-worker-to-receive-logs.valorkin.workers.dev';
   const data = JSON.stringify({author, logLevel, actionType, message, json, createdAt});
 
   const options = {
