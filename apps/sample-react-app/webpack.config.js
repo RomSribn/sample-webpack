@@ -1,7 +1,7 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
-const isDev = false;
+const isDev = true;
 
 // todo: ze wrapper should add:
 // CompressionWebpackPlugin
@@ -46,6 +46,11 @@ class ZeWebpackPlugin {
   apply(compiler) {
     const { createHash } = require('node:crypto');
     // todo: in theory this should set buildId as a query param, but it doesn't work
+    const buildStartedAt = Date.now();
+    compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
+      logEvent({message: 'build started'});
+      cb();
+    });
 /*    let buildId = -1;
     compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
       buildId = (await getBuildId(ze_dev_env.git.email))[ze_dev_env.git.email];
@@ -61,7 +66,7 @@ class ZeWebpackPlugin {
     }*/
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
-      compilation.hooks.assetPath.tap(pluginName, replacePathVariables);
+      // compilation.hooks.assetPath.tap(pluginName, replacePathVariables);
 
       compilation.hooks.processAssets.tapPromise(
         {
@@ -69,8 +74,7 @@ class ZeWebpackPlugin {
           stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
           // additionalAssets: true,
         },
-        async (assets, ...rest) => {
-          console.log(rest);
+        async (assets) => {
           const trackZeTime = Date.now();
           const uploadableAssets = {};
           const snapshotAssets = Object.keys(assets)
@@ -138,27 +142,35 @@ class ZeWebpackPlugin {
             assets: dedupedAssets
           };
 
+          logEvent({message: `build finished, snapshot ${snapshot.id} uploaded`});
           const edgeTodo = await upload('snapshot', snapshot);
           console.log(`snapshot upload result: ${JSON.stringify(edgeTodo)}`);
-          if (Array.isArray(edgeTodo.assets)) {
+
+          if (edgeTodo && Array.isArray(edgeTodo.assets)) {
+            logEvent({message: `uploading missing ${edgeTodo?.assets?.length} assets`});
             // todo: remove when debug is done
             // edgeTodo.assets.length = 1;
-            const responses = await Promise.all(
+            let totalTime = 0;
+            await Promise.all(
               edgeTodo.assets.map((asset) => {
                 const start = Date.now();
                 return upload('file', uploadableAssets[asset.id])
                   .then((response) => {
-                    console.log(`ZE: ${asset.filepath} deployed in ${(Date.now() - start)}ms`);
+                    const ms = Date.now() - start;
+                    totalTime += ms;
+                    console.log(`ZE: ${asset.filepath} deployed in ${ms}ms`);
                   });
               })
             );
-
+            logEvent({message: `uploaded missing ${edgeTodo?.assets?.length} assets in ${totalTime}`});
             console.log(`ZE: ${edgeTodo.assets.length} chunks deployed in ${(Date.now() - trackZeTime)}ms`);
           }
 
+          edgeTodo && logEvent({message: `deploying snapshot ${snapshot.id} as latest`});
           const latest = await upload('snapshot', {...snapshot, id: 'latest'});
-          console.log(`latest upload result: ${JSON.stringify(latest)}`);
+          latest && logEvent({message: `deployed snapshot ${snapshot.id} as latest`});
           // todo: latest version to just deployed snapshot
+          logEvent({message: `build finished in ${Date.now() - buildStartedAt}ms`});
         }
       );
     });
@@ -177,8 +189,34 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   return config;
 });
 
+
+function logEvent({author, logLevel, actionType, message, json, createdAt}) {
+  // todo: defaults
+  author ||= ze_dev_env.git.email;
+  logLevel ||= 'debug';
+  actionType ||= 'build';
+  message ||= '';
+  json ||= {};
+  createdAt ||= Date.now();
+
+  const port = isDev ? 8855 : 443;
+  const hostname = isDev ? '127.0.0.1' : '';
+  const data = JSON.stringify({author, logLevel, actionType, message, json, createdAt});
+
+  const options = {
+    hostname,
+    port,
+    path: `/`,
+    method: 'POST',
+    headers: {
+      'Content-Length': data.length
+    }
+  };
+
+  request(options, data).then(_ => void 0).catch(_ => void 0);
+}
+
 async function getBuildId(key) {
-  const https = isDev ? require('node:http') : require('node:https');
   const port = 443;
   const hostname = 'ze-worker-to-generate-build-id.valorkin.workers.dev';
 
@@ -189,28 +227,10 @@ async function getBuildId(key) {
     method: 'GET'
   };
 
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let response = [];
-      res.on('data', (d) => response.push(d));
-
-      res.on('end', () => {
-        const _response = Buffer.concat(response)?.toString();
-        try {
-          resolve(JSON.parse(_response));
-        } catch {
-          resolve(_response);
-        }
-      });
-    });
-
-    req.on('error', (e) => reject(e));
-    req.end();
-  });
+  return request(options);
 }
 
 async function upload(type, body) {
-  const https = isDev ? require('node:http') : require('node:https');
   const port = isDev ? 8787 : 443;
   const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
   const data = body.buffer || JSON.stringify(body);
@@ -232,12 +252,15 @@ async function upload(type, body) {
     options.headers['x-file-path'] = body.filepath;
   }
 
+  return request(options, data).catch(_ => void 0);
+}
+
+async function request(options, data) {
+  const https = isDev ? require('node:http') : require('node:https');
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let response = [];
-      res.on('data', (d) => {
-        response.push(d);
-      });
+      res.on('data', (d) => response.push(d));
 
       res.on('end', () => {
         const _response = Buffer.concat(response)?.toString();
@@ -249,13 +272,12 @@ async function upload(type, body) {
       });
     });
 
-    req.on('error', (e) => {
-      console.error(e);
-      return reject(e);
-    });
+    req.on('error', (e) =>  reject(e));
 
-    req.write(data);
+    if (data) {
+      req.write(data);
+    }
+
     req.end();
   });
 }
-

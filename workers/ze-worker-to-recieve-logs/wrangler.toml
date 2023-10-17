@@ -46,9 +46,9 @@ compatibility_date = "2023-10-02"
 # binding = "MY_QUEUE"
 # queue = "my-queue"
 
-# [[queues.producers]]
-# binding = "ze_activity_log"
-# queue = "ze-activity-log"
+ [[queues.producers]]
+ binding = "ze_activity_log"
+ queue = "ze-activity-log"
 
 # Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
 # Docs: https://developers.cloudflare.com/queues/get-started

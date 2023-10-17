@@ -22,11 +22,27 @@ export interface Env {
 export default {
   // produce
   async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    await env.ze_activity_log.send({
-      url: req.url,
-      method: req.method,
-      headers: Object.fromEntries(req.headers),
-    });
+    const url = new URL(req.url);
+
+    switch (req.method) {
+      case 'POST':
+        const body = await req.json();
+        const {author, logLevel, actionType, message, json, createdAt} = body;
+        console.log(`received message: ${JSON.stringify(body)} from ${author}`);
+        await env.ze_activity_log.send({
+          author,
+          logLevel,
+          actionType,
+          message,
+          json,
+          createdAt,
+        });
+        break;
+      default:
+        return new Response('Method not allowed', { status: 405 });
+    }
+
+
     return new Response('Sent message to the queue');
   },
   // consume

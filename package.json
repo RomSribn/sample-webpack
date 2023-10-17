@@ -8,7 +8,10 @@
       "workers/*"
     ],
     "nohoist": [
-      "**/@cloudflare/workers-types"
+      "**/@cloudflare/workers-types",
+      "**/tsconfig-paths",
+      "**/@swc/core",
+      "**/@swc/register"
     ]
   },
   "description": "",

@@ -3,9 +3,10 @@
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "node_modules/@cloudflare/workers-types/index.d.ts"
   ],
-  "exclude": ["node_modules", "tmp"],
+  "exclude": ["tmp"],
   "compilerOptions": {
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 

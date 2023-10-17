@@ -1,36 +1,10 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-function log(obj) {
-  console.log(`log ${JSON.stringify(obj)}`);
-}
-
 export interface Env {
   ze_files: KVNamespace;
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-  // MY_KV_NAMESPACE: KVNamespace;
   ze_kv: KVNamespace;
   ze_tags: KVNamespace;
   ze_snapshots: KVNamespace;
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
-  //
-  // Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-  // MY_SERVICE: Fetcher;
-  //
-  // Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-  // MY_QUEUE: Queue;
-}
 
+}
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -48,11 +22,6 @@ export default {
           if (!id) {
             return new Response('Missing id', { status: 400 });
           }
-
-          // const contentType = request.headers.get('content-type');
-          // if (!contentType.includes('application/json')) {
-          //   return new Response('Invalid content type', { status: 400 });
-          // }
 
           const requestJson = await request.json();
           // 1. we got snapshot object from plugin
