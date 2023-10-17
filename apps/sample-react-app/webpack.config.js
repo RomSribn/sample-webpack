@@ -40,20 +40,29 @@ const ze_snapshot = {
 };
 
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
-const { createHash } = require('node:crypto');
-const https = require('node:https');
-const { hostname } = require('os');
-
 const pluginName = 'ConsoleLogOnBuildWebpackPlugin';
 
 class ZeWebpackPlugin {
   apply(compiler) {
     const { createHash } = require('node:crypto');
-    // compiler.hooks.done.tapAsync(pluginName, async (stats) => {
-    // console.log('Hello World!');
-    // });
+    // todo: in theory this should set buildId as a query param, but it doesn't work
+/*    let buildId = -1;
+    compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
+      buildId = (await getBuildId(ze_dev_env.git.email))[ze_dev_env.git.email];
+      cb();
+    });
+    const replacePathVariables = (path, data, assetInfo) => {
+      // todo: if [query] use `&` instead of `?`
+      if (typeof path !== 'string' || path.indexOf('name') === -1) return path;
+      const operand = path.indexOf('?') > -1 ? '&' : '?';
+      // return path.indexOf('query') > -1 ? path : `${path}${operand}[query]`;
+      console.log(path, data.filename)
+      return path;
+    }*/
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.assetPath.tap(pluginName, replacePathVariables);
+
       compilation.hooks.processAssets.tapPromise(
         {
           name: pluginName,
@@ -164,38 +173,66 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   config.watch = true;
   // config.optimization.realContentHash = true;
   config.plugins.push(new CompressionWebpackPlugin());
-  config.plugins.push(new ZeWebpackPlugin());
+  config.plugins.unshift(new ZeWebpackPlugin());
   return config;
 });
 
-async function upload(type, body) {
+async function getBuildId(key) {
+  const https = isDev ? require('node:http') : require('node:https');
+  const port = 443;
+  const hostname = 'ze-worker-to-generate-build-id.valorkin.workers.dev';
+
+  const options = {
+    hostname,
+    port,
+    path: `/?key=${key}`,
+    method: 'GET'
+  };
+
   return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let response = [];
+      res.on('data', (d) => response.push(d));
 
-    const https = isDev ? require('node:http') : require('node:https');
+      res.on('end', () => {
+        const _response = Buffer.concat(response)?.toString();
+        try {
+          resolve(JSON.parse(_response));
+        } catch {
+          resolve(_response);
+        }
+      });
+    });
 
-    const port = isDev ? 8787 : 443;
-    const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
+    req.on('error', (e) => reject(e));
+    req.end();
+  });
+}
 
-    // snapshot or file
-    const data = body.buffer || JSON.stringify(body);
+async function upload(type, body) {
+  const https = isDev ? require('node:http') : require('node:https');
+  const port = isDev ? 8787 : 443;
+  const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
+  const data = body.buffer || JSON.stringify(body);
 
-    const options = {
-      hostname,
-      port,
-      path: `/upload/${type}/${body.id}?type=${type}&id=${body.id}`,
-      method: 'POST',
-      headers: {
-        'Content-Length': data.length
-      }
-    };
-
-    if (!body.buffer) {
-      options.headers['Content-Type'] = 'application/json';
-    } else {
-      options.headers['Content-Type'] = 'application/octet';
-      options.headers['x-file-path'] = body.filepath;
+  const options = {
+    hostname,
+    port,
+    path: `/upload/${type}/${body.id}?type=${type}&id=${body.id}`,
+    method: 'POST',
+    headers: {
+      'Content-Length': data.length
     }
+  };
 
+  if (!body.buffer) {
+    options.headers['Content-Type'] = 'application/json';
+  } else {
+    options.headers['Content-Type'] = 'application/octet';
+    options.headers['x-file-path'] = body.filepath;
+  }
+
+  return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let response = [];
       res.on('data', (d) => {
@@ -221,3 +258,4 @@ async function upload(type, body) {
     req.end();
   });
 }
+
