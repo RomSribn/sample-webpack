@@ -1,34 +1,66 @@
-/**
- * Welcome to Cloudflare Workers!
- *
- * This is a template for a Queue consumer: a Worker that can consume from a
- * Queue: https://developers.cloudflare.com/queues/get-started/
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- * https://developers.cloudflare.com/queues/platform/javascript-apis/#producer
- * https://developers.cloudflare.com/queues/get-started/#3-create-a-queue
- * https://developers.cloudflare.com/queues/platform/javascript-apis/#messagebatch
- */
+import template from './template';
 
 export interface Env {
   // Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
   ze_activity_log: Queue;
 }
 
+let count = 0
+let ws;
+async function handleSession(websocket) {
+  websocket.accept()
+  websocket.addEventListener("message", async ({ data }) => {
+    if (data === "CLICK") {
+      count += 1
+      websocket.send(JSON.stringify({ count, tz: new Date() }))
+    } else {
+      // An unknown message came into the server. Send back an error message
+      websocket.send(JSON.stringify({ error: "Unknown message received", tz: new Date() }))
+    }
+  })
+
+  websocket.addEventListener("close", async evt => {
+    // Handle when a client closes the WebSocket connection
+    console.log(evt)
+  })
+}
+async function websocketHandler(request) {
+  const upgradeHeader = request.headers.get("Upgrade")
+  if (upgradeHeader !== "websocket") {
+    return new Response("Expected websocket", { status: 400 })
+  }
+
+  const [client, server] = Object.values(new WebSocketPair())
+  await handleSession(server)
+
+  return new Response(null, {
+    status: 101,
+    webSocket: client
+  })
+}
+
 export default {
   // produce
   async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(req.url);
+    try {
+      const url = new URL(req.url)
+      console.log(JSON.stringify(url));
+      switch (url.pathname) {
+        case '/':
+          return template()
+        case '/ws':
+          return await websocketHandler(req)
+        default:
+          return new Response("Not found", { status: 404 })
+      }
+    } catch (err) {
+      return new Response(err.toString())
+    }
 
     switch (req.method) {
       case 'POST':
         const body = await req.json();
         const {author, logLevel, actionType, message, json, createdAt} = body;
-        console.log(`received message: ${JSON.stringify(body)} from ${author}`);
         await env.ze_activity_log.send({
           author,
           logLevel,
@@ -46,9 +78,9 @@ export default {
     return new Response('Sent message to the queue');
   },
   // consume
-  // async queue(batch: MessageBatch<Error>, env: Env): Promise<void> {
-  //   for (let message of batch.messages) {
-  //     console.log(`message ${message.id} processed: ${JSON.stringify(message.body)}`);
-  //   }
-  // },
+  async queue(batch: MessageBatch<Error>, env: Env): Promise<void> {
+    for (let message of batch.messages) {
+      console.log(`message ${message.id} processed: ${JSON.stringify(message.body)}`);
+    }
+  },
 };

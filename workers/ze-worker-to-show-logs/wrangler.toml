@@ -55,6 +55,9 @@ compatibility_date = "2023-10-02"
 # [[queues.consumers]]
 # queue = "my-queue"
 
+ [[queues.consumers]]
+ queue = "ze-activity-log"
+
 # Bind another Worker service. Use this binding to call another Worker without network overhead.
 # Docs: https://developers.cloudflare.com/workers/platform/services
 # [[services]]

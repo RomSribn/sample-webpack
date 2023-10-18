@@ -50,6 +50,12 @@ compatibility_date = "2023-10-02"
  binding = "ze_activity_log"
  queue = "ze-activity-log"
 
+[[queues.consumers]]
+queue = "ze-activity-log"
+max_concurrency = 1
+max_batch_size = 1 # optional: defaults to 10
+max_batch_timeout = 5 # optional: defaults to 5 seconds
+
 # Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
 # Docs: https://developers.cloudflare.com/queues/get-started
 # [[queues.consumers]]

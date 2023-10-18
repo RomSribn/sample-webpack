@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "start": "wrangler dev --log-level=debug --persist-to=../.wrangler --port=8899",
+    "start": "wrangler dev --log-level=debug --persist-to=../.wrangler --port=8866",
     "log": "wrangler tail"
   },
   "devDependencies": {
