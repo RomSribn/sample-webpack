@@ -1,6 +1,14 @@
 // todo: ze from git
 const ze_dev_env = {
   isCI: false,
+  app: {
+    // from zephyr server? how current plugin does it?
+    appId: 'mono/sample-react-app',
+    // git org
+    org: 'valorkin',
+    // git repo/package name
+    name: 'ze-mono/sample-react-app',
+  },
   git: {
     name: 'Dmitriy Shekhovtsov',
     email: 'valorkin@gmail.com',

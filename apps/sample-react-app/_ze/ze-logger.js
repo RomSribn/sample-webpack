@@ -10,7 +10,7 @@ function logEvent({ appId, zeUserId, zeBuildId, logLevel, actionType, git, messa
 
   logLevel ||= 'debug';
   actionType ||= 'build';
-  message ||= '';
+  message = `[${ze_dev_env.app.org}/${ze_dev_env.app.name}](${ze_dev_env.git.name}): ${message}`;
 
   git = ze_dev_env.git;
 
