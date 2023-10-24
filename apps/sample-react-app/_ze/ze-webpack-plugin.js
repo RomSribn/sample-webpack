@@ -67,22 +67,6 @@ class ZeWebpackPlugin {
               .map(asset => asset.id).sort().join(''))
             .digest('hex');
 
-          // const allFilenames = snapshotAssets
-          //   .reduce((memo, asset) => {
-          //     memo[asset.filepath] = {
-          //       ...asset,
-          //       id: snapshotAssets[`${assets.filepath}.gz`]
-          //         ? snapshotAssets[`${assets.filepath}.gz`].id
-          //         : asset.id
-          //     };
-          //     return memo;
-          //   }, {});
-          // remove files which has .gz version
-          // const dedupedAssets = snapshotAssets.filter(assets => !(`${assets.filepath}.gz` in allFilenames));
-          const dedupedAssets = snapshotAssets
-            .filter(assets => !(assets.filepath.indexOf('.gz') > -1 ));
-          // const dedupedAssets = snapshotAssets;
-
           const snapshot = {
             type: 'snapshot',
             id: snapshotId,
@@ -92,7 +76,7 @@ class ZeWebpackPlugin {
             created: Date.now(),
             // todo: implement later
             creator: ze_dev_env.git,
-            assets: dedupedAssets
+            assets: snapshotAssets
           };
 
           logEvent({message: `build finished in ${Date.now() - buildStartedAt}ms`});
