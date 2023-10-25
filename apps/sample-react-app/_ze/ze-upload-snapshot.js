@@ -23,11 +23,11 @@ async function zeUploadSnapshot(snapshot) {
     logEvent({
       level: 'info',
       action: 'snapshot:upload:done',
-      message: `uploaded ${buildEnv} snapshot ${snapshot.id} in ${Date.now() - snapUploadMs}ms`
+      message: `uploaded ${buildEnv} snapshot in ${Date.now() - snapUploadMs}ms`
     });
   }
 
-  return { edgeTodo };
+  return edgeTodo;
 }
 
 module.exports = { zeUploadSnapshot };

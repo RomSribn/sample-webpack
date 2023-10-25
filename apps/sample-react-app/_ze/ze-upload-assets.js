@@ -9,7 +9,7 @@ async function zeUploadAssets({missingAssets, uploadableAssets, count}) {
   logEvent({
     level: 'info',
     action: 'snapshot:assets:upload:started',
-    message: `uploading missing assets to zephyr (${missingAssets?.assets?.length} from ${count})`
+    message: `uploading missing assets to zephyr (queued ${missingAssets?.assets?.length} out of ${count})`
   });
 
   let totalTime = 0;
@@ -20,7 +20,11 @@ async function zeUploadAssets({missingAssets, uploadableAssets, count}) {
         .then(_ => {
           const ms = Date.now() - start;
           totalTime += ms;
-          console.log(`ZE: ${asset.filepath} deployed in ${ms}ms`);
+          logEvent({
+            level: 'info',
+            action: 'snapshot:assets:upload:file:done',
+            message: `file ${asset.filepath} uploaded in ${ms}ms`
+          })
         });
     }))
     .catch((err) => {
