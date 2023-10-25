@@ -1,6 +1,6 @@
 const {isDev} = require('./_debug');
-async function request(options, data) {
-  const https = isDev ? require('node:http') : require('node:https');
+async function request(options, data, forceHttps) {
+  const https = (!forceHttps && isDev) ? require('node:http') : require('node:https');
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let response = [];

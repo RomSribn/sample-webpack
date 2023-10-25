@@ -1,5 +1,5 @@
 const { isDev } = require('./_debug');
-const { request } = require('./ze-request');
+const { request } = require('./ze-http-request');
 async function upload(type, body) {
   const port = isDev ? 8787 : 443;
   const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
