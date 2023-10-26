@@ -17,11 +17,16 @@ async function getBuildId(key) {
 function setupBuildId(pluginName, compiler) {
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
     ze_dev_env.zeConfig.buildId = void 0;
-    const buildIds = await getBuildId(ze_dev_env.git.email);
-    if (buildIds) {
-      ze_dev_env.zeConfig.buildId = (buildIds)[ze_dev_env.git.email];
+    if (!ze_dev_env.zeConfig.user) {
+      // todo: user should login first to use zephyr cloud
+      return cb();
     }
-    cb();
+
+    const buildIds = await getBuildId(ze_dev_env.zeConfig.user);
+    if (buildIds) {
+      ze_dev_env.zeConfig.buildId = (buildIds)[ze_dev_env.zeConfig.user];
+    }
+    return cb();
   });
 }
 

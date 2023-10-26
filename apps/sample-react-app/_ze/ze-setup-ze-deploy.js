@@ -7,21 +7,19 @@ const { zeBuildAssetsMap } = require('./ze-build-assets-map');
 
 function createSnapshot(snapshotAssets) {
   return  {
-    type: 'snapshot',
     id: ze_dev_env.zeConfig.buildId,
-
-    // todo: should I decide it in webpack plugin or in worker?
-    tag: `latest+${ze_dev_env.git.email}`, created: Date.now(), // todo: implement later
-    creator: ze_dev_env.git, assets: snapshotAssets
+    type: 'snapshot',
+    creator: ze_dev_env.git,
+    createdAt: Date.now(),
+    assets: snapshotAssets
   };
 }
 
 function setupZeDeploy(pluginName, compiler) {
   compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
-
     compilation.hooks.processAssets.tapPromise({
-      name: pluginName, stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
-      // additionalAssets: true,
+      name: pluginName,
+      stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
     }, async (assets) => {
       if (!ze_dev_env.zeConfig.buildId) {
         // no id - no cloud builds ;)
@@ -29,13 +27,12 @@ function setupZeDeploy(pluginName, compiler) {
       }
 
       const zeStart = Date.now();
-      // todo: update assetsMap and check how ze ui object looks like
-      const {uploadableAssets, snapshotAssets} = zeBuildAssetsMap(assets);
-      const snapshot = createSnapshot(snapshotAssets);
+      const assetsMap = zeBuildAssetsMap(assets);
+      const snapshot = createSnapshot(assetsMap);
       const missingAssets = await zeUploadSnapshot(snapshot);
       await zeUploadAssets({
         missingAssets,
-        uploadableAssets,
+        assetsMap,
         count: Object.keys(assets).length
       });
       await zeDeploySnapshotToEdge(snapshot);

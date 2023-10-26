@@ -35,28 +35,5 @@ const ze_dev_env = {
 
 const buildEnv = ze_dev_env.isCI ? 'CI' : 'local';
 
-const ze_branch = [
-  { key: 'latest', value: 'snapshot_id' },
-  { key: 'latest+valorkin@gmail.com', value: 'snapshot_id' },
-  { key: 'current', value: 'snapshot_id' }
-];
 
-// todo: ze snapshot sample
-const ze_snapshot = {
-  id: '1234567890',
-  // date.now
-  createdAt: Date.now(),
-  creator: {
-    name: 'Dmitriy Shekhovtsov',
-    email: 'valorkin@gmail.com'
-  },
-  assets: {
-    filepath: {
-      // sha256 content hash
-      hash: '1234567890'
-
-    }
-  }
-};
-
-module.exports = {ze_branch, ze_snapshot, ze_dev_env, buildEnv};
+module.exports = {ze_dev_env, buildEnv};

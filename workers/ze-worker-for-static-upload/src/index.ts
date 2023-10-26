@@ -41,7 +41,6 @@ export default {
           // 4. if snapshot id not in kv - create snapshot in kv - hint json type
           // todo: use tags to store versions
           if (id /*&& !found*/) {
-            console.log(`deploying snapshot ${id}`);
             await env.ze_snapshots.put(id, JSON.stringify(requestJson));
           }
 
@@ -49,11 +48,16 @@ export default {
           if (id && Array.isArray(requestJson.assets)) {
             // 5. check that we have all file hashes in r2 or kv
             const knownFiles = await Promise
-              .all(requestJson.assets.map(async (asset) => env.ze_files.get(asset.id)));
+              .all(requestJson.assets.map(async (asset) => {
+                return env.ze_files.get(asset.id)
+              }));
             // 6. if all files in bucket - return empty list of hashes
             // 7. if some files not in bucket - return list of hashes to be uploaded
             response.assets = knownFiles
-              .map((file, index) => file ? null : requestJson.assets[index])
+              .map((file, index) => {
+                console.log(`${!!file} ${requestJson.assets[index].id}`)
+                return file ? null : requestJson.assets[index]
+              })
               .filter(Boolean);
 
             response.id = id;

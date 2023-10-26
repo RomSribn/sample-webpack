@@ -1,14 +1,14 @@
 const { isDev } = require('./_debug');
 const { request } = require('./ze-http-request');
-async function upload(type, body) {
-  const port = isDev ? 8787 : 443;
-  const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
-  const data = body.buffer || JSON.stringify(body);
 
+const port = isDev ? 8787 : 443;
+const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
+async function upload(type, id, body) {
+  const data = body.buffer || JSON.stringify(body);
   const options = {
     hostname,
     port,
-    path: `/upload/${type}/${body.id}?type=${type}&id=${body.id}`,
+    path: `/upload/${type}/${id}`,
     method: 'POST',
     headers: {
       'Content-Length': data.length
@@ -19,7 +19,6 @@ async function upload(type, body) {
     options.headers['Content-Type'] = 'application/json';
   } else {
     options.headers['Content-Type'] = 'application/octet';
-    options.headers['x-file-path'] = body.filepath;
   }
 
   return request(options, data).catch(_ => void 0);

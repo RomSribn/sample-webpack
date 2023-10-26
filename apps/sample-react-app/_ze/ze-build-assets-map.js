@@ -1,10 +1,11 @@
+const path = require('node:path');
 const {createHash} = require('node:crypto')
+const { logEvent } = require('./ze-log-event');
 
 function zeBuildAssetsMap(assets) {
-  const uploadableAssets = {};
-  const snapshotAssets = Object.keys(assets)
-    .map((key) => {
-      const asset = assets[key];
+  return  Object.keys(assets)
+    .reduce((memo, filepath) => {
+      const asset = assets[filepath];
       const className = asset.constructor.name;
       let buffer;
       switch (className) {
@@ -15,29 +16,32 @@ function zeBuildAssetsMap(assets) {
           buffer = asset._valueAsBuffer ?? asset._valueAsString;
           break;
         default:
-          console.log(`unknown asset type: ${className}`);
-          return;
+          logEvent({
+            action: 'ze:build:assets:unknown-asset-type',
+            level: 'error',
+            message: `unknown asset type: ${className}`
+          })
+          return void 0;
       }
-      // todo: log internal error
+
+      buffer = buffer.length ? buffer : Buffer.from(filepath, 'utf8');
+
       const hash = createHash('sha256')
         .update(buffer)
-        .update(Buffer.from(key, 'utf8'))
+        .update(Buffer.from(filepath, 'utf8'))
         .digest('hex');
-      uploadableAssets[hash] = {
-        id: hash, filepath: key, buffer: buffer
-      };
-      return {
-        id: hash, filepath: key
-      };
-    })
-    .filter(Boolean);
 
-  // const snapshotId = createHash('sha256')
-  //   .update(snapshotAssets
-  //     .map(asset => asset.id).sort().join(''))
-  //   .digest('hex');
+      // todo: update worker
+      memo[hash] = {
+        path: filepath,
+        extname: path.extname(filepath),
+        hash,
+        size: buffer.length,
+        buffer: buffer
+      };
+      return memo;
+    });
 
-  return {uploadableAssets, snapshotAssets};
 }
 
 module.exports = { zeBuildAssetsMap };

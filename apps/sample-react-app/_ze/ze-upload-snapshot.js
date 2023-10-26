@@ -11,7 +11,7 @@ async function zeUploadSnapshot(snapshot) {
     message: `started uploading of ${buildEnv} snapshot to zephyr`
   });
 
-  const edgeTodo = await upload('snapshot', snapshot);
+  const edgeTodo = await upload('snapshot', snapshot.id, snapshot);
 
   if (!edgeTodo) {
     logEvent({
