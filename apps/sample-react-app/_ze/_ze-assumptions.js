@@ -3,26 +3,27 @@
 const ze_dev_env = {
   isCI: false,
   get appName() {
-    return `${this.app.org}/${this.app.project}/${this.app.name}`;
+    // todo:
+    return `${this.app.org}-${this.app.project}-${this.app.name}`;
   },
   get username() {
-    return this.git.name;
+    return this.zeConfig.user;
   },
   get snapshotId() {
-    return `${this.appName}/${this.zeConfig.buildId}`;
+    return `${this.appName}_${this.zeConfig.user}_${this.zeConfig.buildId}`;
   },
   zeConfig: {
-    user: 'valorin',
+    user: 'valorkin',
     buildId: void 0
   },
   app: {
     // from zephyr server? how current plugin does it?
-    // package.json name
-    name: 'sample-react-app',
-    // git repo
-    project: 'ze-mono',
     // git org
     org: 'valorkin',
+    // git repo
+    project: 'ze-mono',
+    // package.json name
+    name: 'sample-react-app',
   },
   // todo: what if git not configured? - skip for now
   git: {

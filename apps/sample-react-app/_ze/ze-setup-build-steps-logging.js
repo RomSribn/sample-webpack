@@ -2,10 +2,11 @@ const { logEvent } = require('./ze-log-event');
 const { buildEnv, ze_dev_env } = require('./_ze-assumptions');
 
 function logBuildSteps(pluginName, compiler) {
-  const buildStartedAt = Date.now();
+  let buildStartedAt;
   compiler.hooks
     .beforeCompile.tapAsync(pluginName, async (params, cb) => {
     if (!ze_dev_env.zeConfig.buildId) return cb();
+    buildStartedAt = Date.now();
     logEvent({
       level: 'info',
       action: 'build:started',

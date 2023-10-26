@@ -422,7 +422,7 @@ export function NxWelcome({ title }: { title: string }) {
         <div className="container">
           <div id="welcome">
             <h1>
-              <span> Zack 9</span>
+              <span> Zack 4</span>
               Welcome {title} 👋
             </h1>
             <button className="button-pill" onClick={() => blowMeUp()}>Break the world</button>

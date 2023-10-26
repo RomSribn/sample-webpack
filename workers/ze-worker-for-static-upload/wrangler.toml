@@ -23,10 +23,6 @@ compatibility_date = "2023-10-02"
  id = "7df5dca6384b471d9c21ba7bc372cb9a"
 
  [[kv_namespaces]]
- binding = "ze_kv"
- id = "8cc7cce8351c479f96a4b4314656b898"
-
- [[kv_namespaces]]
  binding = "ze_files"
  id = "5047da35f1bd46f094857cfb2c0ebe57"
 

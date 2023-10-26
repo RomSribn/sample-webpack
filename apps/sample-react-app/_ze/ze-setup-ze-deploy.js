@@ -4,16 +4,9 @@ const { zeDeploySnapshotToEdge } = require('./ze-deploy-snapshot-to-edge');
 const { zeUploadSnapshot } = require('./ze-upload-snapshot');
 const { zeUploadAssets } = require('./ze-upload-assets');
 const { zeBuildAssetsMap } = require('./ze-build-assets-map');
+const { createSnapshot } = require('./ze-build-snapshot');
 
-function createSnapshot(snapshotAssets) {
-  return  {
-    id: ze_dev_env.zeConfig.buildId,
-    type: 'snapshot',
-    creator: ze_dev_env.git,
-    createdAt: Date.now(),
-    assets: snapshotAssets
-  };
-}
+
 
 function setupZeDeploy(pluginName, compiler) {
   compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
@@ -30,11 +23,14 @@ function setupZeDeploy(pluginName, compiler) {
       const assetsMap = zeBuildAssetsMap(assets);
       const snapshot = createSnapshot(assetsMap);
       const missingAssets = await zeUploadSnapshot(snapshot);
-      await zeUploadAssets({
+      // todo: exit if upload failed
+      const assetsUploadSuccess = await zeUploadAssets({
         missingAssets,
         assetsMap,
         count: Object.keys(assets).length
       });
+      if (!assetsUploadSuccess) return;
+
       await zeDeploySnapshotToEdge(snapshot);
 
       logEvent({

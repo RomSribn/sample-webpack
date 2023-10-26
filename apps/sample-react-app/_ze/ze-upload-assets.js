@@ -1,9 +1,14 @@
 const { logEvent } = require('./ze-log-event');
-const { upload } = require('./ze-http-upload');
+const { upload, uploadFile } = require('./ze-http-upload');
 
 async function zeUploadAssets({ missingAssets, assetsMap, count }) {
-  if (!missingAssets || !Array.isArray(missingAssets.assets)) {
-    return;
+  if (!missingAssets?.assets || Object.keys(missingAssets.assets).length === 0) {
+    logEvent({
+      level: 'info',
+      action: 'snapshot:assets:upload:empty',
+      message: `no new assets to upload`
+    });
+    return true;
   }
 
   logEvent({
@@ -13,21 +18,31 @@ async function zeUploadAssets({ missingAssets, assetsMap, count }) {
   });
 
   let totalTime = 0;
-  await Promise
-    .all(Object.keys(missingAssets.assets)
-      .map((hash) => {
+  const assets = Object.values(missingAssets.assets);
+
+  return await Promise
+    .all(assets
+      .map((asset) => {
         const start = Date.now();
-        return upload('file', hash, assetsMap[hash])
+        return uploadFile(asset.hash, assetsMap[asset.hash])
           .then(_ => {
             const fileUploaded = Date.now() - start;
             totalTime += fileUploaded;
             logEvent({
               level: 'info',
               action: 'snapshot:assets:upload:file:done',
-              message: `file ${hash.filepath} uploaded in ${fileUploaded}ms`
+              message: `file ${asset.path} uploaded in ${fileUploaded}ms`
             });
           });
       }))
+    .then(_ => {
+      logEvent({
+        level: 'info',
+        action: 'snapshot:assets:upload:done',
+        message: `uploaded missing assets to zephyr (${missingAssets?.assets?.length} assets in ${totalTime}ms)`
+      });
+      return true;
+    })
     .catch((err) => {
       logEvent({
         level: 'error',
@@ -35,14 +50,8 @@ async function zeUploadAssets({ missingAssets, assetsMap, count }) {
         message: `failed uploading missing assets to zephyr`,
         meta: { error: err.toString() }
       });
+      return false;
     });
-
-  logEvent({
-    level: 'info',
-    action: 'snapshot:assets:upload:done',
-    message: `uploaded missing assets to zephyr (${missingAssets?.assets?.length} assets in ${totalTime}ms)`
-  });
-
 }
 
 module.exports = { zeUploadAssets };

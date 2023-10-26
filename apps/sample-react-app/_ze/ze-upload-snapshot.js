@@ -1,4 +1,4 @@
-const { upload } = require('./ze-http-upload');
+const { uploadSnapshot } = require('./ze-http-upload');
 const { logEvent } = require('./ze-log-event');
 const { buildEnv } = require('./_ze-assumptions');
 
@@ -11,7 +11,7 @@ async function zeUploadSnapshot(snapshot) {
     message: `started uploading of ${buildEnv} snapshot to zephyr`
   });
 
-  const edgeTodo = await upload('snapshot', snapshot.id, snapshot);
+  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot);
 
   if (!edgeTodo) {
     logEvent({
