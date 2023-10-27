@@ -14,7 +14,8 @@ const livereloadScript = `
         const payload = JSON.parse(message.data)
         console[payload.entry.logLevel](payload.message)
         if (payload.entry.actionType === "build:deploy:done") {
-          reload();
+          // todo: wait for KV populated
+          setTimeout(() => reload(), 250);
         }
       } catch (err) {
         console.log(message)

@@ -56,7 +56,8 @@ export async function getWildcard(request: Request, env: Env) {
     return new Response('File Not Found', { status: 404 });
   }
 
-  if (isRootRequest) {
+  const livereload = url.searchParams.get('livereload')
+  if (isRootRequest && livereload) {
     return new HTMLRewriter()
       .on('body', new AppendLivereloadHandler())
       .transform(new Response(file, request));
