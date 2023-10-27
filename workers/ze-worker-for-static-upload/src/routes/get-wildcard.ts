@@ -1,5 +1,6 @@
 import { Env } from '../index';
 import { TagsHeader } from './post-upload-tags';
+import { AppendLivereloadHandler } from '../util-attach-livereload';
 
 // todo: get app name and tag from request?
 const app = 'valorkin-ze-mono-sample-react-app';
@@ -29,12 +30,6 @@ export async function getWildcard(request: Request, env: Env) {
     return new Response('Asset Not Found in Snapshot', { status: 404 });
   }
 
-  const file = await env.ze_files.get(asset.hash, 'stream');
-
-  if (!file) {
-    return new Response('File Not Found', { status: 404 });
-  }
-
   const headers = new Headers();
 
   // headers.set('Content-Length', (file.length-1).toString());
@@ -51,6 +46,20 @@ export async function getWildcard(request: Request, env: Env) {
   }
   if (pathname.indexOf('.css') > -1) {
     headers.set('Content-Type', 'text/css');
+  }
+
+  headers.set('x-server', 'zephyr-cloud');
+
+  const file = await env.ze_files.get(asset.hash, 'stream');
+
+  if (!file) {
+    return new Response('File Not Found', { status: 404 });
+  }
+
+  if (isRootRequest) {
+    return new HTMLRewriter()
+      .on('body', new AppendLivereloadHandler())
+      .transform(new Response(file, request));
   }
 
   return new Response(file, {
