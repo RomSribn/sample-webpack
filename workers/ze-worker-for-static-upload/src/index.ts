@@ -1,7 +1,7 @@
 import { postUploadSnapshot } from './routes/post-upload-snapshot';
 import { postUploadFile } from './routes/post-upload-file';
 import { getWildcard } from './routes/get-wildcard';
-import { postUploadTags } from './routes/post-upload-tags';
+import { postUploadTags, TagsHeader } from './routes/post-upload-tags';
 
 export interface Env {
   ze_tags: KVNamespace;
@@ -40,6 +40,14 @@ export default {
         if (url.pathname === '/__debug_snapshots_list') {
           const list = await env.ze_snapshots.list();
           return new Response(JSON.stringify(list), { status: 200 });
+        }
+
+        if (url.pathname === '/__current_version') {
+          const app = 'valorkin-ze-mono-sample-react-app';
+          const tag = 'latest';
+          const tags = await env.ze_tags.get<TagsHeader>(app, { type: 'json' });
+          const version = tags?.versions[tag];
+          return new Response(version, { status: 200 });
         }
 
         return getWildcard(request, env);

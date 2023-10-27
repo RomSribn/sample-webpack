@@ -1,6 +1,6 @@
 import type {
   DurableObjectNamespace, DurableObjectState,
-  Request, Response, URL
+  Request
 } from '@cloudflare/workers-types';
 
 export interface Env {
@@ -27,14 +27,14 @@ export default {
     let resp = await obj.fetch(request.url);
     let buildId = await resp.text();
 
-    return new Response(JSON.stringify({ [name]: buildId }), { headers: { 'content-type': 'application/json' } }, { status: 200 });
+    return new Response(JSON.stringify({ [name]: buildId }), { headers: { 'content-type': 'application/json' },  status: 200 });
   }
 };
 
 // Durable Object
 export class ZeBuildCounter {
   state: DurableObjectState;
-  value: number;
+  value!: number;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
