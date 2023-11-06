@@ -1,6 +1,7 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 const withModuleFederation = require('@nx/react/module-federation');
+const { withZephyr } = require('@ze/ze-webpack-plugin');
 
 const mfConfig = {
   name: 'team-red',
@@ -13,9 +14,7 @@ const mfConfig = {
 
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), withReact(),
-  withModuleFederation(mfConfig), (config) => {
-    // Update the webpack config as needed here.
-    // e.g. `config.plugins.push(new MyPlugin())`
+  withModuleFederation(mfConfig), withZephyr(), (config) => {
     config.plugins
       .filter(plugin => plugin.constructor.name === 'ModuleFederationPlugin')
       .forEach((plugin) => {

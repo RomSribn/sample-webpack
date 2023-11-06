@@ -1,5 +1,6 @@
 const { request } = require('./ze-http-request');
 const { ze_dev_env } = require('./_ze-assumptions');
+const { getPackageJson } = require('./ze-find-app-name');
 
 const port = 443;
 const hostname = 'ze-worker-to-generate-build-id.valorkin.workers.dev';
@@ -26,6 +27,7 @@ function setupBuildId(pluginName, compiler) {
     if (buildIds) {
       ze_dev_env.zeConfig.buildId = (buildIds)[ze_dev_env.zeConfig.user];
     }
+
     return cb();
   });
 }

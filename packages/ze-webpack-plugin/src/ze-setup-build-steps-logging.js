@@ -29,7 +29,7 @@ function logBuildSteps(pluginName, compiler) {
     logEvent({
       level: 'error',
       action: 'build:failed',
-      message: `${buildEnv} build failed in ${Date.now() - buildStartedAt}ms}`,
+      message: `${buildEnv} build failed in ${Date.now() - buildStartedAt}ms`,
       meta: { error: err.toString() }
     });
   });

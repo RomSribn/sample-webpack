@@ -23,7 +23,7 @@ const ze_dev_env = {
     // git repo
     project: 'ze-mono',
     // package.json name
-    name: 'sample-react-app',
+    name: void 0,
   },
   // todo: what if git not configured? - skip for now
   git: {
