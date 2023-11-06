@@ -19,18 +19,18 @@ const ze_dev_env = {
   app: {
     // from zephyr server? how current plugin does it?
     // git org
-    org: 'valorkin',
+    org: '',
     // git repo
-    project: 'ze-mono',
+    project: '',
     // package.json name
-    name: void 0,
+    name: '',
   },
   // todo: what if git not configured? - skip for now
   git: {
-    name: 'Dmitriy Shekhovtsov',
-    email: 'valorkin@gmail.com',
-    branch: 'master',
-    commit: '1234567890',
+    name: '',
+    email: '',
+    branch: '',
+    commit: '',
   }
 };
 
