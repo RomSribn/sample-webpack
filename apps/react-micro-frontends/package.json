@@ -4,13 +4,15 @@
   "license": "MIT",
   "scripts": {
     "start": "nx run-many -t serve --parallel=5",
+    "build": "nx run-many -t build --parallel=5 --skip-nx-cache",
     "serve:host": "nx run host:serve",
+    "build:host": "nx run host:build:production --skip-nx-cache",
     "serve:team-red": "nx run team-red:serve",
-    "build:team-red": "nx run team-red:build",
+    "build:team-red": "nx run team-red:build --skip-nx-cache",
     "serve:team-blue": "nx run team-blue:serve",
-    "build:team-blue": "nx run team-blue:build",
+    "build:team-blue": "nx run team-blue:build:production --skip-nx-cache",
     "serve:team-green": "nx run team-green:serve",
-    "build:team-green": "nx run team-green:build"
+    "build:team-green": "nx run team-green:build:production --skip-nx-cache"
   },
   "private": true,
   "dependencies": {

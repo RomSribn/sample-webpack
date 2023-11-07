@@ -1,5 +1,5 @@
 const { logEvent } = require('./ze-log-event');
-const { upload, uploadFile } = require('./ze-http-upload');
+const { uploadFile } = require('./ze-http-upload');
 const { isDev } = require('./_debug');
 
 async function zeUploadAssets({ missingAssets, assetsMap, count }) {
@@ -24,17 +24,19 @@ async function zeUploadAssets({ missingAssets, assetsMap, count }) {
 
   return await Promise
     .all(assets
-      .map((asset) => {
+      .map(async (asset) => {
         const start = Date.now();
-        return uploadFile(asset.hash, assetsMap[asset.hash])
+        const assetWithBuffer = assetsMap[asset.hash];
+        const assetSize = (assetWithBuffer.buffer.length / 1024);
+        return await uploadFile(asset.hash, assetWithBuffer)
           .then(_ => {
             const fileUploaded = Date.now() - start;
             totalTime += fileUploaded;
-            totalSize += asset.buffer.length;
+            totalSize += assetSize;
             logEvent({
               level: 'info',
               action: 'snapshot:assets:upload:file:done',
-              message: `file ${asset.path} uploaded in ${fileUploaded}ms (${asset.buffer.length/1024}kb)`
+              message: `file ${asset.path} uploaded in ${fileUploaded}ms (${assetSize.toFixed(2)}kb)`
             });
           })
           .catch((err) => {
@@ -55,11 +57,14 @@ async function zeUploadAssets({ missingAssets, assetsMap, count }) {
       logEvent({
         level: 'info',
         action: 'snapshot:assets:upload:done',
-        message: `uploaded missing assets to zephyr (${missingAssets?.assets?.length} assets in ${totalTime}ms, ${totalSize/1024}kb)`
+        message: `uploaded missing assets to zephyr (${missingAssets?.assets?.length} assets in ${totalTime}ms, ${(totalSize).toFixed(2)}kb)`
       });
       return true;
     })
     .catch((err) => {
+      if (isDev) {
+        console.log(err);
+      }
       logEvent({
         level: 'error',
         action: 'snapshot:assets:upload:failed',

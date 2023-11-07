@@ -2,6 +2,7 @@ import { postUploadSnapshot } from './routes/post-upload-snapshot';
 import { postUploadFile } from './routes/post-upload-file';
 import { getWildcard } from './routes/get-wildcard';
 import { postUploadTags, TagsHeader } from './routes/post-upload-tags';
+import { getListOfApps } from './routes/get-list-of-apps';
 
 export interface Env {
   ze_tags: KVNamespace;
@@ -48,6 +49,11 @@ export default {
           const tags = await env.ze_tags.get<TagsHeader>(app, { type: 'json' });
           const version = tags?.versions[tag];
           return new Response(version, { status: 200 });
+        }
+
+        const regex = /^(edge\.local|\.valorkin\.workers\.dev|ze-worker-for-static-upload\.valorkin\.workers\.dev|valorkin\.dev)/;
+        if (regex.test(url.hostname)) {
+          return getListOfApps(request, env);
         }
 
         return getWildcard(request, env);

@@ -1,9 +1,10 @@
 import { Env } from '../index';
 import { TagsHeader } from './post-upload-tags';
 import { AppendLivereloadHandler } from '../util-attach-livereload';
+import { getAppNameFromHostname } from '../utility/util-get-app-name-from-hostname';
 
 // todo: get app name and tag from request?
-const app = 'valorkin-ze-mono-sample-react-app';
+// const app = 'valorkin-ze-mono-sample-react-app';
 const tag = 'latest';
 
 // 1. if have request for root with _ze_id = set cookie to consume some particular snapshot
@@ -17,6 +18,11 @@ export async function getWildcard(request: Request, env: Env) {
   const url = new URL(request.url);
   const isRootRequest = url.pathname === '/' || url.pathname === '';
   const pathname = isRootRequest ? 'index.html' : url.pathname.substring(1);
+  const app = getAppNameFromHostname(url);
+
+  if (!app) {
+    return new Response('App Not Found', { status: 404 });
+  }
 
   const tags = await env.ze_tags.get<TagsHeader>(app, { type: 'json' });
   if (!tags) {

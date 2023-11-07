@@ -19,11 +19,11 @@ async function uploadFile(id, asset) {
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': asset.buffer.length
+      // 'Content-Length': asset.buffer.length
     }
   };
 
-  options.headers['Content-Type'] = 'application/octet';
+  // options.headers['Content-Type'] = 'application/octet';
   options.headers['x-file-path'] = asset.path;
   options.headers['x-file-meta'] = JSON.stringify(meta)
 

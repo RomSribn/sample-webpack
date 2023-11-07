@@ -16,15 +16,15 @@ compatibility_date = "2023-10-02"
 
  [[kv_namespaces]]
  binding = "ze_tags"
- id = "7cd06672f244484db38bb248e0d443c8"
+ id = "474ef5c725f74362be5ed84accc82b89"
 
  [[kv_namespaces]]
  binding = "ze_snapshots"
- id = "7df5dca6384b471d9c21ba7bc372cb9a"
+ id = "bfbebd5c4d724a6aa80510b9e43c61b1"
 
  [[kv_namespaces]]
  binding = "ze_files"
- id = "5047da35f1bd46f094857cfb2c0ebe57"
+ id = "962f0549087e457bb32e9675bf65aa37"
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
