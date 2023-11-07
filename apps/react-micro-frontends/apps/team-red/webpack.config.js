@@ -2,6 +2,7 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 const withModuleFederation = require('@nx/react/module-federation');
 const { withZephyr } = require('@ze/ze-webpack-plugin');
+const { ze_dev_env } = require('@ze/ze-webpack-plugin/src/_ze-assumptions');
 
 const mfConfig = {
   name: 'team-red',
@@ -42,7 +43,8 @@ function dynmo(config) {
       const defaultUrl = mfPlugin._options.remotes[key];
       mfPlugin._options.remotes[key] = promiseNewPromise
         .replace('_DEFAULT_URL_', defaultUrl)
-        .replace('_EDGE_URL_', `http://valorkin-ze-mono-${key}.edge.local:8787/remoteEntry.js`)
+        .replace('_EDGE_URL_',
+          `__protocol__//${ze_dev_env.app.org}-${ze_dev_env.app.project}-${key}.__domain_and_port__/remoteEntry.js`)
         .replace('_REMOTE_APP_', key)
       ;
     });
@@ -52,43 +54,62 @@ function dynmo(config) {
 function replacer() {
   return new Promise((resolve, reject) => {
     const defaultUrl = '_DEFAULT_URL_';
-    const edgeUrl = '_EDGE_URL_';
-    const remoteApp = '_REMOTE_APP_';
+    let edgeUrl = '_EDGE_URL_';
+    // const remoteApp = '_REMOTE_APP_';
+    let domain = getLastTwoPartsOfUrl(window.location.hostname);
+    const protocol = window.location.protocol;
+    const port = window.location.port;
+    if (port) {
+      domain += `:${port}`;
+    }
+
+    edgeUrl = edgeUrl
+      .replace('__protocol__', protocol)
+      .replace('__domain_and_port__', domain);
+
     Promise
-      .all([
-        fetch(defaultUrl, { method: 'HEAD' }).catch(() => false),
-        fetch(edgeUrl, { method: 'HEAD' }).catch(() => false)
+      .race([
+        // todo: do 250ms timeout
+        fetch(defaultUrl, { method: 'HEAD' }).then(() => defaultUrl).catch(() => false),
+        fetch(edgeUrl, { method: 'HEAD' }).then(() => edgeUrl).catch(() => false)
       ])
-      .then(([localEdge, edge]) => {
-        const module = localEdge ? import(defaultUrl) : import(edgeUrl);
+      .then((remoteUrl) => {
+        const module = import(remoteUrl);
         module
           .then((mod) => {resolve(mod)})
           .catch((err) => {reject(err)});
-     /*   const script = document.createElement('script');
-        script.type = 'module';
-        script.src = localEdge ? defaultUrl : edgeUrl;
-        script.onload = (args) => {
-          console.log(args)
-          // the injected script has loaded and is available on window
-          // we can now resolve this Promise
-          const proxy = {
-            get: (request) => window[remoteApp].get(request),
-            init: (arg) => {
-              try {
-                // return window[remoteApp].init(arg)
-              } catch (e) {
-                console.log('remote container already initialized');
-              }
-            }
-          };
-          resolve(proxy);
-        };
-        // inject this script with the src set to the versioned remoteEntry.js
-        document.head.appendChild(script);*/
+
       })
       .catch((err) => {
         console.log(`who cares in POC`, err);
       });
+
+    function getLastTwoPartsOfUrl(hostname) {
+      const parts = hostname.split('.'); // Splits the hostname into parts
+      return parts.length > 1 ? parts.slice(-2).join('.') : hostname; // Joins the last two parts
+    }
   });
 }
 
+// todo: stub component?
+/*   const script = document.createElement('script');
+   script.type = 'module';
+   script.src = localEdge ? defaultUrl : edgeUrl;
+   script.onload = (args) => {
+     console.log(args)
+     // the injected script has loaded and is available on window
+     // we can now resolve this Promise
+     const proxy = {
+       get: (request) => window[remoteApp].get(request),
+       init: (arg) => {
+         try {
+           // return window[remoteApp].init(arg)
+         } catch (e) {
+           console.log('remote container already initialized');
+         }
+       }
+     };
+     resolve(proxy);
+   };
+   // inject this script with the src set to the versioned remoteEntry.js
+   document.head.appendChild(script);*/
