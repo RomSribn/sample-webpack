@@ -51,7 +51,7 @@
       "options": {
         "port": 4300,
         "buildTarget": "team-blue:build",
-        "hmr": true
+        "hmr": false
       },
       "configurations": {
         "development": {

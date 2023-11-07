@@ -6,13 +6,12 @@ function extractBuffer(asset) {
   const className = asset.constructor.name;
   switch (className) {
     case 'CachedSource':
-      return  asset._cachedBuffer ?? asset._cachedSource;
+    case 'CompatSource':
     case 'RawSource':
-      return asset._valueAsBuffer ?? asset._valueAsString;
     case 'ConcatSource':
-      return extractBuffer(asset._children[0]);
+      return  asset.buffer();
     case 'ReplaceSource':
-      return extractBuffer(asset._source);
+      return asset.source();
     default:
       logEvent({
         action: 'ze:build:assets:unknown-asset-type',
