@@ -8,7 +8,7 @@
     "serve:host": "nx run host:serve",
     "build:host": "nx run host:build:production --skip-nx-cache",
     "serve:team-red": "nx run team-red:serve",
-    "build:team-red": "nx run team-red:build --skip-nx-cache",
+    "build:team-red": "nx run team-red:build:production --skip-nx-cache",
     "serve:team-blue": "nx run team-blue:serve",
     "build:team-blue": "nx run team-blue:build:production --skip-nx-cache",
     "serve:team-green": "nx run team-green:serve",

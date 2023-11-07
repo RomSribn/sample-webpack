@@ -27,6 +27,7 @@ export default {
           default:
             return new Response('Not Implemented', { status: 501 });
         }
+      case 'HEAD':
       case 'GET':
         if (url.pathname === '/__debug_files_list') {
           const files = await env.ze_files.list();

@@ -6,8 +6,6 @@ const { withZephyr } = require('@ze/ze-webpack-plugin');
 module.exports = composePlugins(withNx(), withReact(),
   withZephyr(),
   (config) => {
-  return config;
-});
-
-
+    return config;
+  });
 
