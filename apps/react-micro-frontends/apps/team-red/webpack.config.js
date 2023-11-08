@@ -48,7 +48,8 @@ function dynmo(config) {
         .replace('_DEFAULT_URL_', defaultUrl)
         .replace('_EDGE_URL_',
           `__protocol__//${app.org}-${app.project}-${key}.__domain_and_port__/remoteEntry.js`)
-        .replace('_REMOTE_APP_', key)
+        // .replace('_REMOTE_APP_', key)
+        .replace('_DEFAULT_EDGE_DOMAIN_', 'valorkin.dev')
       ;
     });
   return config;
@@ -58,13 +59,28 @@ function replacer() {
   return new Promise((resolve, reject) => {
     const defaultUrl = '_DEFAULT_URL_';
     let edgeUrl = '_EDGE_URL_';
-    // const remoteApp = '_REMOTE_APP_';
-    let domain = getLastTwoPartsOfUrl(window.location.hostname);
-    const protocol = window.location.protocol;
-    const port = window.location.port;
-    if (port) {
-      domain += `:${port}`;
-    }
+    const getEdgeLink = () => {
+      if (window.location.hostname === 'localhost') {
+        return {
+          protocol: 'https:',
+          domain: '_DEFAULT_EDGE_DOMAIN_'
+        };
+      }
+
+      let domain = getLastTwoPartsOfUrl(window.location.hostname);
+      const protocol = window.location.protocol;
+      const port = window.location.port;
+      if (port) {
+        domain += `:${port}`;
+      }
+
+      return {
+        protocol,
+        domain
+      };
+    };
+
+    const {protocol, domain} = getEdgeLink();
 
     edgeUrl = edgeUrl
       .replace('__protocol__', protocol)
