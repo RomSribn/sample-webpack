@@ -2,7 +2,6 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 const withModuleFederation = require('@nx/react/module-federation');
 const { withZephyr } = require('@ze/ze-webpack-plugin');
-const { ze_dev_env } = require('@ze/ze-webpack-plugin/src/_ze-assumptions');
 
 const mfConfig = {
   name: 'team-red',
@@ -24,6 +23,10 @@ module.exports = composePlugins(withNx(), withReact(),
   });
 
 function dynmo(config) {
+  const app = {
+    org: 'valorkin',
+    project: 'ze-mono',
+  }
   const mfPlugin = config.plugins
     .find(plugin => plugin.constructor.name === 'ModuleFederationPlugin');
   const zePlugin = config.plugins
@@ -44,7 +47,7 @@ function dynmo(config) {
       mfPlugin._options.remotes[key] = promiseNewPromise
         .replace('_DEFAULT_URL_', defaultUrl)
         .replace('_EDGE_URL_',
-          `__protocol__//${ze_dev_env.app.org}-${ze_dev_env.app.project}-${key}.__domain_and_port__/remoteEntry.js`)
+          `__protocol__//${app.org}-${app.project}-${key}.__domain_and_port__/remoteEntry.js`)
         .replace('_REMOTE_APP_', key)
       ;
     });

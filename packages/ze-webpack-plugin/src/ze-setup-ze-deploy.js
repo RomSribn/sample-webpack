@@ -1,37 +1,37 @@
-const { ze_dev_env } = require('./_ze-assumptions');
-const { logEvent } = require('./ze-log-event');
+const { logger } = require('./ze-log-event');
 const { zeDeploySnapshotToEdge } = require('./ze-deploy-snapshot-to-edge');
 const { zeUploadSnapshot } = require('./ze-upload-snapshot');
 const { zeUploadAssets } = require('./ze-upload-assets');
 const { zeBuildAssetsMap } = require('./ze-build-assets-map');
 const { createSnapshot } = require('./ze-build-snapshot');
 
+function setupZeDeploy(pluginOptions, compiler) {
+  const { pluginName, zeConfig } = pluginOptions;
+  const logEvent = logger(pluginOptions);
 
-
-function setupZeDeploy(pluginName, compiler) {
   compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
     compilation.hooks.processAssets.tapPromise({
       name: pluginName,
       stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
     }, async (assets) => {
-      if (!ze_dev_env.zeConfig.buildId) {
+      if (!zeConfig.buildId) {
         // no id - no cloud builds ;)
         return;
       }
 
       const zeStart = Date.now();
-      const assetsMap = zeBuildAssetsMap(assets);
-      const snapshot = createSnapshot(assetsMap);
-      const missingAssets = await zeUploadSnapshot(snapshot);
+      const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
+      const snapshot = createSnapshot(pluginOptions, assetsMap);
+      const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot);
       // todo: exit if upload failed
-      const assetsUploadSuccess = await zeUploadAssets({
+      const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
         missingAssets,
         assetsMap,
         count: Object.keys(assets).length
       });
       if (!assetsUploadSuccess) return;
 
-      await zeDeploySnapshotToEdge(snapshot);
+      await zeDeploySnapshotToEdge(pluginOptions, snapshot);
 
       logEvent({
         level: 'info',

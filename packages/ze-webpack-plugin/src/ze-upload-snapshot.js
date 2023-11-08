@@ -1,8 +1,9 @@
 const { uploadSnapshot } = require('./ze-http-upload');
-const { logEvent } = require('./ze-log-event');
-const { buildEnv } = require('./_ze-assumptions');
+const { logger } = require('./ze-log-event');
 
-async function zeUploadSnapshot(snapshot) {
+async function zeUploadSnapshot(pluginOptions, snapshot) {
+  const { buildEnv } = pluginOptions;
+  const logEvent = logger(pluginOptions);
   const snapUploadMs = Date.now();
 
   logEvent({

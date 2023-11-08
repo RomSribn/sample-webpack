@@ -1,11 +1,13 @@
-const { logEvent } = require('./ze-log-event');
-const { buildEnv, ze_dev_env } = require('./_ze-assumptions');
+const { logger } = require('./ze-log-event');
 
-function logBuildSteps(pluginName, compiler) {
+function logBuildSteps(pluginOptions, compiler) {
+  const {pluginName, zeConfig, buildEnv} = pluginOptions;
+  const logEvent = logger(pluginOptions);
+
   let buildStartedAt;
   compiler.hooks
     .beforeCompile.tapAsync(pluginName, async (params, cb) => {
-    if (!ze_dev_env.zeConfig.buildId) return cb();
+    if (!zeConfig.buildId) return cb();
     buildStartedAt = Date.now();
     logEvent({
       level: 'info',
@@ -16,7 +18,7 @@ function logBuildSteps(pluginName, compiler) {
   });
   compiler.hooks
     .done.tap(pluginName, () => {
-    if (!ze_dev_env.zeConfig.buildId) return;
+    if (!zeConfig.buildId) return;
     logEvent({
       level: 'info',
       action: 'build:done',
@@ -25,7 +27,7 @@ function logBuildSteps(pluginName, compiler) {
   });
   compiler.hooks
     .failed.tap(pluginName, (err) => {
-    if (!ze_dev_env.zeConfig.buildId) return;
+    if (!zeConfig.buildId) return;
     logEvent({
       level: 'error',
       action: 'build:failed',

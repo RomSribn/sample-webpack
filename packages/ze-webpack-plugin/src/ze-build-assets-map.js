@@ -1,9 +1,12 @@
 const path = require('node:path');
 const { createHash } = require('node:crypto');
-const { logEvent } = require('./ze-log-event');
+const { logger } = require('./ze-log-event');
 
+function getAssetType(asset) {
+  return asset.constructor.name;
+}
 function extractBuffer(asset) {
-  const className = asset.constructor.name;
+  const className = getAssetType(asset);
   switch (className) {
     case 'CachedSource':
     case 'CompatSource':
@@ -13,22 +16,24 @@ function extractBuffer(asset) {
     case 'ReplaceSource':
       return asset.source();
     default:
-      logEvent({
-        action: 'ze:build:assets:unknown-asset-type',
-        level: 'error',
-        message: `unknown asset type: ${className}`
-      });
       return void 0;
   }
 }
 
-function zeBuildAssetsMap(assets) {
+function zeBuildAssetsMap(pluginOptions, assets) {
+  const logEvent = logger(pluginOptions);
+
   return Object.keys(assets)
     .reduce((memo, filepath) => {
       const asset = assets[filepath];
       const buffer = extractBuffer(asset);
 
       if (!buffer) {
+        logEvent({
+          action: 'ze:build:assets:unknown-asset-type',
+          level: 'error',
+          message: `unknown asset type: ${getAssetType(asset)}`
+        });
         return  memo;
       }
 

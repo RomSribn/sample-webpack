@@ -1,8 +1,9 @@
-const { logEvent } = require('./ze-log-event');
+const { logger } = require('./ze-log-event');
 const { uploadTags } = require('./ze-http-upload');
-const { ze_dev_env } = require('./_ze-assumptions');
 
-async function zeDeploySnapshotToEdge(snapshot, tag) {
+async function zeDeploySnapshotToEdge(pluginOptions, snapshot, tag) {
+  const logEvent = logger(pluginOptions);
+
   logEvent({
     level: 'info',
     action: 'deploy:edge:started',
@@ -10,11 +11,11 @@ async function zeDeploySnapshotToEdge(snapshot, tag) {
   });
 
   const deployStart = Date.now();
-  const latest = await uploadTags(ze_dev_env.appName, {
+  const latest = await uploadTags(pluginOptions.appName, {
     tag: tag ?? 'latest',
     snapshot: snapshot.id,
-    app: ze_dev_env.appName,
-    user: ze_dev_env.username
+    app: pluginOptions.appName,
+    user: pluginOptions.username
   });
 
   if (latest) {

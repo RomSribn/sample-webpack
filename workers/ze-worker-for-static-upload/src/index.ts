@@ -3,6 +3,7 @@ import { postUploadFile } from './routes/post-upload-file';
 import { getWildcard } from './routes/get-wildcard';
 import { postUploadTags, TagsHeader } from './routes/post-upload-tags';
 import { getListOfApps } from './routes/get-list-of-apps';
+import { getAppNameFromHostname } from './utility/util-get-app-name-from-hostname';
 
 export interface Env {
   ze_tags: KVNamespace;
@@ -45,14 +46,15 @@ export default {
         }
 
         if (url.pathname === '/__current_version') {
-          const app = 'valorkin-ze-mono-sample-react-app';
-          const tag = 'latest';
-          const tags = await env.ze_tags.get<TagsHeader>(app, { type: 'json' });
-          const version = tags?.versions[tag];
-          return new Response(version, { status: 200 });
+          const app = getAppNameFromHostname(url);
+          if (app) {
+            const tag = await env.ze_tags.get(app, { type: 'stream' });
+            return new Response(tag, { status: 200 });
+          }
+
         }
 
-        const regex = /^(edge\.local|\.valorkin\.workers\.dev|ze-worker-for-static-upload\.valorkin\.workers\.dev|valorkin\.dev)/;
+        const regex = /^(edge\.local|valorkin\.dev)/;
         if (regex.test(url.hostname)) {
           return getListOfApps(request, env);
         }

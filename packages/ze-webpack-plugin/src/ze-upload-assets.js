@@ -1,8 +1,10 @@
-const { logEvent } = require('./ze-log-event');
+const { logger } = require('./ze-log-event');
 const { uploadFile } = require('./ze-http-upload');
 const { isDev } = require('./_debug');
 
-async function zeUploadAssets({ missingAssets, assetsMap, count }) {
+async function zeUploadAssets(pluginOptions, { missingAssets, assetsMap, count }) {
+  const logEvent = logger(pluginOptions);
+
   if (!missingAssets?.assets || Object.keys(missingAssets.assets).length === 0) {
     logEvent({
       level: 'info',

@@ -1,10 +1,9 @@
-const { ze_dev_env } = require('./_ze-assumptions');
 
-function createSnapshot(assets) {
+function createSnapshot(options, assets) {
   return {
-    id: ze_dev_env.snapshotId,
+    id: options.snapshotId,
     type: 'snapshot',
-    creator: ze_dev_env.git,
+    creator: options.git,
     createdAt: Date.now(),
     assets: Object.keys(assets).reduce((memo, hash) => {
       const asset = assets[hash];

@@ -27,4 +27,21 @@ function getPackageJson(context) {
 
 }
 
-module.exports = {getPackageJson};
+function findAppName(config) {
+
+  const mfConfig = config.plugins
+    .find(plugin => plugin.constructor.name === 'ModuleFederationPlugin');
+
+  if (mfConfig) {
+    return mfConfig._options.name;
+  }
+
+  if (!config) return this;
+  const context = config.context;
+  const packageJson = getPackageJson(context);
+  if (packageJson && packageJson.name) {
+    return packageJson.name;
+  }
+}
+
+module.exports = {getPackageJson, findAppName};

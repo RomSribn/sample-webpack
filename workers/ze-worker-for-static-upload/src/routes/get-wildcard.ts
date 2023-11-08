@@ -1,19 +1,9 @@
 import { Env } from '../index';
 import { TagsHeader } from './post-upload-tags';
-import { AppendLivereloadHandler } from '../util-attach-livereload';
+import { AppendLivereloadHandler } from '../utility/util-attach-livereload';
 import { getAppNameFromHostname } from '../utility/util-get-app-name-from-hostname';
 
-// todo: get app name and tag from request?
-// const app = 'valorkin-ze-mono-sample-react-app';
 const tag = 'latest';
-
-// 1. if have request for root with _ze_id = set cookie to consume some particular snapshot
-// 2. if requested file path and _ze_id = return file for a snapshot (just file id would be enough for a start)
-// todo: respond with file with one request to kv? prefix(snapshotid) + filepath
-// 1. get snapshot id from headers
-// 2. get if not snapshot id from cookie choose latest snapshot and set cookie for it
-// 3. return file based on snapshot id and file path
-// todo: use versioned streams to store snapshots
 export async function getWildcard(request: Request, env: Env) {
   const url = new URL(request.url);
   const isRootRequest = url.pathname === '/' || url.pathname === '';
