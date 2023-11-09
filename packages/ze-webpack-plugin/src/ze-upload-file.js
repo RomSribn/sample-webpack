@@ -2,7 +2,7 @@ const { isDev } = require('./_debug');
 const { request } = require('./ze-http-request');
 
 const port = isDev ? 8787 : 443;
-const hostname = isDev ? '127.0.0.1' : 'ze-worker-for-static-upload.valorkin.workers.dev';
+const hostname = isDev ? '127.0.0.1' : 'cf.valorkin.dev';
 async function uploadFile(id, asset) {
   const type = 'file';
   const meta = {

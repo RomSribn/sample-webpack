@@ -1,4 +1,4 @@
-const { uploadSnapshot } = require('./ze-http-upload');
+const { uploadSnapshot } = require('./ze-upload-file');
 const { logger } = require('./ze-log-event');
 
 async function zeUploadSnapshot(pluginOptions, snapshot) {

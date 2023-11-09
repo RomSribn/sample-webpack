@@ -1,7 +1,7 @@
 const { request } = require('./ze-http-request');
 
 const port = 443;
-const hostname = 'ze-worker-to-generate-build-id.valorkin.workers.dev';
+const hostname = 'ze-build-id.valorkin.dev';
 
 async function getBuildId(key) {
   const options = {

@@ -1,5 +1,5 @@
 const { logger } = require('./ze-log-event');
-const { uploadTags } = require('./ze-http-upload');
+const { uploadTags } = require('./ze-upload-file');
 
 async function zeDeploySnapshotToEdge(pluginOptions, snapshot, tag) {
   const logEvent = logger(pluginOptions);

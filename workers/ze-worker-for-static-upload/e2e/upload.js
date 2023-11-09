@@ -1,7 +1,7 @@
 const https = require('node:https');
 
 const options = {
-  hostname: 'ze-worker-for-static-upload.valorkin.workers.dev',
+  hostname: 'cf.valorkin.dev',
   port: 443,
   path: '/some/path',
   method: 'POST',

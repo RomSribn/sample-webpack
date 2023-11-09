@@ -54,7 +54,7 @@ export default {
 
         }
 
-        const regex = /^(edge\.local|valorkin\.dev)/;
+        const regex = /^(edge\.local|(cf|aws)\.valorkin\.dev)/;
         if (regex.test(url.hostname)) {
           return getListOfApps(request, env);
         }

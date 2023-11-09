@@ -49,7 +49,7 @@ function dynmo(config) {
         .replace('_EDGE_URL_',
           `__protocol__//${app.org}-${app.project}-${key}.__domain_and_port__/remoteEntry.js`)
         // .replace('_REMOTE_APP_', key)
-        .replace('_DEFAULT_EDGE_DOMAIN_', 'valorkin.dev')
+        .replace('_DEFAULT_EDGE_DOMAIN_', 'cf.valorkin.dev')
       ;
     });
   return config;

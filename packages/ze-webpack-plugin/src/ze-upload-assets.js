@@ -1,5 +1,5 @@
 const { logger } = require('./ze-log-event');
-const { uploadFile } = require('./ze-http-upload');
+const { uploadFile } = require('./ze-upload-file');
 const { isDev } = require('./_debug');
 
 async function zeUploadAssets(pluginOptions, { missingAssets, assetsMap, count }) {
