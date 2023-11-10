@@ -4,8 +4,5 @@ export function getAppNameFromHostname(url: URL) {
   if (!appMatch) {
     return void 0;
   }
-  if (/\.edge\.local/.test(url.hostname)) {
-    return appMatch[1];
-  }
-  return appMatch[2];
+  return appMatch[1];
 }

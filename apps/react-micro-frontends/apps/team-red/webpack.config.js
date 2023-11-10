@@ -67,7 +67,7 @@ function replacer() {
         };
       }
 
-      let domain = getLastTwoPartsOfUrl(window.location.hostname);
+      let domain = getEdgeHost(window.location.hostname);
       const protocol = window.location.protocol;
       const port = window.location.port;
       if (port) {
@@ -103,9 +103,9 @@ function replacer() {
         console.log(`who cares in POC`, err);
       });
 
-    function getLastTwoPartsOfUrl(hostname) {
+    function getEdgeHost(hostname) {
       const parts = hostname.split('.'); // Splits the hostname into parts
-      return parts.length > 1 ? parts.slice(-2).join('.') : hostname; // Joins the last two parts
+      return parts.length > 1 ? parts.slice(-3).join('.') : hostname; // Joins the last two parts
     }
   });
 }
