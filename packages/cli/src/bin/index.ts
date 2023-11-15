@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import packageJson from '../../package.json';
 import { saveToken, getToken } from '../lib/token';

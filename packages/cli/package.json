@@ -10,12 +10,12 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "commander": "^11.1.0",
-    "conf": "^12.0.0",
-    "open": "^9.1.0",
+    "conf": "10.2.0",
+    "open": "8.4.0",
     "socket.io-client": "^4.7.2",
     "uuid": "^9.0.1"
   },
-  "type": "commonjs",
+  "type": "module",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
 }

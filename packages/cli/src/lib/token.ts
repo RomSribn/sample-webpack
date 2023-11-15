@@ -5,7 +5,7 @@ function saveToken(token: string): void {
 }
 
 function getToken(): string | undefined {
-  return conf.get('token');
+  return conf.get('token') as string | undefined;
 }
 
 export { saveToken, getToken };
