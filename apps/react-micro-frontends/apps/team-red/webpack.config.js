@@ -5,11 +5,7 @@ const { withZephyr } = require('@ze/ze-webpack-plugin');
 
 const mfConfig = {
   name: 'team-red',
-  exposes: {
-    './TeamRedLayout': './src/app/team-red-layout'
-  },
-  remotes: ['team-green', 'team-blue'],
-  additionalShared: ['react', 'react-dom']
+  remotes: ['team-green', 'team-blue']
 };
 
 // Nx plugins for webpack.
@@ -17,9 +13,7 @@ module.exports = composePlugins(withNx(), withReact(),
   withModuleFederation(mfConfig),
   withZephyr(),
   (config) => {
-
     return dynmo(config);
-    // return config;
   });
 
 function dynmo(config) {
@@ -104,31 +98,9 @@ function replacer() {
       });
 
     function getEdgeHost(hostname) {
-      const parts = hostname.split('.'); // Splits the hostname into parts
-      return parts.length > 1 ? parts.slice(-3).join('.') : hostname; // Joins the last two parts
+      const regex = /^(.+?)\.(edge\.local|(cf|aws)\.valorkin\.dev)/;
+      const match = hostname.match(regex);
+      return match[2];
     }
   });
 }
-
-// todo: stub component?
-/*   const script = document.createElement('script');
-   script.type = 'module';
-   script.src = localEdge ? defaultUrl : edgeUrl;
-   script.onload = (args) => {
-     console.log(args)
-     // the injected script has loaded and is available on window
-     // we can now resolve this Promise
-     const proxy = {
-       get: (request) => window[remoteApp].get(request),
-       init: (arg) => {
-         try {
-           // return window[remoteApp].init(arg)
-         } catch (e) {
-           console.log('remote container already initialized');
-         }
-       }
-     };
-     resolve(proxy);
-   };
-   // inject this script with the src set to the versioned remoteEntry.js
-   document.head.appendChild(script);*/

@@ -7,8 +7,7 @@ const mfConfig = {
   name: 'team-green',
   exposes: {
     './GreenRecos': './src/app/team-green-recos.tsx'
-  },
-  additionalShared: ['react', 'react-dom']
+  }
 };
 
 // Nx plugins for webpack.
