@@ -5,6 +5,9 @@ const { withZephyr } = require('@ze/ze-webpack-plugin');
 
 const mfConfig = {
   name: 'team-red',
+  exposes: {
+    './TeamRedLayout': './src/app/team-red-layout'
+  },
   remotes: ['team-green', 'team-blue']
 };
 
@@ -13,7 +16,9 @@ module.exports = composePlugins(withNx(), withReact(),
   withModuleFederation(mfConfig),
   withZephyr(),
   (config) => {
+
     return dynmo(config);
+    // return config;
   });
 
 function dynmo(config) {
