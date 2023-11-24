@@ -381,8 +381,10 @@ export class ContentClass extends HTMLElement {
     if (!!accessToken) {
       await this.getAppData();
       this.mainContentBox.innerHTML = getFormContent();
-      const storageData = await chrome.storage.session.get("currentFormValues") as ICurrentValue;
-      this.validateCurrentValues(storageData)
+      const storageData = await chrome.storage.session.get("currentFormValues");
+      if (storageData.currentFormValues) {
+        this.validateCurrentValues((storageData?.currentFormValues) as ICurrentValue)
+      }
       this.initForm();
       this.getMainContent();
       return;
