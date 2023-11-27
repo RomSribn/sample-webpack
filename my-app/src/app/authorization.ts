@@ -5,10 +5,8 @@ const uuidv4 = require('uuid').v4;
 const AUTH0_CLIENT_ID = 'Bid9zSuXbsHFOHahQK8RlycTsEh1dJ00';
 const AUTH0_DOMAIN = 'dev-dauyheb8iq6ef5la.us.auth0.com';
 //todo change on another domain if it is needed
-const ZEPHYR_API_ENDPOINT = 'http://localhost:3333';
-const ZEPHYR_WS_ENDPOINT = 'http://localhost:3333';
-
-// http://localhost:3333/user-token/generate?code=61EYjVFLm26TFj_bfYJ8kH3iOwm-MdPC8KmJh_1ku6G6H&state=66df4f5053884843a843b5c950407de5
+const ZEPHYR_API_ENDPOINT = 'https://api-dev.zephyr-cloud.io';
+const ZEPHYR_WS_ENDPOINT = 'https://api-dev.zephyr-cloud.io';
 
 const clientId = AUTH0_CLIENT_ID;
 const domain = AUTH0_DOMAIN;

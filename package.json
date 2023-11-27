@@ -2,7 +2,10 @@
   "name": "@zephyr-side-panel/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start": "nx run my-app:serve",
+    "build": "nx run my-app:build"
+  },
   "private": true,
   "devDependencies": {
     "@nx/eslint": "17.1.3",
