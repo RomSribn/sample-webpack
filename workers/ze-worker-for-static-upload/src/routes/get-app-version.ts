@@ -2,6 +2,14 @@ import { Env } from '../index';
 import { getAppNameFromHostname } from '../utility/util-get-app-name-from-hostname';
 import { getDeploymentDomain } from '../utils/get-deployment-domain';
 
+function _safeToUrl(str: string) {
+  try {
+    return new URL(str);
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function getAppVersion(request: Request, env: Env) {
   const url = new URL(request.url);
   const app = getAppNameFromHostname(url);
@@ -71,11 +79,14 @@ export async function getAppVersion(request: Request, env: Env) {
       const fallback = mfConfig.remotes[remote];
       // todo: if we have an object here already
       if (typeof fallback !== 'string') {
-        return fallback;
+        continue;
       }
 
       // remote pathname
-      const url = new URL(fallback);
+      const url = _safeToUrl(fallback);
+      if (!url) {
+        continue;
+      }
       const pathname = url.pathname;
 
       // create app name
