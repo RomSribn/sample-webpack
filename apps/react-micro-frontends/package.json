@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx run-many -t serve --parallel=5",
-    "build": "nx run-many -t build --parallel=5 --skip-nx-cache",
+    "build": "nx run-many -t build --parallel=1 --skip-nx-cache",
     "serve:host": "nx run host:serve",
     "build:host": "nx run host:build:production --skip-nx-cache",
     "serve:team-red": "nx run team-red:serve",

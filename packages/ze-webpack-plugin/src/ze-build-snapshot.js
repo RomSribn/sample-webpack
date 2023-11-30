@@ -5,6 +5,7 @@ function createSnapshot(options, assets) {
     type: 'snapshot',
     creator: options.git,
     createdAt: Date.now(),
+    mfConfig: options.mfConfig,
     assets: Object.keys(assets).reduce((memo, hash) => {
       const asset = assets[hash];
       memo[asset.path] = {
