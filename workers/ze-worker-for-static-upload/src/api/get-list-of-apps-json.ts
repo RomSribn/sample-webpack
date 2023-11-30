@@ -4,7 +4,6 @@ import { getDeploymentDomain } from '../utils/get-deployment-domain';
 
 export async function getListOfAppsJson(request: Request, env: Env) {
   const url = new URL(request.url);
-  const port = url.port;
   const cursor = url.searchParams.get('cursor');
 
   const kvList = await getKVList(env, cursor);
