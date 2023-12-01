@@ -22,7 +22,7 @@ export default function GreenRecos({ id, sku }: { id: string, sku: string }) {
   }, [sku]);
 
   return (<div id={id}>
-    <h3>Related Products</h3>
+    <h3>Related Products For Our Demo</h3>
     {reco.map((id) =>
       <img key={id} src={`./team-green/images/reco_${id}.jpg`} alt={`Reco ${id}`} />)}
   </div>);

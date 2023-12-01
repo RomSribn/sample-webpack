@@ -44,6 +44,7 @@ function dynmo(config) {
     .forEach((key) => {
       const defaultUrl = mfPlugin._options.remotes[key];
       mfPlugin._options.remotes[key] = promiseNewPromise
+        .replace('__REMOTE_KEY__', key)
         .replace('_DEFAULT_URL_', defaultUrl)
         .replace('_EDGE_URL_',
           `__protocol__//${app.org}-${app.project}-${key}.__domain_and_port__/remoteEntry.js`)
@@ -56,6 +57,7 @@ function dynmo(config) {
 
 function replacer() {
   return new Promise((resolve, reject) => {
+    const remoteKey = '__REMOTE_KEY__';
     const defaultUrl = '_DEFAULT_URL_';
     let edgeUrl = '_EDGE_URL_';
     const getEdgeLink = () => {
@@ -84,6 +86,12 @@ function replacer() {
     edgeUrl = edgeUrl
       .replace('__protocol__', protocol)
       .replace('__domain_and_port__', domain);
+
+    const sessionEdgeURL = window.sessionStorage.getItem(remoteKey)
+
+    if (sessionEdgeURL) {
+      edgeUrl = sessionEdgeURL;
+    }
 
     Promise
       .race([
