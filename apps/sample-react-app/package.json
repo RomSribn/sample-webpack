@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nx serve",
     "watch": "nx watch",
-    "build": "nx build",
+    "build": "nx build --watch",
     "rsbuild": "nx run rsbuild",
     "test": "nx test"
   },
