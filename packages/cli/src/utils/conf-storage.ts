@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import Conf from 'conf';
 import packageJson from '../../package.json';
 
