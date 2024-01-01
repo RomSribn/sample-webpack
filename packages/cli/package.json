@@ -8,10 +8,10 @@
     "zephyr-cli": "./src/index.js"
   },
   "dependencies": {
-    "tslib": "^2.3.0",
+    "tslib": "^2.6.2",
     "commander": "^11.1.0",
-    "conf": "10.2.0",
-    "open": "8.4.0",
+    "conf": "^12.0.0",
+    "open": "^10.0.2",
     "socket.io-client": "^4.7.2",
     "uuid": "^9.0.1"
   },
