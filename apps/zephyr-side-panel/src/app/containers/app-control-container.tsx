@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { RemotesSelector } from './remotes-selector';
 import { ApplicationTagSelector } from './application-tag-selector';

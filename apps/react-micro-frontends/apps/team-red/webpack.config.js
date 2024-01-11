@@ -31,9 +31,9 @@ function dynmo(config) {
   const mfPlugin = config.plugins.find(
     (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'
   );
-  const zePlugin = config.plugins.find(
-    (plugin) => plugin.constructor.name === 'ZeWebpackPlugin'
-  );
+  // const zePlugin = config.plugins.find(
+  //   (plugin) => plugin.constructor.name === 'ZeWebpackPlugin'
+  // );
 
   const fnReplace = replacer.toString();
   const strStart = new RegExp(/^function[\W\S]+return new Promise/);
