@@ -6,11 +6,13 @@
     "build": "nx run-many --all --target=build",
     "lint": "nx run-many --all --target=lint",
     "test": "nx run-many --all --target=test",
+    "try": "nx run zephyr-api:start",
     "prepare": "husky install"
   },
   "workspaces": [
     "api/*",
     "apps/*",
+    "examples/*",
     "packages/*",
     "workers/*"
   ],

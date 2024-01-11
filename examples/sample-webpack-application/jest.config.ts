@@ -15,5 +15,5 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/apps/sample-webpack-application',
+  coverageDirectory: '../../coverage/examples/sample-webpack-application',
 };

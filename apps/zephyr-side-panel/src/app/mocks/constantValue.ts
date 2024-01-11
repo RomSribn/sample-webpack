@@ -1,13 +1,13 @@
 export const applicationsData = [
   {
-    app: 'valorkin-ze-mono-team-red',
+    app: 'valorkin-zephyr-mono-team-red',
     versions: {
-      latest: 'valorkin-ze-mono-team-red_valorkin_395',
-      next: 'valorkin-ze-mono-team-red_valorkin_396',
+      latest: 'valorkin-zephyr-mono-team-red_valorkin_395',
+      next: 'valorkin-zephyr-mono-team-red_valorkin_396',
     },
     tags: {
       latest: {
-        id: 'valorkin-ze-mono-team-red_valorkin_395',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_395',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',
@@ -206,7 +206,7 @@ export const applicationsData = [
         },
       },
       next: {
-        id: 'valorkin-ze-mono-team-red_valorkin_396',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_396',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',
@@ -407,14 +407,14 @@ export const applicationsData = [
     },
   },
   {
-    app: 'valorkin-ze-mono-team-blue',
+    app: 'valorkin-zephyr-mono-team-blue',
     versions: {
-      latest: 'valorkin-ze-mono-team-red_valorkin_39',
-      canary: 'valorkin-ze-mono-team-red_valorkin_38',
+      latest: 'valorkin-zephyr-mono-team-red_valorkin_39',
+      canary: 'valorkin-zephyr-mono-team-red_valorkin_38',
     },
     tags: {
       latest: {
-        id: 'valorkin-ze-mono-team-red_valorkin_39',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_39',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',
@@ -475,7 +475,7 @@ export const applicationsData = [
         },
       },
       canary: {
-        id: 'valorkin-ze-mono-team-red_valorkin_38',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_38',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',
@@ -676,14 +676,14 @@ export const applicationsData = [
     },
   },
   {
-    app: 'valorkin-ze-mono-team-green',
+    app: 'valorkin-zephyr-mono-team-green',
     versions: {
-      staging: 'valorkin-ze-mono-team-red_valorkin_3',
-      production: 'valorkin-ze-mono-team-red_valorkin_4',
+      staging: 'valorkin-zephyr-mono-team-red_valorkin_3',
+      production: 'valorkin-zephyr-mono-team-red_valorkin_4',
     },
     tags: {
       staging: {
-        id: 'valorkin-ze-mono-team-red_valorkin_3',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_3',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',
@@ -882,7 +882,7 @@ export const applicationsData = [
         },
       },
       production: {
-        id: 'valorkin-ze-mono-team-red_valorkin_4',
+        id: 'valorkin-zephyr-mono-team-red_valorkin_4',
         type: 'snapshot',
         creator: {
           name: 'Dmitriy Shekhovtsov',

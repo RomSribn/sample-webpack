@@ -16,7 +16,6 @@
         "main": "api/zephyr-api/src/index.ts",
         "tsConfig": "api/zephyr-api/tsconfig.app.json",
         "assets": ["api/zephyr-api/src/assets"],
-        "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
           "outExtension": {

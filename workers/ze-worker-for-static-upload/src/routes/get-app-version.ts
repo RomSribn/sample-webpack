@@ -89,7 +89,7 @@ export async function getAppVersion(request: Request, env: Env) {
 			const pathname = url.pathname;
 
 			// create app name
-			const hardcode = 'valorkin-ze-mono';
+			const hardcode = 'valorkin-zephyr-mono';
 			const remoteAppName = [hardcode, remote].join('-');
 
 			const remoteTag = await env.ze_tags.get<any>(remoteAppName, { type: 'json' });

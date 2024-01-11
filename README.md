@@ -6,20 +6,20 @@ add to Acrylic hosts:
 
 - `127.0.0.1 edge.local *.edge.local`
 
-`yarn`
+`npm ci`
 
 set pg_url for ze_api, ask @valorkin or make your own
 
-start logger server
-
 ```bash
-cd api/ze-api
-npm start
+# start logger server
+nx run zephyr-api:serve
 ```
 
 start local edge
 
 ```bash
+npx nx run ze-worker-for-static-upload:start
+
 cd workspace/ze-worker-for-static-upload
 npm start
 ```

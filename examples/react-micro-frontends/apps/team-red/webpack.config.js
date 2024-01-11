@@ -26,7 +26,7 @@ module.exports = composePlugins(
 function dynmo(config) {
   const app = {
     org: 'valorkin',
-    project: 'ze-mono',
+    project: 'zephyr-mono',
   };
   const mfPlugin = config.plugins.find(
     (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'

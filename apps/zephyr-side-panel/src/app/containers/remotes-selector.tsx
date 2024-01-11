@@ -4,22 +4,22 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
 export interface RemoteDescriptor {
-  // "name": "valorkin-ze-mono-team-blue",
+  // "name": "valorkin-zephyr-mono-team-blue",
   name: string;
-  // "url": "http://valorkin-ze-mono-team-blue_valorkin_535.edge.local:8787/remoteEntry.js",
+  // "url": "http://valorkin-zephyr-mono-team-blue_valorkin_535.edge.local:8787/remoteEntry.js",
   url: string;
   // "versions": [
   //   {
-  //     "name": "valorkin-ze-mono-team-blue_valorkin_535",
-  //     "url": "valorkin-ze-mono-team-blue_valorkin_535.edge.local"
+  //     "name": "valorkin-zephyr-mono-team-blue_valorkin_535",
+  //     "url": "valorkin-zephyr-mono-team-blue_valorkin_535.edge.local"
   //   }
   // ],
   versions: { name: string; url: string }[];
   // "fallback": "http://localhost:4300/remoteEntry.js",
   fallback: string;
-  // "latest": "http://valorkin-ze-mono-team-blue.edge.local:8787/remoteEntry.js",
+  // "latest": "http://valorkin-zephyr-mono-team-blue.edge.local:8787/remoteEntry.js",
   latest: string;
-  // "version": "valorkin-ze-mono-team-blue_valorkin_535"
+  // "version": "valorkin-zephyr-mono-team-blue_valorkin_535"
   version: string;
 }
 

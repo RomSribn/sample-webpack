@@ -27,8 +27,8 @@ export type AppInfo = {
 
 export function extractAppInfoFromUrl(url: string): AppInfo {
   // eg
-  // http://valorkin-ze-mono-sample-react-app_valorkin_559.edge.loc:8787/
-  // app = valorkin-ze-mono-sample-react-app
+  // http://valorkin-zephyr-mono-sample-react-app_valorkin_559.edge.loc:8787/
+  // app = valorkin-zephyr-mono-sample-react-app
   // version = valorkin_559
   // tag = latest | valorkin_559 (?)
   const _url = new URL(url);
