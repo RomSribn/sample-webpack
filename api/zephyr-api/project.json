@@ -1,0 +1,67 @@
+{
+  "name": "zephyr-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "api/zephyr-api/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/api/zephyr-api",
+        "format": ["cjs"],
+        "bundle": false,
+        "main": "api/zephyr-api/src/index.ts",
+        "tsConfig": "api/zephyr-api/tsconfig.app.json",
+        "assets": ["api/zephyr-api/src/assets"],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "zephyr-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "zephyr-api:build:development"
+        },
+        "production": {
+          "buildTarget": "zephyr-api:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "api/zephyr-api/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

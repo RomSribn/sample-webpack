@@ -1,12 +1,7 @@
 {
-  "name": "ze-api",
+  "name": "zephyr-api",
   "version": "0.0.1",
   "type": "module",
-  "scripts": {
-    "start": "tsx watch src/index.ts",
-    "serve": "tsx watch src/index.ts",
-    "test": "node_modules/jest/bin/jest.js"
-  },
   "dependencies": {
     "@hono/node-server": "^1.2.0",
     "dotenv": "^16.3.1",
