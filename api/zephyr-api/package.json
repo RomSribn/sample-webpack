@@ -1,10 +1,6 @@
 {
   "name": "zephyr-api",
   "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "start": "nx run zephyr-api:serve"
-  },
   "dependencies": {
     "@hono/node-server": "^1.2.0",
     "dotenv": "^16.3.1",
