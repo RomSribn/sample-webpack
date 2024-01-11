@@ -1,3 +1,1 @@
-export function zeMfReload(app) {
-
-}
+export function zeMfReload(app) {}

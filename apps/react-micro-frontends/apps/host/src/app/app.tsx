@@ -20,5 +20,4 @@ root.render(
   </StrictMode>
 );
 
-
 export default App;

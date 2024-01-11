@@ -1,3 +1,3 @@
 const isDev = true;
 
-module.exports = {isDev};
+module.exports = { isDev };

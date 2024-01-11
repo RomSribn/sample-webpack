@@ -30,10 +30,10 @@ const livereloadScript = `
   connect();
 })();
 </script>
-`
+`;
 
 export class AppendLivereloadHandler {
-  element(element: any) {
-    element.append(livereloadScript, { html: true });
-  }
+	element(element: any) {
+		element.append(livereloadScript, { html: true });
+	}
 }

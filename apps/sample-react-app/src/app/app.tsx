@@ -7,7 +7,7 @@ export function App() {
   return (
     <div>
       <NxWelcome title="sample-react-app" />
-        <p>hello</p>
+      <p>hello</p>
     </div>
   );
 }

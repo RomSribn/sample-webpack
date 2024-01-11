@@ -4,8 +4,12 @@ function getGitInfo() {
 
     const username = execSync('git config user.name').toString().trim();
     const email = execSync('git config user.email').toString().trim();
-    const remoteOrigin = execSync('git config --get remote.origin.url').toString().trim();
-    const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+    const remoteOrigin = execSync('git config --get remote.origin.url')
+      .toString()
+      .trim();
+    const branch = execSync('git rev-parse --abbrev-ref HEAD')
+      .toString()
+      .trim();
     const commitHash = execSync('git rev-parse HEAD').toString().trim();
 
     // parse remote origin url to get the organization and repository name
@@ -16,8 +20,10 @@ function getGitInfo() {
       .pop() // Take the last part, which is the path
       .split('/'); // Split the path into parts
 
-    const organization = urlParts.length > 1 ? urlParts[urlParts.length - 2] : null;
-    const repositoryName = urlParts.length > 0 ? urlParts[urlParts.length - 1] : null;
+    const organization =
+      urlParts.length > 1 ? urlParts[urlParts.length - 2] : null;
+    const repositoryName =
+      urlParts.length > 0 ? urlParts[urlParts.length - 1] : null;
 
     return {
       git: {
@@ -28,8 +34,8 @@ function getGitInfo() {
       },
       app: {
         org: organization,
-        project: repositoryName
-      }
+        project: repositoryName,
+      },
     };
   } catch (error) {
     console.error('Error retrieving Git information:', error);

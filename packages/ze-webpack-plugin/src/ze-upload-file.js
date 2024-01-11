@@ -10,8 +10,8 @@ async function uploadFile(id, asset) {
     extname: asset.extname,
     hash: asset.hash,
     size: asset.size,
-    createdAt: Date.now()
-  }
+    createdAt: Date.now(),
+  };
 
   const options = {
     hostname,
@@ -20,15 +20,14 @@ async function uploadFile(id, asset) {
     method: 'POST',
     headers: {
       // 'Content-Length': asset.buffer.length
-    }
+    },
   };
 
   // options.headers['Content-Type'] = 'application/octet';
   options.headers['x-file-path'] = asset.path;
-  options.headers['x-file-meta'] = JSON.stringify(meta)
+  options.headers['x-file-meta'] = JSON.stringify(meta);
 
-  return request(options, asset.buffer)
-    .catch(err => console.warn(err));
+  return request(options, asset.buffer).catch((err) => console.warn(err));
 }
 
 async function uploadSnapshot(id, body) {
@@ -40,13 +39,13 @@ async function uploadSnapshot(id, body) {
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length
-    }
+      'Content-Length': data.length,
+    },
   };
 
   options.headers['Content-Type'] = 'application/json';
 
-  return request(options, data).catch(err => console.log(err));
+  return request(options, data).catch((err) => console.log(err));
 }
 
 async function uploadTags(id, body) {
@@ -58,13 +57,13 @@ async function uploadTags(id, body) {
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length
-    }
+      'Content-Length': data.length,
+    },
   };
 
   options.headers['Content-Type'] = 'application/json';
 
-  return request(options, data).catch(err => console.log(err));
+  return request(options, data).catch((err) => console.log(err));
 }
 
 module.exports = { uploadSnapshot, uploadFile, uploadTags };

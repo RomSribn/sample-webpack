@@ -3,9 +3,11 @@ const { withReact } = require('@nx/react');
 
 const { withZephyr } = require('@ze/ze-webpack-plugin');
 
-module.exports = composePlugins(withNx(), withReact(),
+module.exports = composePlugins(
+  withNx(),
+  withReact(),
   withZephyr(),
   (config) => {
     return config;
-  });
-
+  }
+);

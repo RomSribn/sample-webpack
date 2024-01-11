@@ -1,4 +1,4 @@
-import {html, raw} from 'hono/html'
+import { html, raw } from 'hono/html';
 
 // todo: add more granular failure codes
 // todo: ${executionContext} - local, ci, edge
@@ -58,8 +58,7 @@ deploy:edge:failed
 * */
 
 export function viewLogs(app) {
-    app
-        .get(`/view-logs`, async (c) => {
-            return c.html(html`Hello World`)
-        })
+  app.get(`/view-logs`, async (c) => {
+    return c.html(html`Hello World`);
+  });
 }

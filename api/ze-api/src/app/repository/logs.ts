@@ -1,94 +1,109 @@
-import {Client} from "pg";
+import { Client } from 'pg';
 
 export interface GitInfo {
-    name: string;
-    email: string;
-    branch: string;
-    commit: string;
+  name: string;
+  email: string;
+  branch: string;
+  commit: string;
 }
 
 export interface LogEntry {
-    appId: string;
-    zeUserId: string;
-    zeBuildId: string;
-    logLevel: string;
-    actionType: string;
-    git: GitInfo;
-    message: string;
-    meta: {
-        isCI: boolean;
-    };
-    createdAt: number;
+  appId: string;
+  zeUserId: string;
+  zeBuildId: string;
+  logLevel: string;
+  actionType: string;
+  git: GitInfo;
+  message: string;
+  meta: {
+    isCI: boolean;
+  };
+  createdAt: number;
 }
 
 export async function insertNewEntry(client: Client, entry: LogEntry) {
-    const {
-        appId,
-        zeUserId,
-        zeBuildId,
-        logLevel,
-        actionType,
-        message,
-        createdAt,
-        meta,
-        git
-    } = entry;
+  const {
+    appId,
+    zeUserId,
+    zeBuildId,
+    logLevel,
+    actionType,
+    message,
+    createdAt,
+    meta,
+    git,
+  } = entry;
 
-    const logsQuery = `
+  const logsQuery = `
     INSERT INTO logs (appId, zeUserId, zeBuildId, logLevel, actionType, message, createdAt, meta)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING id;
   `;
 
-    try {
-        // Insert into logs and get the newly created ID
-        const res = await client.query(logsQuery, [appId, zeUserId, zeBuildId, logLevel, actionType, message, createdAt, JSON.stringify(meta)]);
-        const newId = res.rows[0].id;
+  try {
+    // Insert into logs and get the newly created ID
+    const res = await client.query(logsQuery, [
+      appId,
+      zeUserId,
+      zeBuildId,
+      logLevel,
+      actionType,
+      message,
+      createdAt,
+      JSON.stringify(meta),
+    ]);
+    const newId = res.rows[0].id;
 
-        // If you need to insert into the `git_info` table as well, you can do it here using `newId`
-        const gitQuery = `
+    // If you need to insert into the `git_info` table as well, you can do it here using `newId`
+    const gitQuery = `
       INSERT INTO git_info (name, email, branch, commit, log_id)
       VALUES ($1, $2, $3, $4, $5);
     `;
-        process.nextTick(() => {
-            client.query(gitQuery, [git.name, git.email, git.branch, git.commit, newId]);
-        });
+    process.nextTick(() => {
+      client.query(gitQuery, [
+        git.name,
+        git.email,
+        git.branch,
+        git.commit,
+        newId,
+      ]);
+    });
 
-        return newId;
-    } catch (err) {
-        console.error('Error executing query', err.stack);
-    }
+    return newId;
+  } catch (err) {
+    console.error('Error executing query', err.stack);
+  }
 }
 
 export async function getLastTenEntries(client: Client, appId) {
-    const query = `
+  const query = `
     SELECT * FROM logs
     WHERE appId = $1
     ORDER BY id DESC
     LIMIT 10;
   `;
 
-    try {
-        const res = await client.query(query, [appId]);
-        return res.rows;
-    } catch (err) {
-        console.error('Error executing query', err.stack);
-    }
+  try {
+    const res = await client.query(query, [appId]);
+    return res.rows;
+  } catch (err) {
+    console.error('Error executing query', err.stack);
+  }
 }
 
 export async function getEntriesAfterId(client: Client, appId, specificId) {
-    const query = `
+  const query = `
     SELECT * FROM logs
     WHERE appId = $2 AND id > $1
     ORDER BY id ASC;
   `;
 
-    try {
-        const res = await client.query(query, [specificId, appId]);
-        return res.rows;
-    } catch (err) {
-        console.error('Error executing query', err.stack);
-    }
+  try {
+    const res = await client.query(query, [specificId, appId]);
+    return res.rows;
+  } catch (err) {
+    console.error('Error executing query', err.stack);
+  }
 }
 
 // Example usage
@@ -102,7 +117,6 @@ export async function getEntriesAfterId(client: Client, appId, specificId) {
     createdAt: 1697759173516,
     meta: {isCI: false}
 };*/
-
 
 /*
 -- Create a new table based on the JSON structure

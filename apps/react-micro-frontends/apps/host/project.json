@@ -1,6 +1,6 @@
 {
   "name": "host",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/host/src",
   "projectType": "application",
   "targets": {
@@ -15,11 +15,13 @@
         "baseHref": "/",
         "main": "apps/host/src/main.tsx",
         "tsConfig": "apps/host/tsconfig.app.json",
-        "assets": [{
-          "glob": "**/*",
-          "input": "apps/host/src/assets",
-          "output": "."
-        }],
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/react-micro-frontends/apps/host/src/assets",
+            "output": "."
+          }
+        ],
         "styles": ["apps/host/src/styles.css"],
         "scripts": [],
         "isolatedConfig": true,
@@ -63,14 +65,16 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/host/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/react-micro-frontends/apps/host/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/host/jest.config.ts",
+        "jestConfig": "apps/react-micro-frontends/apps/host/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 const prices: Record<string, string> = {
   t_porsche: '66,00 €',
   t_fendt: '54,00 €',
-  t_eicher: '58,00 €'
+  t_eicher: '58,00 €',
 };
-export default function BlueBuy({ id, sku }: { id: string, sku: string }) {
+export default function BlueBuy({ id, sku }: { id: string; sku: string }) {
   const [price, setPrice] = useState(prices[sku]);
 
   const log = (...args: string[]) => {
@@ -14,8 +14,12 @@ export default function BlueBuy({ id, sku }: { id: string, sku: string }) {
 
   const addToCart = () => {
     log('event sent "blue:basket:changed"');
-    window.dispatchEvent(new CustomEvent('blue:basket:changed',
-      { bubbles: true, detail: { price } }));
+    window.dispatchEvent(
+      new CustomEvent('blue:basket:changed', {
+        bubbles: true,
+        detail: { price },
+      })
+    );
   };
 
   log('connected', sku);
@@ -29,7 +33,11 @@ export default function BlueBuy({ id, sku }: { id: string, sku: string }) {
     };
   }, [sku]);
 
-  return (<div id={id}>
-    <button type="button" onClick={addToCart}>buy for ${price}</button>
-  </div>);
+  return (
+    <div id={id}>
+      <button type="button" onClick={addToCart}>
+        buy for ${price}
+      </button>
+    </div>
+  );
 }

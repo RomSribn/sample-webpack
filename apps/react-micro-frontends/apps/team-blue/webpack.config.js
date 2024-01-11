@@ -7,13 +7,17 @@ const mfConfig = {
   name: 'team-blue',
   exposes: {
     './BlueBasket': './src/app/team-blue-basket.tsx',
-    './BlueBuy': './src/app/team-blue-buy.tsx'
-  }
+    './BlueBuy': './src/app/team-blue-buy.tsx',
+  },
 };
 
 // Nx plugins for webpack.
-module.exports = composePlugins(withNx(), withReact(),
+module.exports = composePlugins(
+  withNx(),
+  withReact(),
   withZephyr(),
-  withModuleFederation(mfConfig),  (config) => {
+  withModuleFederation(mfConfig),
+  (config) => {
     return config;
-  });
+  }
+);

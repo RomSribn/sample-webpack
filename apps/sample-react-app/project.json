@@ -1,7 +1,7 @@
 {
   "name": "sample-react-app",
-  "$schema": "node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "./src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/sample-react-app/src",
   "projectType": "application",
   "targets": {
     "rsbuild": {
@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "target": "web",
-        "outputPath": "dist/sample-react-app",
+        "outputPath": "/dist/sample-react-app",
         "main": "src/main.tsx",
         "tsConfig": "tsconfig.app.json",
         "rspackConfig": "rspack.config.js",
@@ -51,16 +51,18 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/sample-react-app",
-        "index": "src/index.html",
+        "outputPath": "dist/apps/sample-react-app",
+        "index": "apps/sample-react-app/src/index.html",
         "baseHref": "/",
-        "main": "src/main.tsx",
-        "tsConfig": "tsconfig.app.json",
-        "assets": ["src/favicon.ico", "src/assets"],
-        "styles": ["src/styles.css"],
+        "main": "apps/sample-react-app/src/main.tsx",
+        "tsConfig": "apps/sample-react-app/tsconfig.app.json",
+        "assets": [
+          "apps/sample-react-app/src/favicon.ico",
+          "apps/sample-react-app/src/assets"
+        ],
+        "styles": ["apps/sample-react-app/src/styles.css"],
         "scripts": [],
-        "isolatedConfig": true,
-        "webpackConfig": "webpack.config.js"
+        "webpackConfig": "apps/sample-react-app/webpack.config.js"
       },
       "configurations": {
         "development": {
@@ -72,8 +74,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "src/environments/environment.ts",
-              "with": "src/environments/environment.prod.ts"
+              "replace": "apps/sample-react-app/src/environments/environment.ts",
+              "with": "apps/sample-react-app/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,

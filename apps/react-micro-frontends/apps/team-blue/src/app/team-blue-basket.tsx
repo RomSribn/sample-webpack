@@ -7,11 +7,13 @@ function log(...args: string[]) {
 }
 
 const state: { count: number } = {
-  count: 0
+  count: 0,
 };
 
 export default function BlueBasket({ id }: { id: string }) {
-  const [classname, setClassname] = useState(state.count === 0 ? 'empty' : 'filled');
+  const [classname, setClassname] = useState(
+    state.count === 0 ? 'empty' : 'filled'
+  );
   const [count, setCount] = useState(state.count);
 
   useEffect(() => {
@@ -29,9 +31,9 @@ export default function BlueBasket({ id }: { id: string }) {
     };
   }, []);
 
-  return (<div id={id}>
-    <div className={classname}>basket: {count} item(s)</div>
-  </div>);
+  return (
+    <div id={id}>
+      <div className={classname}>basket: {count} item(s)</div>
+    </div>
+  );
 }
-
-

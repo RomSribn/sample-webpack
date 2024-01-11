@@ -1,0 +1,84 @@
+{
+  "name": "zephyr-side-panel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/zephyr-side-panel/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/zephyr-side-panel",
+        "index": "apps/zephyr-side-panel/src/index.html",
+        "baseHref": "/",
+        "main": "apps/zephyr-side-panel/src/main.tsx",
+        "tsConfig": "apps/zephyr-side-panel/tsconfig.app.json",
+        "assets": [
+          "apps/zephyr-side-panel/src/manifest.json",
+          "apps/zephyr-side-panel/src/favicon.ico",
+          "apps/zephyr-side-panel/src/assets"
+        ],
+        "styles": ["apps/zephyr-side-panel/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "apps/zephyr-side-panel/webpack.config.js"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/zephyr-side-panel/src/environments/environment.ts",
+              "with": "apps/zephyr-side-panel/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "media",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 3333,
+        "buildTarget": "zephyr-side-panel:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "zephyr-side-panel:build:development"
+        },
+        "production": {
+          "buildTarget": "zephyr-side-panel:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/zephyr-side-panel/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/zephyr-side-panel/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

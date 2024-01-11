@@ -7,7 +7,7 @@
  */
 export function NxWelcome({ title }: { title: string }) {
   function blowMeUp() {
-    throw new Error(`Get me sentry rollbacks`)
+    throw new Error(`Get me sentry rollbacks`);
   }
 
   return (
@@ -422,10 +422,10 @@ export function NxWelcome({ title }: { title: string }) {
         <div className="container">
           <div id="welcome">
             <h1>hello to Roma</h1>
-            <h1>
-              Welcome {title} 👋
-            </h1>
-            <button className="button-pill" onClick={() => blowMeUp()}>Break the world</button>
+            <h1>Welcome {title} 👋</h1>
+            <button className="button-pill" onClick={() => blowMeUp()}>
+              Break the world
+            </button>
           </div>
 
           <div id="hero" className="rounded">

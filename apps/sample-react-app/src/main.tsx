@@ -1,11 +1,11 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react';
 
 import App from './app/app';
 
 Sentry.init({
-  dsn: "https://dc0d5d0da7a3e71e65bdf4a984a8faf0@o4505862739525632.ingest.sentry.io/4506043285176320",
+  dsn: 'https://dc0d5d0da7a3e71e65bdf4a984a8faf0@o4505862739525632.ingest.sentry.io/4506043285176320',
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled

@@ -16,27 +16,22 @@ import { Env } from '../index';
 // 7. if some files not in bucket - return list of hashes to be uploaded
 
 interface SnapshotTemp {
-  id: string;
-  assets: Record<string, any>;
-  message: string;
+	id: string;
+	assets: Record<string, any>;
+	message: string;
 }
 
 export async function postUploadSnapshot(request: Request, env: Env) {
-  const newSnapshot = await request.json<SnapshotTemp>();
-  const response = { id: newSnapshot.id, assets: [], message: '' } as SnapshotTemp;
+	const newSnapshot = await request.json<SnapshotTemp>();
+	const response = { id: newSnapshot.id, assets: [], message: '' } as SnapshotTemp;
 
-  await env.ze_snapshots.put(newSnapshot.id, JSON.stringify(newSnapshot));
-  const assetPaths = Object.keys(newSnapshot.assets);
-  const knownFiles = await Promise
-    .all(assetPaths
-      .map(async (path: string) =>
-        env.ze_files.get(newSnapshot.assets[path].hash, {type: 'stream'})
-      ));
+	await env.ze_snapshots.put(newSnapshot.id, JSON.stringify(newSnapshot));
+	const assetPaths = Object.keys(newSnapshot.assets);
+	const knownFiles = await Promise.all(
+		assetPaths.map(async (path: string) => env.ze_files.get(newSnapshot.assets[path].hash, { type: 'stream' }))
+	);
 
-  response.assets = knownFiles
-    .map((file, index) =>
-      file ? null : newSnapshot.assets[assetPaths[index]])
-    .filter(Boolean);
+	response.assets = knownFiles.map((file, index) => (file ? null : newSnapshot.assets[assetPaths[index]])).filter(Boolean);
 
-  return new Response(JSON.stringify(response), { status: 200 });
+	return new Response(JSON.stringify(response), { status: 200 });
 }

@@ -9,7 +9,7 @@ async function zeUploadSnapshot(pluginOptions, snapshot) {
   logEvent({
     level: 'info',
     action: 'snapshot:upload:started',
-    message: `started uploading of ${buildEnv} snapshot to zephyr`
+    message: `started uploading of ${buildEnv} snapshot to zephyr`,
   });
 
   const edgeTodo = await uploadSnapshot(snapshot.id, snapshot);
@@ -18,13 +18,15 @@ async function zeUploadSnapshot(pluginOptions, snapshot) {
     logEvent({
       level: 'error',
       action: 'snapshot:upload:failed',
-      message: `failed uploading of ${buildEnv} snapshot to zephyr`
+      message: `failed uploading of ${buildEnv} snapshot to zephyr`,
     });
   } else {
     logEvent({
       level: 'info',
       action: 'snapshot:upload:done',
-      message: `uploaded ${buildEnv} snapshot in ${Date.now() - snapUploadMs}ms`
+      message: `uploaded ${buildEnv} snapshot in ${
+        Date.now() - snapUploadMs
+      }ms`,
     });
   }
 

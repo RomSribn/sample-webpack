@@ -1,25 +1,42 @@
 {
-  "name": "ze",
-  "private": true,
-  "workspaces": {
-    "packages": [
-      "api/*",
-      "apps/*",
-      "packages/*",
-      "workers/*"
-    ],
-    "nohoist": [
-      "**/@cloudflare/workers-types",
-      "**/tsconfig-paths",
-      "**/@swc/core",
-      "**/@swc/register"
-    ]
+  "name": "@zephyr-side-panel/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "nx run-many --all --target=build",
+    "lint": "nx run-many --all --target=lint",
+    "test": "nx run-many --all --target=test",
+    "prepare": "husky install"
   },
-  "description": "",
-  "scripts": {},
-  "author": "valorkin",
-  "license": "UNLICENSED",
+  "workspaces": [
+    "api/*",
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
+  "private": true,
   "devDependencies": {
+    "husky": "8.0.3",
+    "nx": "17.2.8",
+    "prettier": "^2.6.2",
+    "@nx/eslint": "17.2.8",
+    "@nx/devkit": "17.2.8",
+    "@nx/eslint-plugin": "17.2.8",
+    "@nx/jest": "17.2.8",
+    "@nx/js": "17.2.8",
+    "@nx/react": "17.2.8",
+    "@nx/webpack": "17.2.8",
+    "@nx/workspace": "17.2.8",
+    "@nx/web": "17.2.8",
+    "babel-jest": "^29.4.1",
+    "eslint": "~8.46.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-jsx-a11y": "6.7.1",
+    "eslint-plugin-react": "7.32.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "jest": "^29.4.1",
+    "jest-environment-jsdom": "^29.4.1",
     "wrangler": "^3.11.0"
   }
 }
