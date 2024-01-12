@@ -16,7 +16,8 @@
     "baseUrl": "./merge-side-panel",
     "paths": {
       "@zephyr/cli": ["packages/cli/src/index.ts"],
-      "@zephyr/webpack-plugin": ["packages/webpack-plugin/src/index.ts"]
+      "@zephyr/webpack-plugin": ["packages/webpack-plugin/src/index.ts"],
+      "zephyr-webpack-plugin": ["packages/zephyr-webpack-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
