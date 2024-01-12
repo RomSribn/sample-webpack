@@ -14,7 +14,6 @@ function getMFConfigs(config: Configuration): unknown | Array<unknown> {
     })
     .filter(Boolean);
 }
-
 export function withZephyr() {
   return function configure(
     config: Configuration

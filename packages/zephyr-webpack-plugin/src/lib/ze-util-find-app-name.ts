@@ -18,7 +18,9 @@ function findClosestPackageJson(startPath: string): string | void {
   } while (startPath !== dir);
 }
 
-function getPackageJson(context: string | undefined): unknown | undefined {
+function getPackageJson(
+  context: string | undefined
+): { name: string } | undefined {
   const path = findClosestPackageJson(context || process.cwd());
   if (!path) return void 0;
   try {
@@ -44,9 +46,6 @@ export function findAppName(config: Configuration): string | undefined {
 
   const context = config.context;
   const packageJson = getPackageJson(context);
-  if (packageJson && packageJson.name) {
-    return packageJson.name;
-  }
 
-  return void 0;
+  return packageJson?.name;
 }
