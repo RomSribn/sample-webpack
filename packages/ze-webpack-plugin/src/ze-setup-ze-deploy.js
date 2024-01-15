@@ -10,35 +10,38 @@ function setupZeDeploy(pluginOptions, compiler) {
   const logEvent = logger(pluginOptions);
 
   compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
-    compilation.hooks.processAssets.tapPromise({
-      name: pluginName,
-      stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
-    }, async (assets) => {
-      if (!zeConfig.buildId) {
-        // no id - no cloud builds ;)
-        return;
+    compilation.hooks.processAssets.tapPromise(
+      {
+        name: pluginName,
+        stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+      },
+      async (assets) => {
+        if (!zeConfig.buildId) {
+          // no id - no cloud builds ;)
+          return;
+        }
+
+        const zeStart = Date.now();
+        const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
+        const snapshot = createSnapshot(pluginOptions, assetsMap);
+        const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot);
+        // todo: exit if upload failed
+        const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
+          missingAssets,
+          assetsMap,
+          count: Object.keys(assets).length,
+        });
+        if (!assetsUploadSuccess) return;
+
+        await zeDeploySnapshotToEdge(pluginOptions, snapshot);
+
+        logEvent({
+          level: 'info',
+          action: 'build:deploy:done',
+          message: `build deployed in ${Date.now() - zeStart}ms`,
+        });
       }
-
-      const zeStart = Date.now();
-      const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
-      const snapshot = createSnapshot(pluginOptions, assetsMap);
-      const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot);
-      // todo: exit if upload failed
-      const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
-        missingAssets,
-        assetsMap,
-        count: Object.keys(assets).length
-      });
-      if (!assetsUploadSuccess) return;
-
-      await zeDeploySnapshotToEdge(pluginOptions, snapshot);
-
-      logEvent({
-        level: 'info',
-        action: 'build:deploy:done',
-        message: `build deployed in ${Date.now() - zeStart}ms`
-      });
-    });
+    );
   });
 }
 

@@ -1,13 +1,7 @@
 {
-  "include": [
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "node_modules/@cloudflare/workers-types/index.d.ts"
-  ],
-  "exclude": ["tmp"],
-  "compilerOptions": {
+	"include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "node_modules/@cloudflare/workers-types/index.d.ts"],
+	"exclude": ["tmp"],
+	"compilerOptions": {
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
 		/* Projects */

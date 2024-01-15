@@ -1,4 +1,3 @@
-
 function createSnapshot(options, assets) {
   return {
     id: options.snapshotId,
@@ -12,10 +11,10 @@ function createSnapshot(options, assets) {
         path: asset.path,
         extname: asset.extname,
         hash: asset.hash,
-        size: asset.size
+        size: asset.size,
       };
       return memo;
-    }, {})
+    }, {}),
   };
 }
 

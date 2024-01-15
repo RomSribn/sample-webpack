@@ -12,7 +12,7 @@ function extractBuffer(asset) {
     case 'CompatSource':
     case 'RawSource':
     case 'ConcatSource':
-      return  asset.buffer();
+      return asset.buffer();
     case 'ReplaceSource':
       return asset.source();
     default:
@@ -23,36 +23,34 @@ function extractBuffer(asset) {
 function zeBuildAssetsMap(pluginOptions, assets) {
   const logEvent = logger(pluginOptions);
 
-  return Object.keys(assets)
-    .reduce((memo, filepath) => {
-      const asset = assets[filepath];
-      const buffer = extractBuffer(asset);
+  return Object.keys(assets).reduce((memo, filepath) => {
+    const asset = assets[filepath];
+    const buffer = extractBuffer(asset);
 
-      if (!buffer) {
-        logEvent({
-          action: 'ze:build:assets:unknown-asset-type',
-          level: 'error',
-          message: `unknown asset type: ${getAssetType(asset)}`
-        });
-        return  memo;
-      }
-
-      const hash = createHash('sha256')
-        .update(buffer.length ? buffer : Buffer.from(filepath, 'utf8'))
-        .update(Buffer.from(filepath, 'utf8'))
-        .digest('hex');
-
-      // todo: update worker
-      memo[hash] = {
-        path: filepath,
-        extname: path.extname(filepath),
-        hash,
-        size: buffer.length,
-        buffer: buffer
-      };
+    if (!buffer) {
+      logEvent({
+        action: 'ze:build:assets:unknown-asset-type',
+        level: 'error',
+        message: `unknown asset type: ${getAssetType(asset)}`,
+      });
       return memo;
-    }, {});
+    }
 
+    const hash = createHash('sha256')
+      .update(buffer.length ? buffer : Buffer.from(filepath, 'utf8'))
+      .update(Buffer.from(filepath, 'utf8'))
+      .digest('hex');
+
+    // todo: update worker
+    memo[hash] = {
+      path: filepath,
+      extname: path.extname(filepath),
+      hash,
+      size: buffer.length,
+      buffer: buffer,
+    };
+    return memo;
+  }, {});
 }
 
 module.exports = { zeBuildAssetsMap };

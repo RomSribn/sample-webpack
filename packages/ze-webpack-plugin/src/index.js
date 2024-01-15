@@ -1,3 +1,3 @@
-const { withZephyr } = require('./with-zephyr')
+const { withZephyr } = require('./with-zephyr');
 
-module.exports = {withZephyr};
+module.exports = { withZephyr };

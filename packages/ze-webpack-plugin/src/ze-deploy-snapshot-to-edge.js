@@ -7,7 +7,7 @@ async function zeDeploySnapshotToEdge(pluginOptions, snapshot, tag) {
   logEvent({
     level: 'info',
     action: 'deploy:edge:started',
-    message: `started deploying local build to edge`
+    message: `started deploying local build to edge`,
   });
 
   const deployStart = Date.now();
@@ -15,20 +15,20 @@ async function zeDeploySnapshotToEdge(pluginOptions, snapshot, tag) {
     tag: tag ?? 'latest',
     snapshot: snapshot.id,
     app: pluginOptions.appName,
-    user: pluginOptions.username
+    user: pluginOptions.username,
   });
 
   if (latest) {
     logEvent({
       level: 'info',
       action: 'deploy:edge:done',
-      message: `local build deployed to edge in ${Date.now() - deployStart}ms`
+      message: `local build deployed to edge in ${Date.now() - deployStart}ms`,
     });
   } else {
     logEvent({
       level: 'error',
       action: 'deploy:edge:failed',
-      message: `failed deploying local build to edge`
+      message: `failed deploying local build to edge`,
     });
   }
 }

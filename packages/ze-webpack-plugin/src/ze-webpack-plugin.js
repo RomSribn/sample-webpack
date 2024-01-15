@@ -21,7 +21,7 @@ class ZeWebpackPlugin {
     },
     zeConfig: {
       user: 'valorkin',
-      buildId: void 0
+      buildId: void 0,
     },
     app: {
       // git org
@@ -29,19 +29,19 @@ class ZeWebpackPlugin {
       // git repo
       project: '',
       // package.json name
-      name: ''
+      name: '',
     },
     // todo: what if git not configured? - skip for now
     git: {
       name: '',
       email: '',
       branch: '',
-      commit: ''
-    }
+      commit: '',
+    },
   };
 
   constructor(options = {}) {
-    this._options = Object.assign(this._options, options)
+    this._options = Object.assign(this._options, options);
   }
 
   apply(compiler) {

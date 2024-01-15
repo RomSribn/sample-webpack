@@ -1,6 +1,7 @@
 const isDev = true;
 async function request(options, data, forceHttps) {
-  const https = (!forceHttps && isDev) ? require('node:http') : require('node:https');
+  const https =
+    !forceHttps && isDev ? require('node:http') : require('node:https');
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let response = [];
@@ -28,18 +29,16 @@ async function request(options, data, forceHttps) {
 
 const port = isDev ? 3000 : 3000;
 const hostname = isDev ? '127.0.0.1' : '127.0.0.1';
-const log = isDev ? v => console.log(v) : _ => void 0;
+const log = isDev ? (v) => console.log(v) : (_) => void 0;
 
 function logger(options) {
   return function logEvent({ level, action, message, meta }) {
-
     // todo: get from ze-config-provider
     const appId = options.appName;
     const zeUserId = options.zeConfig.user;
     const zeBuildId = options.zeConfig.buildId;
     const git = options.git;
     const createdAt = Date.now();
-
 
     // todo: if user not logged in - Ze does nothing
     if (!zeBuildId || !zeUserId) {
@@ -54,14 +53,19 @@ function logger(options) {
     meta = Object.assign({}, meta, {
       isCI: options.isCI,
       app: options.app,
-      git: options.git
+      git: options.git,
     });
 
     const data = JSON.stringify({
-      appId, zeUserId, zeBuildId,
+      appId,
+      zeUserId,
+      zeBuildId,
       logLevel: level,
       actionType: action,
-      git, message, meta, createdAt
+      git,
+      message,
+      meta,
+      createdAt,
     });
 
     const reqOptions = {
@@ -70,14 +74,12 @@ function logger(options) {
       path: `/logs`,
       method: 'POST',
       headers: {
-        'Content-Length': data.length
-      }
+        'Content-Length': data.length,
+      },
     };
 
     request(reqOptions, data).then(log).catch(log);
-  }
+  };
 }
-
-
 
 module.exports = { logger };

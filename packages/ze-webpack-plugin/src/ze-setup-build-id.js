@@ -8,12 +8,12 @@ async function getBuildId(key) {
     hostname,
     port,
     path: `/?key=${key}`,
-    method: 'GET'
+    method: 'GET',
   };
 
   return request(options, void 0, true);
 }
-function setupBuildId({pluginName, zeConfig}, compiler) {
+function setupBuildId({ pluginName, zeConfig }, compiler) {
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
     zeConfig.buildId = void 0;
     if (!zeConfig.user) {
@@ -23,11 +23,11 @@ function setupBuildId({pluginName, zeConfig}, compiler) {
 
     const buildIds = await getBuildId(zeConfig.user);
     if (buildIds) {
-      zeConfig.buildId = (buildIds)[zeConfig.user];
+      zeConfig.buildId = buildIds[zeConfig.user];
     }
 
     return cb();
   });
 }
 
-module.exports = {setupBuildId};
+module.exports = { setupBuildId };

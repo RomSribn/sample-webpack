@@ -1,6 +1,7 @@
-const {isDev} = require('./_debug');
+const { isDev } = require('./_debug');
 async function request(options, data, forceHttps) {
-  const https = (!forceHttps && isDev) ? require('node:http') : require('node:https');
+  const https =
+    !forceHttps && isDev ? require('node:http') : require('node:https');
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let response = [];
@@ -26,4 +27,4 @@ async function request(options, data, forceHttps) {
   });
 }
 
-module.exports = {request};
+module.exports = { request };

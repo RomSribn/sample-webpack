@@ -24,13 +24,12 @@ function getPackageJson(context) {
     console.error('Error:', error.message);
     return void 0;
   }
-
 }
 
 function findAppName(config) {
-
-  const mfConfig = config.plugins
-    .find(plugin => plugin.constructor.name === 'ModuleFederationPlugin');
+  const mfConfig = config.plugins.find(
+    (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'
+  );
 
   if (mfConfig) {
     return mfConfig._options.name;
@@ -44,4 +43,4 @@ function findAppName(config) {
   }
 }
 
-module.exports = {getPackageJson, findAppName};
+module.exports = { getPackageJson, findAppName };
