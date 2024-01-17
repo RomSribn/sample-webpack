@@ -1,4 +1,4 @@
-import { getItem, init, setItem } from 'node-persist';
+import { getItem, init, setItem, clear } from 'node-persist';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -20,4 +20,9 @@ export async function saveToken(token: string): Promise<void> {
 export async function getToken(): Promise<string | undefined> {
   await storage;
   return getItem(StorageKeys.zetoken);
+}
+
+export async function clearAll(): Promise<void> {
+  await storage;
+  return clear();
 }
