@@ -15,13 +15,21 @@ set pg_url for ze_api, ask @valorkin or make your own
 nx run zephyr-api:serve
 ```
 
-start local edge
+```bash
+# start local edge
+npx nx run ze-worker-for-static-upload:start
+```
+
+clean workers cache for demo
 
 ```bash
-npx nx run ze-worker-for-static-upload:start
+rm -rf ./workers/.wrangler
+```
 
-cd workspace/ze-worker-for-static-upload
-npm start
+sample-webpack-app
+
+```bash
+npx nx run sample-webpack-application:build --watch --skip-nx-cache
 ```
 
 open http://edge.local:8787

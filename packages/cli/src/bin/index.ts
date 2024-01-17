@@ -6,17 +6,17 @@ import { getPersonalAccessTokenFromWebsocket } from '../lib/login';
 const program = new Command();
 
 program
-  .name(packageJson.name)
+  .name(`${packageJson.name} (shorthand 'ze')`)
   .version(packageJson.version)
-  .helpOption('-h, --help', 'Display help for command')
-  .showHelpAfterError(false);
+  .helpOption('-h, --help', 'Display help for command');
+// .showHelpAfterError(true);
 
 program
   .command('login')
   .description('Login to Zephyr Cloud')
   .action(async () => {
     const token = await getPersonalAccessTokenFromWebsocket();
-    saveToken(token);
+    await saveToken(token);
   });
 
 program

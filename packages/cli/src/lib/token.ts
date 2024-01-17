@@ -1,11 +1,23 @@
-import { conf } from '../utils/conf-storage';
+import { getItem, init, setItem } from 'node-persist';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 
-function saveToken(token: string): void {
-  conf.set('token', token);
+const ZE_PATH = `.zephyr`;
+
+const enum StorageKeys {
+  zetoken = 'ze-token',
 }
 
-function getToken(): string | undefined {
-  return conf.get('token') as string | undefined;
+const storage = init({
+  dir: join(homedir(), ZE_PATH),
+});
+
+export async function saveToken(token: string): Promise<void> {
+  await storage;
+  void (await setItem(StorageKeys.zetoken, token));
 }
 
-export { saveToken, getToken };
+export async function getToken(): Promise<string | undefined> {
+  await storage;
+  return getItem(StorageKeys.zetoken);
+}

@@ -9,7 +9,6 @@ const {
   AUTH0_CLIENT_ID: clientId,
   AUTH0_DOMAIN: domain,
   ZEPHYR_API_ENDPOINT: zephyrApiEndpoint,
-  ZEPHYR_WS_ENDPOINT: zephyrWsEndpoint,
 } = environment;
 
 export async function isTokenValid(token: string): Promise<void> {
@@ -48,7 +47,7 @@ function getAuthenticationURL(state: string): string {
 
 function subscribeToWsEvents(
   state: string,
-  redirectUrl: string
+  redirectUrl: string,
 ): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const socket = io(zephyrWsEndpoint);

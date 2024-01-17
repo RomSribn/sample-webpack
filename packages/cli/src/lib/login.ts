@@ -14,12 +14,12 @@ export interface GetPersonalAccessTokenFromWebsocketOptions {
 export async function getPersonalAccessTokenFromWebsocket(
   { openBrowser }: GetPersonalAccessTokenFromWebsocketOptions = {
     openBrowser: true,
-  }
+  },
 ): Promise<string> {
   const sessionKey = generateSessionKey();
   if (openBrowser) {
     const authUrl = getAuthenticationURL({ state: sessionKey });
-    open(authUrl);
+    await open(authUrl);
   }
   return await subscribeToWsEvents(sessionKey);
 }
@@ -35,7 +35,7 @@ export function getAuthenticationURL(options: AuthOptions): string {
 
   const auth0RedirectUrl = new URL(
     'user-token/generate',
-    environment.ZEPHYR_API_ENDPOINT
+    environment.ZEPHYR_API_ENDPOINT,
   );
 
   const authParams = new URLSearchParams({
@@ -53,20 +53,19 @@ export function getAuthenticationURL(options: AuthOptions): string {
 
 function subscribeToWsEvents(sessionKey: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    const socket = createSocket(environment.ZEPHYR_WS_ENDPOINT);
+    const socket = createSocket(environment.ZEPHYR_API_ENDPOINT);
 
     const cleanup = () => {
       disposeSocket(socket);
     };
 
     socket.on('connect', () => {
-      console.debug('WS Connected');
+      // console.debug('WS Connected');
     });
 
     socket.on('disconnect', () => {
-      console.debug('WS Disconnected');
+      // console.debug('WS Disconnected');
       cleanup();
-      reject(new Error('WS Disconnected'));
     });
 
     const roomSocket = socket.emit('joinAccessTokenRoom', {

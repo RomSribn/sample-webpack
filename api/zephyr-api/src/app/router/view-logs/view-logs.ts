@@ -1,4 +1,4 @@
-import { html, raw } from 'hono/html';
+import { html } from 'hono/html';
 
 // todo: add more granular failure codes
 // todo: ${executionContext} - local, ci, edge

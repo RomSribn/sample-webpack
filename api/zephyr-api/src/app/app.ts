@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { logger } from 'hono/logger';
 
 import './wss';
 import { logs } from './router/logs';
