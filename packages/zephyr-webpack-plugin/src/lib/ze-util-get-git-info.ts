@@ -8,8 +8,8 @@ export interface GitInfo {
     commit: string;
   };
   app: {
-    org: string | null;
-    project: string | null;
+    org: string | undefined;
+    project: string | undefined;
   };
 }
 
@@ -39,9 +39,9 @@ export function getGitInfo(): GitInfo | undefined {
       ?.split('/');
 
     const organization =
-      urlParts && urlParts?.length > 1 ? urlParts[urlParts.length - 2] : null;
+      urlParts && urlParts?.length > 1 ? urlParts[urlParts.length - 2] : undefined;
     const repositoryName =
-      urlParts && urlParts.length > 0 ? urlParts[urlParts.length - 1] : null;
+      urlParts && urlParts.length > 0 ? urlParts[urlParts.length - 1] : undefined;
 
     return {
       git: {
