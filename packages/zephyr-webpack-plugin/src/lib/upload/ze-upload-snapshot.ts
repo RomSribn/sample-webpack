@@ -17,14 +17,19 @@ export async function zeUploadSnapshot(
     message: `started uploading of ${buildEnv} snapshot to zephyr`,
   });
 
-  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot);
+  let error;
+  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot)
+    .catch(err => error = err )
 
-  if (!edgeTodo) {
+
+  if (!edgeTodo || error) {
     logEvent({
       level: 'error',
       action: 'snapshot:upload:failed',
       message: `failed uploading of ${buildEnv} snapshot to zephyr`,
     });
+    console.error(`Zephyr deployment canceled!`)
+    return;
   } else {
     logEvent({
       level: 'info',

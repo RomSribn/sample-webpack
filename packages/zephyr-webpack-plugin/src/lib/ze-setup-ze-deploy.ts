@@ -29,7 +29,9 @@ export function setupZeDeploy(
         const zeStart = Date.now();
         const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
         const snapshot = createSnapshot(pluginOptions, assetsMap);
-        const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot);
+        const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot)
+          .catch(_ => void _);
+        if (typeof missingAssets === 'undefined') return;
         // todo: exit if upload failed
         const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
           missingAssets,

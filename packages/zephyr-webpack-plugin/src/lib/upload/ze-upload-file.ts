@@ -24,7 +24,7 @@ export async function uploadFile(
     extname: asset.extname,
     hash: asset.hash,
     size: asset.size,
-    createdAt: Date.now(),
+    createdAt: Date.now()
   };
 
   const options: RequestOptions & { headers: Record<string, string> } = {
@@ -34,14 +34,14 @@ export async function uploadFile(
     method: 'POST',
     headers: {
       // 'Content-Length': asset.buffer.length
-    },
+    }
   };
 
   // options.headers['Content-Type'] = 'application/octet';
   options.headers['x-file-path'] = asset.path;
   options.headers['x-file-meta'] = JSON.stringify(meta);
 
-  return request(options, asset.buffer).catch((err) => console.warn(err));
+  return request(options, asset.buffer);
 }
 
 export interface SnapshotUploadRes {
@@ -60,15 +60,14 @@ export async function uploadSnapshot(
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length.toString(),
-    },
+      'Content-Length': data.length.toString()
+    }
   };
 
   options.headers['Content-Type'] = 'application/json';
 
-  const res = await request<SnapshotUploadRes>(options, data).catch((err) =>
-    console.log(err)
-  );
+  const res = await request<SnapshotUploadRes>(options, data);
+
   if (!res || typeof res === 'string') {
     console.error(res);
     return;
@@ -86,11 +85,11 @@ export async function uploadTags(id: string, body: unknown): Promise<unknown> {
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length.toString(),
-    },
+      'Content-Length': data.length.toString()
+    }
   };
 
   options.headers['Content-Type'] = 'application/json';
 
-  return request(options, data).catch((err) => console.log(err));
+  return request(options, data);
 }

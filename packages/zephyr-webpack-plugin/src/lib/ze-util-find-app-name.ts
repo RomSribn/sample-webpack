@@ -18,9 +18,12 @@ function findClosestPackageJson(startPath: string): string | void {
   } while (startPath !== dir);
 }
 
-function getPackageJson(
-  context: string | undefined
-): { name: string } | undefined {
+interface PackageJson {
+  name: string;
+  dependencies?: Record<string, string>;
+}
+
+export function getPackageJson(context: string | undefined): PackageJson | undefined {
   const path = findClosestPackageJson(context || process.cwd());
   if (!path) return void 0;
   try {
