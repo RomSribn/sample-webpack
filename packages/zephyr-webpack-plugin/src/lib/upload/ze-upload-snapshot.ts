@@ -1,11 +1,11 @@
-import { SnapshotUploadRes, uploadSnapshot } from './ze-upload-file';
-import { logger } from '../ze-log-event';
+import { uploadSnapshot } from './ze-upload-file';
+import { logger } from '../utils/ze-log-event';
 import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
-import { Snapshot } from '../ze-build-snapshot';
+import { Snapshot, SnapshotUploadRes } from 'zephyr-edge-contract';
 
 export async function zeUploadSnapshot(
   pluginOptions: ZeWebpackPluginOptions,
-  snapshot: Snapshot
+  snapshot: Snapshot,
 ): Promise<SnapshotUploadRes | undefined> {
   const { buildEnv } = pluginOptions;
   const logEvent = logger(pluginOptions);
@@ -18,9 +18,9 @@ export async function zeUploadSnapshot(
   });
 
   let error;
-  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot)
-    .catch(err => error = err )
-
+  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot).catch(
+    (err) => (error = err),
+  );
 
   if (!edgeTodo || error) {
     logEvent({
@@ -28,7 +28,7 @@ export async function zeUploadSnapshot(
       action: 'snapshot:upload:failed',
       message: `failed uploading of ${buildEnv} snapshot to zephyr`,
     });
-    console.error(`Zephyr deployment canceled!`)
+    console.error(`Zephyr deployment canceled!`);
     return;
   } else {
     logEvent({

@@ -34,7 +34,7 @@ export interface ITagResponseData {
 }
 
 export async function getAppData(token: string): Promise<IAppResponseData[]> {
-  const fetchUrl = 'http://edge.local:8787/__mock_app_data';
+  const fetchUrl = 'http://edge.lan:8787/__mock_app_data';
   const appData = await fetch(fetchUrl);
   if (!appData.ok) {
     return [];

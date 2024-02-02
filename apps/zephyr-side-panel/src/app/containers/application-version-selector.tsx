@@ -28,7 +28,7 @@ export function ApplicationVersionSelector({
         defaultValue={appVersion.version}
         onChange={_onAppVersionChange}
         options={appVersionList}
-        renderInput={(params) => <TextField {...params} />}
+        renderInput={(params) => <TextField {...params as any} />}
         key={appVersion.app}
       />
     </fieldset>

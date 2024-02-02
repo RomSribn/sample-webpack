@@ -2,7 +2,7 @@ import { ConvertedDependencies } from '../convert-to-graph/convert-dependencies'
 import { ModuleObject, Overrides } from '../convert-to-graph/module-part-two';
 import { LocalPackageJson } from '../convert-to-graph/get-licenses';
 
-function mergeWithoutDupe(source: LocalPackageJson[]) {
+function mergeWithoutDupe(source: LocalPackageJson[]): LocalPackageJson[] {
   return source.reduce((acc, item) => {
     if (typeof item === 'object') {
       const isDupe = acc.find((existing) => {

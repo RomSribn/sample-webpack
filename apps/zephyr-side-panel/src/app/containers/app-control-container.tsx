@@ -48,6 +48,7 @@ export function AppControlContainer({
   // TODO: fix this, help @valorkin pls
   // const appInfo = useMemo(() => extractAppInfoFromUrl(url), [url]);
 
+  console.log('appVersions', appVersion)
   const appOptions = useMemo(() => {
     return applications.list.map((app) => app.name);
   }, [applications]);

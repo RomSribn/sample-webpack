@@ -1,14 +1,11 @@
 import { Compiler } from 'webpack';
-import { request } from './ze-http-request';
+import { request } from './utils/ze-http-request';
 import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
+import { buildid_endpoint } from '../config/endpoints';
 
-// fix: hardcode
-const port = 443;
-const hostname = 'ze-build-id.valorkin.dev';
-
-// todo: introduce ze-api-typings
+const { port, hostname } = buildid_endpoint;
 export async function getBuildId(
-  key: string
+  key: string,
 ): Promise<Record<string, string> | undefined> {
   const options = {
     hostname,
@@ -28,7 +25,7 @@ export async function getBuildId(
 
 export function setupBuildId(
   { pluginName, zeConfig }: ZeWebpackPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ): void {
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
     zeConfig.buildId = void 0;

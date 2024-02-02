@@ -101,6 +101,8 @@ export function logger(options: LoggerOptions) {
       },
     };
 
-    request(reqOptions, data).then(log).catch(_ => console.log(message));
+    request(reqOptions, data)
+      .then(log)
+      .catch(() => console.log(message));
   };
 }

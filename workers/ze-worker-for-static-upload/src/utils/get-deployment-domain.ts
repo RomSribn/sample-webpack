@@ -1,4 +1,4 @@
-const regex = /^.*(edge\.local|(cf|aws)\.valorkin\.dev)/;
+const regex = /^.*(edge\.lan|(cf|aws)\.valorkin\.dev)/;
 export function getDeploymentDomain(hostname: string): string {
 	const match = hostname.match(regex);
 	if (!match) {

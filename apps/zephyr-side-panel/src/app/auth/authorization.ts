@@ -5,10 +5,12 @@ import { session } from '../storage/session';
 import { environment } from '../../environments/environment';
 import { navigate } from '../utils/navigate';
 
+const zephyrWsEndpoint = 'ws://'
+
 const {
   AUTH0_CLIENT_ID: clientId,
   AUTH0_DOMAIN: domain,
-  ZEPHYR_API_ENDPOINT: zephyrApiEndpoint,
+  ZEPHYR_API_ENDPOINT: zephyrApiEndpoint
 } = environment;
 
 export async function isTokenValid(token: string): Promise<void> {
@@ -50,7 +52,7 @@ function subscribeToWsEvents(
   redirectUrl: string,
 ): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    const socket = io(zephyrWsEndpoint);
+    const socket = io(zephyrApiEndpoint);
     socket.on('connect', () => {
       console.debug('WS Connected');
     });

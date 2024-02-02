@@ -23,7 +23,9 @@ interface PackageJson {
   dependencies?: Record<string, string>;
 }
 
-export function getPackageJson(context: string | undefined): PackageJson | undefined {
+export function getPackageJson(
+  context: string | undefined,
+): PackageJson | undefined {
   const path = findClosestPackageJson(context || process.cwd());
   if (!path) return void 0;
   try {
@@ -38,7 +40,7 @@ export function getPackageJson(context: string | undefined): PackageJson | undef
 
 export function findAppName(config: Configuration): string | undefined {
   const mfConfig = config.plugins?.find(
-    (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin'
+    (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
   ) as { _options?: { name?: string } };
 
   if (mfConfig) {

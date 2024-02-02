@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "zephyr-cli": ["packages/cli/src/index.ts"],
+      "zephyr-edge-contract": ["libs/zephyr-edge-contract/src/index.ts"],
       "zephyr-webpack-plugin": ["packages/zephyr-webpack-plugin/src/index.ts"]
     }
   },

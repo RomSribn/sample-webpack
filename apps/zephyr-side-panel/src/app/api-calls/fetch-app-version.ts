@@ -19,7 +19,9 @@ export const fetchAppVersion = async ({
 
   // request current version of the app
   const _url = new URL(activeURL);
-  return (await fetchJSON(`${_url.origin}/__app_version`).catch(
-    () => void 0
+  const res = (await fetchJSON(`${_url.origin}/__app_version`).catch(
+    (e) => console.log(e)
   )) as FetchAppVersionResponse;
+  console.log(res)
+  return res;
 };

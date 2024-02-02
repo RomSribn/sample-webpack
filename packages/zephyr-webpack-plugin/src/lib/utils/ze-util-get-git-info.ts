@@ -39,9 +39,13 @@ export function getGitInfo(): GitInfo | undefined {
       ?.split('/');
 
     const organization =
-      urlParts && urlParts?.length > 1 ? urlParts[urlParts.length - 2] : undefined;
+      urlParts && urlParts?.length > 1
+        ? urlParts[urlParts.length - 2]
+        : undefined;
     const repositoryName =
-      urlParts && urlParts.length > 0 ? urlParts[urlParts.length - 1] : undefined;
+      urlParts && urlParts.length > 0
+        ? urlParts[urlParts.length - 1]
+        : undefined;
 
     return {
       git: {

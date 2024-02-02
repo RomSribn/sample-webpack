@@ -1,15 +1,15 @@
 import { Compiler } from 'webpack';
-import { logger } from './ze-log-event';
-import { zeDeploySnapshotToEdge } from './ze-deploy-snapshot-to-edge';
+import { logger } from './utils/ze-log-event';
+import { zeUploadSnapshotToEdge } from './upload/ze-upload-snapshot-to-edge';
 import { zeUploadSnapshot } from './upload/ze-upload-snapshot';
 import { zeUploadAssets } from './upload/ze-upload-assets';
-import { zeBuildAssetsMap } from './ze-build-assets-map';
-import { createSnapshot } from './ze-build-snapshot';
+import { zeBuildAssetsMap } from './payload-builders/ze-build-assets-map';
+import { createSnapshot } from './payload-builders/ze-build-snapshot';
 import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ): void {
   const { pluginName, zeConfig } = pluginOptions;
   const logEvent = logger(pluginOptions);
@@ -29,8 +29,10 @@ export function setupZeDeploy(
         const zeStart = Date.now();
         const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
         const snapshot = createSnapshot(pluginOptions, assetsMap);
-        const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot)
-          .catch(_ => void _);
+        const missingAssets = await zeUploadSnapshot(
+          pluginOptions,
+          snapshot,
+        ).catch((_) => void _);
         if (typeof missingAssets === 'undefined') return;
         // todo: exit if upload failed
         const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
@@ -40,14 +42,14 @@ export function setupZeDeploy(
         });
         if (!assetsUploadSuccess) return;
 
-        await zeDeploySnapshotToEdge(pluginOptions, snapshot);
+        await zeUploadSnapshotToEdge(pluginOptions, snapshot);
 
         logEvent({
           level: 'info',
           action: 'build:deploy:done',
           message: `build deployed in ${Date.now() - zeStart}ms`,
         });
-      }
+      },
     );
   });
 }

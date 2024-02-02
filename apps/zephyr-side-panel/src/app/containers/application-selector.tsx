@@ -33,6 +33,7 @@ interface ApplicationSelectorProps {
   onChange: (appName: string | undefined) => void;
 }
 
+// @ts-nocheck
 export function ApplicationSelector({
   appVersion,
   appOptions,
@@ -48,7 +49,7 @@ export function ApplicationSelector({
           onChange(newInputValue);
         }}
         options={appOptions}
-        renderInput={(params) => <TextField {...params} />}
+        renderInput={(params) => <TextField {...params as any} />}
         key={appVersion?.app}
       />
     </fieldset>

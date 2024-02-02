@@ -1,12 +1,12 @@
-import { logger } from './ze-log-event';
-import { uploadTags } from './upload/ze-upload-file';
-import { Snapshot } from './ze-build-snapshot';
-import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
+import { logger } from '../utils/ze-log-event';
+import { uploadTags } from './ze-upload-file';
+import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
+import { Snapshot } from 'zephyr-edge-contract';
 
-export async function zeDeploySnapshotToEdge(
+export async function zeUploadSnapshotToEdge(
   pluginOptions: ZeWebpackPluginOptions,
   snapshot: Snapshot,
-  tag?: string
+  tag?: string,
 ): Promise<void> {
   const logEvent = logger(pluginOptions);
 

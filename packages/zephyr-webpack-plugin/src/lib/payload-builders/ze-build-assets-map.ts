@@ -1,21 +1,7 @@
 import { extname } from 'node:path';
 import { createHash } from 'node:crypto';
-import { logger, LoggerOptions } from './ze-log-event';
-import { Asset } from 'webpack';
-
-type Source = Asset['source'];
-
-export interface ZeBuildAsset {
-  path: string;
-  extname: string;
-  hash: string;
-  size: number;
-  buffer: Buffer | string;
-}
-
-export interface ZeBuildAssetsMap {
-  [key: string]: ZeBuildAsset;
-}
+import { logger, LoggerOptions } from '../utils/ze-log-event';
+import { Source, ZeBuildAssetsMap } from 'zephyr-edge-contract';
 
 function getAssetType(asset: Source): string {
   return asset.constructor.name;
@@ -38,7 +24,7 @@ function extractBuffer(asset: Source): Buffer | string | undefined {
 
 export function zeBuildAssetsMap(
   pluginOptions: LoggerOptions,
-  assets: Record<string, Source>
+  assets: Record<string, Source>,
 ): ZeBuildAssetsMap {
   const logEvent = logger(pluginOptions);
 

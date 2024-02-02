@@ -30,7 +30,7 @@ export function ApplicationTagSelector({
         defaultValue={'latest'}
         onChange={_onAppTagChange}
         options={tagList}
-        renderInput={(params) => <TextField {...params} />}
+        renderInput={(params) => <TextField {...params as any} />}
         key={appVersion.app}
       />
     </fieldset>

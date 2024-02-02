@@ -6,7 +6,7 @@ import { ApplicationList } from '../containers/application-selector';
 export type FetchAppListResponse = ApplicationList;
 
 export const fetchAppList = async (): Promise<FetchAppListResponse> => {
-  return (await fetchJSON('http://edge.local:8787/__app_list').catch(
+  return (await fetchJSON('http://edge.lan:8787/__app_list').catch(
     () => []
   )) as ApplicationList;
 };

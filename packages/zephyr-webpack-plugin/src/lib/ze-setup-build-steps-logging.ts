@@ -1,10 +1,10 @@
 import { Compiler } from 'webpack';
-import { logger } from './ze-log-event';
+import { logger } from './utils/ze-log-event';
 import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
 
 export function logBuildSteps(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ): { buildStartedAt: number } {
   const { pluginName, zeConfig, buildEnv } = pluginOptions;
   const logEvent = logger(pluginOptions);

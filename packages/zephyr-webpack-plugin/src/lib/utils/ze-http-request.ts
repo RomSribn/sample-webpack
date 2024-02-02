@@ -1,6 +1,6 @@
-import { isDev } from './_debug';
 import * as http from 'node:http';
 import * as https from 'node:https';
+import { isDev } from '../../config/endpoints';
 
 export interface RequestOptions {
   hostname: string;
@@ -13,7 +13,7 @@ export interface RequestOptions {
 export async function request<T = unknown>(
   options: RequestOptions,
   data: unknown,
-  forceHttps?: boolean
+  forceHttps?: boolean,
 ): Promise<T | string> {
   const _https = !forceHttps && isDev ? http : https;
   return new Promise((resolve, reject) => {

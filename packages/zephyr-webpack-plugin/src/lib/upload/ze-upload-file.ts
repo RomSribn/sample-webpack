@@ -1,22 +1,12 @@
-import { isDev } from '../_debug';
-import { request, RequestOptions } from '../ze-http-request';
-import { ZeBuildAsset } from '../ze-build-assets-map';
+import { edge_endpoint } from '../../config/endpoints';
+import { request, RequestOptions } from '../utils/ze-http-request';
+import { SnapshotUploadRes, UploadableAsset } from 'zephyr-edge-contract';
 
-interface UploadableAsset {
-  path: string;
-  extname: string;
-  hash: string;
-  size: number;
-  buffer: Buffer | string;
-}
-
-// todo: hardcode
-const port = isDev ? 8787 : 443;
-const hostname = isDev ? '127.0.0.1' : 'cf.valorkin.dev';
+const { hostname, port } = edge_endpoint;
 
 export async function uploadFile(
   id: string,
-  asset: UploadableAsset
+  asset: UploadableAsset,
 ): Promise<unknown> {
   const type = 'file';
   const meta = {
@@ -24,7 +14,7 @@ export async function uploadFile(
     extname: asset.extname,
     hash: asset.hash,
     size: asset.size,
-    createdAt: Date.now()
+    createdAt: Date.now(),
   };
 
   const options: RequestOptions & { headers: Record<string, string> } = {
@@ -34,7 +24,7 @@ export async function uploadFile(
     method: 'POST',
     headers: {
       // 'Content-Length': asset.buffer.length
-    }
+    },
   };
 
   // options.headers['Content-Type'] = 'application/octet';
@@ -44,13 +34,9 @@ export async function uploadFile(
   return request(options, asset.buffer);
 }
 
-export interface SnapshotUploadRes {
-  assets: ZeBuildAsset[];
-}
-
 export async function uploadSnapshot(
   id: string,
-  body: unknown
+  body: unknown,
 ): Promise<SnapshotUploadRes | undefined> {
   const type = 'snapshot';
   const data = JSON.stringify(body);
@@ -60,8 +46,8 @@ export async function uploadSnapshot(
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length.toString()
-    }
+      'Content-Length': data.length.toString(),
+    },
   };
 
   options.headers['Content-Type'] = 'application/json';
@@ -85,8 +71,8 @@ export async function uploadTags(id: string, body: unknown): Promise<unknown> {
     path: `/upload?type=${type}&id=${id}`,
     method: 'POST',
     headers: {
-      'Content-Length': data.length.toString()
-    }
+      'Content-Length': data.length.toString(),
+    },
   };
 
   options.headers['Content-Type'] = 'application/json';

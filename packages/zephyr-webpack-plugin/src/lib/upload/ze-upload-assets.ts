@@ -1,20 +1,11 @@
-import { logger } from '../ze-log-event';
-import { SnapshotUploadRes, uploadFile } from './ze-upload-file';
-import { isDev } from '../_debug';
+import { logger } from '../utils/ze-log-event';
+import { uploadFile } from './ze-upload-file';
 import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
-import { ZeBuildAsset } from '../ze-build-assets-map';
-
-export interface ZeUploadAssetsOptions {
-  missingAssets: SnapshotUploadRes | undefined;
-  count: number;
-  assetsMap: {
-    [key: string]: ZeBuildAsset;
-  };
-}
+import { ZeUploadAssetsOptions } from 'zephyr-edge-contract';
 
 export async function zeUploadAssets(
   pluginOptions: ZeWebpackPluginOptions,
-  { missingAssets, assetsMap, count }: ZeUploadAssetsOptions
+  { missingAssets, assetsMap, count }: ZeUploadAssetsOptions,
 ): Promise<boolean> {
   const logEvent = logger(pluginOptions);
 
@@ -59,9 +50,6 @@ export async function zeUploadAssets(
           });
         })
         .catch((err) => {
-          if (isDev) {
-            console.log(err);
-          }
           logEvent({
             level: 'error',
             action: 'snapshot:assets:upload:file:failed',
@@ -71,7 +59,7 @@ export async function zeUploadAssets(
 
           throw err;
         });
-    })
+    }),
   )
     .then(() => {
       logEvent({
@@ -84,9 +72,6 @@ export async function zeUploadAssets(
       return true;
     })
     .catch((err) => {
-      if (isDev) {
-        console.log(err);
-      }
       logEvent({
         level: 'error',
         action: 'snapshot:assets:upload:failed',
