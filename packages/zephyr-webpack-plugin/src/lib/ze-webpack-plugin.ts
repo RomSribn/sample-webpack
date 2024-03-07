@@ -4,71 +4,48 @@ import * as isCI from 'is-ci';
 import { setupBuildId } from './ze-setup-build-id';
 import { logBuildSteps } from './ze-setup-build-steps-logging';
 import { setupZeDeploy } from './ze-setup-ze-deploy';
+import { createFullAppName } from 'zephyr-edge-contract';
 
 const pluginName = 'ZeWebpackPlugin';
 
-export interface ZeWebpackPluginOptions {
-  pluginName: string;
-  isCI: boolean;
-  buildEnv: string;
-  appName: string;
-  username: string;
-  snapshotId: string;
+const default_zewebpack_options = {
+  pluginName,
+  isCI,
+  buildEnv: isCI ? 'ci' : 'local',
+  get appName() {
+    return createFullAppName(this.app);
+  },
+  get username() {
+    return this.zeConfig.user;
+  },
   zeConfig: {
-    user: string;
-    buildId: string | undefined;
-  };
+    user: 'valorkin',
+    buildId: void 0,
+  },
   app: {
-    org: string;
-    project: string;
-    name: string;
-  };
+    // git org
+    org: '',
+    // git repo
+    project: '',
+    // package.json name
+    name: '',
+    // package.json version
+    version: '',
+  },
+  // todo: what if git not configured? - skip for now
   git: {
-    name: string;
-    email: string;
-    branch: string;
-    commit: string;
-  };
-  mfConfig?: unknown;
-}
+    name: '',
+    email: '',
+    branch: '',
+    commit: '',
+  },
+};
 
 export class ZeWebpackPlugin {
-  _options: ZeWebpackPluginOptions = {
-    pluginName,
-    isCI,
-    buildEnv: isCI ? 'ci' : 'local',
-    get appName() {
-      return `${this.app.org}-${this.app.project}-${this.app.name}`;
-    },
-    get username() {
-      return this.zeConfig.user;
-    },
-    get snapshotId() {
-      return `${this.appName}_${this.zeConfig.user}_${this.zeConfig.buildId}`;
-    },
-    zeConfig: {
-      user: 'valorkin',
-      buildId: void 0,
-    },
-    app: {
-      // git org
-      org: '',
-      // git repo
-      project: '',
-      // package.json name
-      name: '',
-    },
-    // todo: what if git not configured? - skip for now
-    git: {
-      name: '',
-      email: '',
-      branch: '',
-      commit: '',
-    },
-  };
+  _options = default_zewebpack_options;
 
   constructor(options = {}) {
-    this._options = Object.assign(this._options, options);
+    this._options = Object.assign(this._options, options ?? {});
   }
 
   apply(compiler: Compiler): void {

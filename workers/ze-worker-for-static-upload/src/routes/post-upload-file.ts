@@ -1,7 +1,7 @@
-import { Env } from '../index';
-
 // todo: check if file exists - do nothing
 // todo: use html and custom tags to store file metadata for response headers and filename
+
+import { Env } from '../env';
 
 function getSafeMeta(str: string) {
 	try {

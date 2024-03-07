@@ -1,18 +1,11 @@
 import { postUploadSnapshot } from './routes/post-upload-snapshot';
 import { postUploadFile } from './routes/post-upload-file';
 import { getWildcard } from './routes/get-wildcard';
-import { postUploadTags } from './routes/post-upload-tags';
-import { getListOfApps } from './routes/get-list-of-apps';
-import { getAppNameFromHostname } from './utility/util-get-app-name-from-hostname';
+import { getUiListOfApps } from './routes/get-ui-list-of-apps';
 import { getListOfAppsJson } from './api/get-list-of-apps-json';
-import { getDeploymentDomain } from './utils/get-deployment-domain';
 import { getAppVersion } from './routes/get-app-version';
-
-export interface Env {
-	ze_tags: KVNamespace;
-	ze_snapshots: KVNamespace;
-	ze_files: KVNamespace;
-}
+import { postUploadEnvs } from './routes/post-upload-envs';
+import { Env } from './env';
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -27,8 +20,8 @@ export default {
 						return postUploadSnapshot(request, env);
 					case 'file':
 						return postUploadFile(request, env);
-					case 'tag':
-						return postUploadTags(request, env);
+					case 'envs':
+						return postUploadEnvs(request, env);
 					default:
 						return new Response('Not Implemented', { status: 501 });
 				}
@@ -39,8 +32,8 @@ export default {
 					return new Response(JSON.stringify(files), { status: 200 });
 				}
 
-				if (url.pathname === '/__debug_tags_list') {
-					const files = await env.ze_tags.list();
+				if (url.pathname === '/__debug_app_list') {
+					const files = await env.ze_app_list.list();
 					return new Response(JSON.stringify(files), { status: 200 });
 				}
 
@@ -57,9 +50,8 @@ export default {
 					return getListOfAppsJson(request, env);
 				}
 
-				const regex = /^(edge\.lan|(cf|aws)\.valorkin\.dev)/;
-				if (regex.test(url.hostname)) {
-					return getListOfApps(request, env);
+				if (url.pathname === '/__my_app_list') {
+					return getUiListOfApps(request, env);
 				}
 
 				return getWildcard(request, env);

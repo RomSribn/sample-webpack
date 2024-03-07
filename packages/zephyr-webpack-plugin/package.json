@@ -10,9 +10,13 @@
     "@babel/types": "7.23.6",
     "@babel/traverse": "7.23.7",
     "@babel/generator": "7.23.6",
-    "@module-federation/automatic-vendor-federation": "1.2.1"
+    "@module-federation/automatic-vendor-federation": "1.2.1",
+    "zephyr-edge-contract": "*",
+    "node-persist": "^4.0.1",
+    "nx": "17.2.8"
   },
   "devDependencies": {
-    "@types/is-ci": "3.0.4"
+    "@types/is-ci": "3.0.4",
+    "@types/node-persist": "^3.1.8"
   }
 }

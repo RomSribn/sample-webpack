@@ -2,6 +2,9 @@
 	"include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "node_modules/@cloudflare/workers-types/index.d.ts"],
 	"exclude": ["tmp"],
 	"compilerOptions": {
+		"paths": {
+			"zephyr-edge-contract": ["../../libs/zephyr-edge-contract/src/index.ts"]
+		},
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
 		/* Projects */
@@ -33,7 +36,10 @@
 		// "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
 		// "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
 		// "typeRoots": [],                                  /* Specify multiple folders that act like `./node_modules/@types`. */
-		"types": ["@cloudflare/workers-types"] /* Specify type package names to be included without being referenced in a source file. */,
+		"types": [
+			"@cloudflare/workers-types",
+			"jest"
+		] /* Specify type package names to be included without being referenced in a source file. */,
 		// "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
 		"resolveJsonModule": true /* Enable importing .json files */,
 		// "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */

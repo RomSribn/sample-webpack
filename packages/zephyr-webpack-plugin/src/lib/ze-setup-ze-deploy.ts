@@ -1,11 +1,11 @@
 import { Compiler } from 'webpack';
 import { logger } from './utils/ze-log-event';
-import { zeUploadSnapshotToEdge } from './upload/ze-upload-snapshot-to-edge';
+import { zeEnableSnapshotOnEdge } from './upload/ze-enable-snapshot-on-edge';
 import { zeUploadSnapshot } from './upload/ze-upload-snapshot';
 import { zeUploadAssets } from './upload/ze-upload-assets';
 import { zeBuildAssetsMap } from './payload-builders/ze-build-assets-map';
 import { createSnapshot } from './payload-builders/ze-build-snapshot';
-import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
+import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
@@ -42,7 +42,7 @@ export function setupZeDeploy(
         });
         if (!assetsUploadSuccess) return;
 
-        await zeUploadSnapshotToEdge(pluginOptions, snapshot);
+        await zeEnableSnapshotOnEdge(pluginOptions, snapshot);
 
         logEvent({
           level: 'info',

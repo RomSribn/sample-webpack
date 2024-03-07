@@ -7,7 +7,7 @@ module.exports = ({ fetchClient, currentHost, remoteName, dashboardURL }) =>
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-      }
+      },
     )
       .then((res) => res.json())
       .then((data) => {
@@ -18,6 +18,7 @@ module.exports = ({ fetchClient, currentHost, remoteName, dashboardURL }) =>
         new Promise((resolve, reject) => {
           const __webpack_error__ = new Error();
           if (typeof window[name] !== 'undefined') return resolve(window[name]);
+          // eslint-disable-next-line no-undef
           __webpack_require__.l(
             url.href,
             (event) => {
@@ -32,7 +33,7 @@ module.exports = ({ fetchClient, currentHost, remoteName, dashboardURL }) =>
               __webpack_error__.request = realSrc;
               reject(__webpack_error__);
             },
-            name
+            name,
           );
         })
           .then(() => {

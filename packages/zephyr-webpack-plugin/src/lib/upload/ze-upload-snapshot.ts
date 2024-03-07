@@ -1,7 +1,7 @@
 import { uploadSnapshot } from './ze-upload-file';
 import { logger } from '../utils/ze-log-event';
-import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
 import { Snapshot, SnapshotUploadRes } from 'zephyr-edge-contract';
+import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 
 export async function zeUploadSnapshot(
   pluginOptions: ZeWebpackPluginOptions,
@@ -18,9 +18,7 @@ export async function zeUploadSnapshot(
   });
 
   let error;
-  const edgeTodo = await uploadSnapshot(snapshot.id, snapshot).catch(
-    (err) => (error = err),
-  );
+  const edgeTodo = await uploadSnapshot(snapshot).catch((err) => (error = err));
 
   if (!edgeTodo || error) {
     logEvent({

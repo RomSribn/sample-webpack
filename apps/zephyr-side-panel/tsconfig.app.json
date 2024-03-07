@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "../dist/out-tsc",
     "types": [
+      "node",
       "chrome",
 
       "@nx/react/typings/cssmodule.d.ts",

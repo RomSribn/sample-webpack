@@ -15,7 +15,7 @@ export function clientVersion({
   fallbackRemoteVar,
   dashboardTimeout,
   fallbackEnableCacheBuster,
-}: ClientVersionParams) {
+}: ClientVersionParams): string {
   fallbackRemoteVar = fallbackRemoteVar || remoteName;
   fallbackEntryURL = fallbackEntryURL || '';
   fallbackEnableCacheBuster = fallbackEnableCacheBuster || false;
@@ -86,7 +86,7 @@ export function clientVersion({
         if (!fallbackEntryURL) return Promise.reject(error);
         var name = '${fallbackRemoteVar}';
         var url = new URL(fallbackEntryURL);
-        
+
         if (${fallbackEnableCacheBuster}) {
           var cacheBuster = Date.now();
           url.searchParams.append('cacheBuster', cacheBuster);

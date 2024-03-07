@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { Configuration } from 'webpack';
 
 function findClosestPackageJson(startPath: string): string | void {
   let dir = startPath;
@@ -20,37 +19,21 @@ function findClosestPackageJson(startPath: string): string | void {
 
 interface PackageJson {
   name: string;
+  version: string;
   dependencies?: Record<string, string>;
 }
 
 export function getPackageJson(
   context: string | undefined,
 ): PackageJson | undefined {
-  const path = findClosestPackageJson(context || process.cwd());
-  if (!path) return void 0;
+  const packageJson = findClosestPackageJson(context || process.cwd());
+  if (!packageJson) return void 0;
   try {
-    return JSON.parse(path);
+    return JSON.parse(packageJson);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // todo: logger
     console.error('Error:', error?.message);
     return void 0;
   }
-}
-
-export function findAppName(config: Configuration): string | undefined {
-  const mfConfig = config.plugins?.find(
-    (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
-  ) as { _options?: { name?: string } };
-
-  if (mfConfig) {
-    return mfConfig?._options?.name;
-  }
-
-  if (!config) return void 0;
-
-  const context = config.context;
-  const packageJson = getPackageJson(context);
-
-  return packageJson?.name;
 }

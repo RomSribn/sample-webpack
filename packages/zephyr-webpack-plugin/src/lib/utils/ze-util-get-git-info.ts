@@ -55,8 +55,8 @@ export function getGitInfo(): GitInfo | undefined {
         commit: commitHash,
       },
       app: {
-        org: organization,
-        project: repositoryName,
+        org: organization?.toLowerCase(),
+        project: repositoryName?.toLowerCase(),
       },
     };
   } catch (error) {

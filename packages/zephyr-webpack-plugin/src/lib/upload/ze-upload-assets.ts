@@ -1,7 +1,7 @@
 import { logger } from '../utils/ze-log-event';
 import { uploadFile } from './ze-upload-file';
-import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
 import { ZeUploadAssetsOptions } from 'zephyr-edge-contract';
+import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 
 export async function zeUploadAssets(
   pluginOptions: ZeWebpackPluginOptions,
@@ -41,6 +41,7 @@ export async function zeUploadAssets(
           const fileUploaded = Date.now() - start;
           totalTime += fileUploaded;
           totalSize += assetSize;
+
           logEvent({
             level: 'info',
             action: 'snapshot:assets:upload:file:done',

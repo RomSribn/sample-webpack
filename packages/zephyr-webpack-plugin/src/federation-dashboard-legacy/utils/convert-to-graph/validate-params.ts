@@ -40,8 +40,8 @@ interface ValidateParams {
 
 export function validateParams(
   { federationRemoteEntry, topLevelPackage, modules }: ValidateParams,
-  standalone?: boolean
-) {
+  standalone?: boolean,
+): void {
   const hasLoc = federationRemoteEntry
     ? objHasKeys(federationRemoteEntry, ['origins', '0', 'loc'])
     : federationRemoteEntry;
@@ -58,7 +58,7 @@ export function validateParams(
         federationRemoteEntry.origins[0].loc === '')
     ) {
       throw new Error(
-        'federationRemoteEntry.origins[0].loc must be defined and have a value'
+        'federationRemoteEntry.origins[0].loc must be defined and have a value',
       );
     }
   }
@@ -93,7 +93,7 @@ export function validateParams(
 
     if (
       (['consume-shared-module', 'provide-module', 'remote-module'].includes(
-        module.moduleType ?? ''
+        module.moduleType ?? '',
       ) ||
         module.name?.includes('container entry')) &&
       typeof module.issuerName === 'undefined'

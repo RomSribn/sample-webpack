@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+// context
+import { AppContext } from '../context/app-context';
+// utils
 import { loginWithLink } from '../auth/authorization';
 import { getActiveTabUrl } from '../utils/get-active-tab-url';
 
-export function LoginButton({ accessToken }: { accessToken?: string }) {
+interface LoginButtonProps {
+  accessToken?: string;
+}
+
+export function LoginButton({ accessToken }: LoginButtonProps) {
+  const { refreshToken } = useContext(AppContext);
+
   const [isLoading, setIsLoading] = useState<boolean>(!!accessToken);
   const buttonTitle = isLoading ? 'Loading...' : 'Login';
 
@@ -11,6 +20,7 @@ export function LoginButton({ accessToken }: { accessToken?: string }) {
     const url = await getActiveTabUrl();
     if (url) {
       await loginWithLink(url);
+      refreshToken();
     }
   };
 

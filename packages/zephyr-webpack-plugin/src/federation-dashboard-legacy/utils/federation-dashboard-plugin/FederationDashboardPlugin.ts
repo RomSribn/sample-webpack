@@ -1,6 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join, sep } from 'node:path';
-import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { sep } from 'node:path';
 
 import { parse } from '@babel/parser';
 import { isNode } from '@babel/types';
@@ -18,132 +17,34 @@ import {
   Module,
   sources,
   Stats,
+  StatsChunk,
   StatsCompilation,
 } from 'webpack';
-// convert this require to imports
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AutomaticVendorFederation = require('@module-federation/automatic-vendor-federation');
-
 import {
   ConvertedGraph,
   convertToGraph,
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
+import { getToken } from '../../../token/token';
+import { findPackageJson } from './find-package-json';
+import { computeVersionStrategy, gitSha } from './compute-version-strategy';
+import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';
+import { AddRuntimeRequirementToPromiseExternal } from './add-runtime-requirement-to-promise-external';
+import { Exposes, Source } from './federation-dashboard-types';
+import { createFullAppName, createSnapshotId } from 'zephyr-edge-contract';
+import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
+// convert this require to imports
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const AutomaticVendorFederation = require('@module-federation/automatic-vendor-federation');
+
+const PLUGIN_NAME = 'FederationDashboardPlugin';
 
 const { RawSource } = sources;
 type ModuleFederationPlugin = typeof container.ModuleFederationPlugin;
 type ModuleFederationPluginOptions =
   ConstructorParameters<ModuleFederationPlugin>[0];
-
-const PLUGIN_NAME = 'FederationDashboardPlugin';
-
-interface Source {
-  source: () => Buffer;
-  size: () => number;
-}
-
-type Exposes = (string | ExposesObject)[] | ExposesObject;
-
-interface ExposesObject {
-  [index: string]: string | ExposesConfig | string[];
-}
-
-/**
- * Advanced configuration for modules that should be exposed by this container.
- */
-interface ExposesConfig {
-  /**
-   * Request to a module that should be exposed by this container.
-   */
-  import: string | string[];
-
-  /**
-   * Custom chunk name for the exposed module.
-   */
-  name?: string;
-}
-
-let gitSha: string | undefined;
-try {
-  gitSha = execSync('git rev-parse HEAD').toString().trim();
-} catch (e) {
-  console.error(e);
-}
-
-const findPackageJson = (filePath: string[] | undefined) => {
-  if (!filePath || filePath.length === 0) {
-    return;
-  }
-  if (existsSync(join(filePath.join(sep), 'package.json'))) {
-    try {
-      const file = readFileSync(
-        join(filePath.join(sep), 'package.json'),
-        'utf-8'
-      );
-      return JSON.parse(file);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  filePath.pop();
-  findPackageJson(filePath);
-};
-
-const computeVersionStrategy = (
-  stats: { hash?: string },
-  arg: string | undefined
-): string | undefined => {
-  switch (arg) {
-    case 'gitSha':
-      return gitSha;
-    case 'buildHash':
-      return stats.hash;
-    default:
-      return arg ? arg.toString() : gitSha;
-  }
-};
-
-class AddRuntimeRequiremetToPromiseExternal {
-  apply(compiler: Compiler) {
-    compiler.hooks.compilation.tap(
-      'AddRuntimeRequiremetToPromiseExternal',
-      (compilation: Compilation) => {
-        const { RuntimeGlobals } = compiler.webpack;
-        if (compilation.outputOptions.trustedTypes) {
-          compilation.hooks.additionalModuleRuntimeRequirements.tap(
-            'AddRuntimeRequiremetToPromiseExternal',
-            (module: Module & { externalType?: string }, set) => {
-              if (module.externalType === 'promise') {
-                set.add(RuntimeGlobals.loadScript);
-              }
-            }
-          );
-        }
-      }
-    );
-  }
-}
-
-interface FederationDashboardPluginOptions {
-  debug: boolean;
-  filename: string;
-  useAST: boolean;
-  fetchClient?: (
-    input: RequestInfo | URL,
-    init?: RequestInit
-  ) => Promise<Response>;
-  standalone?: boolean;
-  dashboardURL?: string;
-  metadata?: Record<string, string>;
-  environment?: string;
-  versionStrategy?: string;
-  posted?: Date;
-  group?: string;
-  nextjs?: string;
-  packageJsonPath?: string;
-}
 
 export class FederationDashboardPlugin {
   _options: FederationDashboardPluginOptions;
@@ -157,7 +58,8 @@ export class FederationDashboardPlugin {
     exposes?: Exposes;
   } = {};
 
-  constructor(options: { filename: string; reportFunction: () => void }) {
+  // { filename: string; reportFunction: () => void }
+  constructor(options: Partial<FederationDashboardPluginOptions>) {
     this._options = Object.assign(
       {
         debug: false,
@@ -165,31 +67,37 @@ export class FederationDashboardPlugin {
         useAST: false,
         fetchClient: undefined,
       },
-      options
+      options,
     );
   }
 
   /**
    * @param {Compiler} compiler
    */
-  apply(compiler: Compiler) {
+  apply(compiler: Compiler): void {
+    // todo: use buildid version (user_build_count)
     compiler.options.output.uniqueName = `v${Date.now()}`;
-    new AddRuntimeRequiremetToPromiseExternal().apply(compiler);
+
+    new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+
     const FederationPlugin = compiler.options.plugins.find(
-      (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin'
+      (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
     ) as ModuleFederationPlugin & { _options: ModuleFederationPluginOptions };
+
+    // todo: valorkin fixes
+    this._options.standalone = typeof FederationPlugin === 'undefined';
 
     if (FederationPlugin) {
       this.FederationPluginOptions = Object.assign(
         {},
         FederationPlugin._options,
-        this._options.standalone || {}
+        this._options.standalone || {},
       );
     } else if (this._options.standalone) {
       this.FederationPluginOptions = {};
     } else {
       throw new Error(
-        'Dashboard plugin is missing Module Federation or standalone option'
+        'Dashboard plugin is missing Module Federation or standalone option',
       );
     }
 
@@ -202,22 +110,23 @@ export class FederationDashboardPlugin {
             name: PLUGIN_NAME,
             stage: Compilation.PROCESS_ASSETS_STAGE_REPORT,
           },
-          () => this.processWebpackGraph(compilation)
+          () => this.processWebpackGraph(compilation),
         );
       });
     }
 
+    // todo: valorkin find usage of this env variables
     if (this.FederationPluginOptions?.name) {
       new DefinePlugin({
         'process.dashboardURL': JSON.stringify(this._options.dashboardURL),
         'process.CURRENT_HOST': JSON.stringify(
-          this.FederationPluginOptions.name
+          this.FederationPluginOptions.name,
         ),
       }).apply(compiler);
     }
   }
 
-  parseModuleAst(compilation: Compilation, callback?: () => void) {
+  parseModuleAst(compilation: Compilation, callback?: () => void): void {
     const filePaths: { resource: string; file?: string }[] = [];
     const allArgumentsUsed: string[][] = [];
     // Explore each chunk (build output):
@@ -228,12 +137,12 @@ export class FederationDashboardPlugin {
           module: Module & {
             resource?: string;
             resourceResolveData?: { relativePath: string };
-          }
+          },
         ) => {
           // Loop through all the dependencies that has the named export that we are looking for
           const matchedNamedExports = module.dependencies.filter(
             (dep: Dependency & { name?: string }) =>
-              dep.name === 'federateComponent'
+              dep.name === 'federateComponent',
           );
 
           if (matchedNamedExports.length > 0 && module.resource) {
@@ -242,7 +151,7 @@ export class FederationDashboardPlugin {
               file: module.resourceResolveData?.relativePath,
             });
           }
-        }
+        },
       );
 
       filePaths.forEach(({ resource, file }) => {
@@ -264,7 +173,7 @@ export class FederationDashboardPlugin {
 
             if (callee?.loc?.identifierName === 'federateComponent') {
               const argsAreStrings = args.every(
-                (arg) => arg.type === 'StringLiteral'
+                (arg) => arg.type === 'StringLiteral',
               );
               if (!argsAreStrings) {
                 return;
@@ -306,18 +215,25 @@ export class FederationDashboardPlugin {
       });
     });
 
-    const uniqueArgs = allArgumentsUsed.reduce((acc, current) => {
-      const id = current.join('|');
-      acc[id] = current as [file: string, applicationID: string, name: string];
-      return acc;
-    }, {} as Record<string, [file: string, applicationID: string, name: string]>);
+    const uniqueArgs = allArgumentsUsed.reduce(
+      (acc, current) => {
+        const id = current.join('|');
+        acc[id] = current as [
+          file: string,
+          applicationID: string,
+          name: string,
+        ];
+        return acc;
+      },
+      {} as Record<string, [file: string, applicationID: string, name: string]>,
+    );
     this.allArgumentsUsed = Object.values(uniqueArgs);
     if (callback) callback();
   }
 
   async processWebpackGraph(
     curCompiler: Compilation,
-    callback?: () => void
+    callback?: () => void,
   ): Promise<void> {
     const liveStats = curCompiler.getStats();
     const stats = liveStats.toJson();
@@ -330,11 +246,11 @@ export class FederationDashboardPlugin {
     // get RemoteEntryChunk
     const RemoteEntryChunk = this.getRemoteEntryChunk(
       stats,
-      this.FederationPluginOptions
+      this.FederationPluginOptions,
     );
     const validChunkArray = this.buildValidChunkArray(
       liveStats,
-      this.FederationPluginOptions
+      this.FederationPluginOptions,
     );
     const chunkDependencies = this.getChunkDependencies(validChunkArray);
     const vendorFederation = this.buildVendorFederationMap(liveStats);
@@ -364,6 +280,23 @@ export class FederationDashboardPlugin {
       console.warn('Error during dashboard data processing');
       console.warn(err);
     }
+
+    // todo: ze_webpack plugin
+    const ze_webpack_plugin = curCompiler.options.plugins.find(
+      (plugin) => plugin?.constructor.name === 'ZeWebpackPlugin',
+    ) as unknown as { _options: ZeWebpackPluginOptions };
+    const version = createSnapshotId(ze_webpack_plugin._options);
+
+    // todo: override data from convert graph
+    const data_overrides = {
+      id: createFullAppName(this._options.app!),
+      version: version,
+      app: this._options.app,
+      git: this._options.git,
+    };
+
+    // todo: extend data
+    Object.assign(graphData!, data_overrides);
 
     if (graphData) {
       const dashData = (this._dashData = JSON.stringify(graphData));
@@ -402,7 +335,7 @@ export class FederationDashboardPlugin {
           Object.keys(this.FederationPluginOptions.exposes || {}).length !== 0
         ) {
           const remoteEntry = curCompiler.getAsset(
-            this.FederationPluginOptions.filename
+            this.FederationPluginOptions.filename,
           ) as Asset & { source: { _value?: string } };
           const cleanVersion =
             typeof rawData.version === 'string'
@@ -436,26 +369,26 @@ export class FederationDashboardPlugin {
           const remoteEntryBuffer = Buffer.from(newSource, 'utf-8');
           const originalRemoteEntryBuffer = Buffer.from(
             rewriteTempalteFromMain,
-            'utf-8'
+            'utf-8',
           );
 
           const remoteEntrySource = new RawSource(remoteEntryBuffer);
 
           const originalRemoteEntrySource = new RawSource(
-            originalRemoteEntryBuffer
+            originalRemoteEntryBuffer,
           );
 
           if (remoteEntry && graphData?.version) {
             curCompiler.updateAsset(
               this.FederationPluginOptions.filename,
-              originalRemoteEntrySource
+              originalRemoteEntrySource,
             );
 
             curCompiler.emitAsset(
               [graphData.version, this.FederationPluginOptions.filename].join(
-                '.'
+                '.',
               ),
-              remoteEntrySource
+              remoteEntrySource,
             );
           }
         }
@@ -468,34 +401,43 @@ export class FederationDashboardPlugin {
 
   getRemoteEntryChunk(
     stats: StatsCompilation,
-    FederationPluginOptions: typeof this.FederationPluginOptions
-  ) {
+    FederationPluginOptions: typeof this.FederationPluginOptions,
+  ): StatsChunk | undefined {
     if (!stats.chunks) return;
 
     return stats.chunks.find((chunk) =>
-      chunk.names?.find((name) => name === FederationPluginOptions.name)
+      chunk.names?.find((name) => name === FederationPluginOptions.name),
     );
   }
 
-  getChunkDependencies(validChunkArray: Chunk[]) {
-    return validChunkArray.reduce((acc, chunk) => {
-      const subset = chunk.getAllReferencedChunks();
-      const stringifiableChunk = Array.from(subset).map((sub) => {
-        const cleanSet = Object.getOwnPropertyNames(sub).reduce((acc, key) => {
-          if (key === '_groups') return acc;
-          return Object.assign(acc, { [key]: sub[key as keyof Chunk] });
-        }, {} as Record<keyof Omit<Chunk, '_groups'>, Chunk[keyof Omit<Chunk, '_groups'>]>);
+  getChunkDependencies(validChunkArray: Chunk[]): Record<string, never> {
+    return validChunkArray.reduce(
+      (acc, chunk) => {
+        const subset = chunk.getAllReferencedChunks();
+        const stringifiableChunk = Array.from(subset).map((sub) => {
+          const cleanSet = Object.getOwnPropertyNames(sub).reduce(
+            (acc, key) => {
+              if (key === '_groups') return acc;
+              return Object.assign(acc, { [key]: sub[key as keyof Chunk] });
+            },
+            {} as Record<
+              keyof Omit<Chunk, '_groups'>,
+              Chunk[keyof Omit<Chunk, '_groups'>]
+            >,
+          );
 
-        return this.mapToObjectRec(cleanSet);
-      });
+          return this.mapToObjectRec(cleanSet);
+        });
 
-      return Object.assign(acc, {
-        [`${chunk.id}`]: stringifiableChunk,
-      });
-    }, {} as Record<string, never>);
+        return Object.assign(acc, {
+          [`${chunk.id}`]: stringifiableChunk,
+        });
+      },
+      {} as Record<string, never>,
+    );
   }
 
-  buildVendorFederationMap(liveStats: Stats) {
+  buildVendorFederationMap(liveStats: Stats): TopLevelPackage {
     const vendorFederation: TopLevelPackage = {};
     let packageJson;
     if (this._options.packageJsonPath) {
@@ -540,8 +482,8 @@ export class FederationDashboardPlugin {
     m:
       | Record<string, Chunk[keyof Chunk]>
       | Map<string, Chunk[keyof Chunk]>
-      | Chunk[keyof Chunk][]
-  ) {
+      | Chunk[keyof Chunk][],
+  ): Record<string, unknown> {
     const lo: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(m)) {
       if (value instanceof Map && value.size > 0) {
@@ -557,12 +499,12 @@ export class FederationDashboardPlugin {
 
   buildValidChunkArray(
     liveStats: Stats,
-    FederationPluginOptions: typeof this.FederationPluginOptions
+    FederationPluginOptions: typeof this.FederationPluginOptions,
   ): Chunk[] {
     if (!FederationPluginOptions.name) return [];
 
     const namedChunkRefs = liveStats.compilation.namedChunks.get(
-      FederationPluginOptions.name
+      FederationPluginOptions.name,
     );
 
     if (!namedChunkRefs) return [];
@@ -601,7 +543,7 @@ export class FederationDashboardPlugin {
     return Array.from(directReasons);
   }*/
 
-  async postDashboardData(dashData: string) {
+  async postDashboardData(dashData: string): Promise<void> {
     if (!this._options.dashboardURL) {
       return Promise.resolve();
     }
@@ -609,19 +551,21 @@ export class FederationDashboardPlugin {
       ? this._options.fetchClient
       : fetch;
     try {
+      const token = await getToken();
       const res = await client(this._options.dashboardURL, {
         method: 'POST',
         body: dashData,
         headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
           Accept: 'application/json',
-          'Content-type': 'application/json',
         },
       });
 
       if (!res.ok) throw new Error(res.statusText);
     } catch (err) {
       console.warn(
-        `Error posting data to dashboard URL: ${this._options.dashboardURL}`
+        `Error posting data to dashboard URL: ${this._options.dashboardURL}`,
       );
       console.error(err);
     }

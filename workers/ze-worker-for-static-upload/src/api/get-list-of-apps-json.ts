@@ -1,30 +1,30 @@
-import { Env } from '../index';
-import { TagsHeader } from '../routes/post-upload-tags';
-import { getDeploymentDomain } from '../utils/get-deployment-domain';
+import { getZeApp } from '../utils/get-ze-app-from-uri';
+import { Env } from '../env';
+import { get_app_list } from '../zephyr-api/get-app-list';
+
+function mapAppIdInUrl(url: URL, app_id: string): string {
+	const _url = new URL(url);
+	_url.host = [app_id, _url.host].join('.');
+	_url.pathname = '';
+	_url.search = '';
+	return _url.toString();
+}
 
 export async function getListOfAppsJson(request: Request, env: Env) {
 	const url = new URL(request.url);
-	const cursor = url.searchParams.get('cursor');
 
-	const kvList = await getKVList(env, cursor);
+	const app_list = await get_app_list(env);
 
-	const zedomain = getDeploymentDomain(url.hostname);
-	const list = kvList?.keys.map((key) => ({
-		name: key.name,
-		url: (() => {
-			const _url = new URL(request.url);
-			_url.hostname = [key.name, zedomain].join('.');
-			_url.pathname = '';
-			_url.search = '';
-			return _url.toString();
-		})(),
-	}));
+	const { domain } = getZeApp(url);
+
 	// Generate HTML string with KV pairs
 	const json = {
-		list,
+		list: app_list.keys.map((key) => ({
+			name: key.name,
+			url: mapAppIdInUrl(url, key.name),
+		})),
 		origin: url.origin,
-		zedomain,
-		cursor: kvList?.list_complete ? '' : kvList?.cursor,
+		zedomain: domain,
 	};
 
 	// Return HTML response
@@ -34,8 +34,4 @@ export async function getListOfAppsJson(request: Request, env: Env) {
 			'Content-Type': 'application/json',
 		},
 	});
-}
-
-async function getKVList(env: Env, cursor: string | null) {
-	return await env.ze_tags.list<TagsHeader>({ limit: 1000, cursor });
 }

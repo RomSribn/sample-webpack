@@ -7,7 +7,7 @@ interface EdgeEndpoint {
 
 const dev_edge_endpoint: EdgeEndpoint = {
   port: 8787,
-  hostname: '127.0.0.1',
+  hostname: 'edge.lan',
 };
 
 const prod_edge_endpoint: EdgeEndpoint = {

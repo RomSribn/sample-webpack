@@ -1,35 +1,51 @@
-import { useMemo } from 'react';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
-
-import { ApplicationVersion } from './application-selector';
+import { useContext } from 'react';
+// @mui
+import { Popper, TextField, Autocomplete } from '@mui/material';
+// context
+import { AppContext } from '../context/app-context';
+// icons
+import { ArrowDownIcon } from '../../assets/icons';
+// types
+import { type ApplicationVersion } from '../hooks/queries';
 
 interface ApplicationVersionProps {
-  appVersion: ApplicationVersion;
-  onAppVersionChange: (appVersion: string) => void;
+  applicationVersionList: ApplicationVersion[];
+  onAppVersionChange: (applicationVersion: ApplicationVersion) => void;
 }
 export function ApplicationVersionSelector({
-  appVersion,
+  applicationVersionList,
   onAppVersionChange,
 }: ApplicationVersionProps) {
-  const appVersionList = useMemo(() => {
-    return appVersion.versions.map((version) => version);
-  }, [appVersion]);
+  const { currentApplication } = useContext(AppContext);
 
-  const _onAppVersionChange = (event: unknown, newValue: string) => {
-    onAppVersionChange(newValue);
+  const _onAppVersionChange = (
+    _: unknown,
+    newAppVersion: ApplicationVersion,
+  ) => {
+    onAppVersionChange(newAppVersion);
   };
 
   return (
     <fieldset name="application-version">
       <label>Version</label>
       <Autocomplete
+        className="custom-select"
+        popupIcon={<ArrowDownIcon width={12} height={12} />}
+        PopperComponent={({ ...props }) => (
+          <Popper {...props} className="custom-select__popper" />
+        )}
         disableClearable={true}
-        defaultValue={appVersion.version}
         onChange={_onAppVersionChange}
-        options={appVersionList}
-        renderInput={(params) => <TextField {...params as any} />}
-        key={appVersion.app}
+        options={applicationVersionList}
+        getOptionLabel={(option) => option.name}
+        renderInput={(params) => (
+          <TextField
+            id={params.id}
+            inputProps={params.inputProps}
+            InputProps={params.InputProps}
+          />
+        )}
+        key={currentApplication?.id}
       />
     </fieldset>
   );

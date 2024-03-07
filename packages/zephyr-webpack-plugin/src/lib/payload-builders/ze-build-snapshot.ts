@@ -1,18 +1,36 @@
-import { ZeWebpackPluginOptions } from '../ze-webpack-plugin';
 import {
+  createFullAppName,
+  createSnapshotId,
   Snapshot,
   SnapshotAsset,
   ZeBuildAssetsMap,
 } from 'zephyr-edge-contract';
+import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
+import { getCurrentZephyrUser } from '../zephyr-app/get-current-user';
+import { isCI } from 'nx/src/utils/is-ci';
+import { edge_endpoint } from '../../config/endpoints';
 
 export function createSnapshot(
   options: ZeWebpackPluginOptions,
   assets: ZeBuildAssetsMap,
 ): Snapshot {
+  // todo: api request for version?
+  const version_postfix = isCI()
+    ? `${options.git.branch}.${options.zeConfig.buildId}`
+    : `${options.zeConfig.user}.${options.zeConfig.buildId}`;
   return {
-    id: options.snapshotId,
-    type: 'snapshot',
-    creator: options.git,
+    app_id: createFullAppName(options.app),
+    version: `${options.app.version}-${version_postfix}`,
+    snapshot_id: createSnapshotId(options),
+    domain: edge_endpoint.hostname,
+    uid: {
+      build: options.zeConfig.buildId!,
+      app_name: options.app.name,
+      repo: options.app.project,
+      org: options.app.org,
+    },
+    git: options.git,
+    creator: getCurrentZephyrUser(),
     createdAt: Date.now(),
     mfConfig: options.mfConfig,
     assets: Object.keys(assets).reduce(

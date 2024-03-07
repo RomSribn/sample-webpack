@@ -1,6 +1,11 @@
 import { edge_endpoint } from '../../config/endpoints';
 import { request, RequestOptions } from '../utils/ze-http-request';
-import { SnapshotUploadRes, UploadableAsset } from 'zephyr-edge-contract';
+import {
+  Snapshot,
+  SnapshotUploadRes,
+  UploadableAsset,
+  ZeEnvs,
+} from 'zephyr-edge-contract';
 
 const { hostname, port } = edge_endpoint;
 
@@ -35,15 +40,14 @@ export async function uploadFile(
 }
 
 export async function uploadSnapshot(
-  id: string,
-  body: unknown,
+  body: Snapshot,
 ): Promise<SnapshotUploadRes | undefined> {
   const type = 'snapshot';
   const data = JSON.stringify(body);
   const options: RequestOptions & { headers: Record<string, string> } = {
     hostname,
     port,
-    path: `/upload?type=${type}&id=${id}`,
+    path: `/upload?type=${type}`,
     method: 'POST',
     headers: {
       'Content-Length': data.length.toString(),
@@ -60,6 +64,24 @@ export async function uploadSnapshot(
   }
 
   return res;
+}
+
+export async function uploadEnvs(body: ZeEnvs): Promise<unknown> {
+  const type = 'envs';
+  const data = JSON.stringify(body);
+  const options: RequestOptions & { headers: Record<string, string> } = {
+    hostname,
+    port,
+    path: `/upload?type=${type}`,
+    method: 'POST',
+    headers: {
+      'Content-Length': data.length.toString(),
+    },
+  };
+
+  options.headers['Content-Type'] = 'application/json';
+
+  return request(options, data);
 }
 
 export async function uploadTags(id: string, body: unknown): Promise<unknown> {

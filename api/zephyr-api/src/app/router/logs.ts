@@ -58,7 +58,6 @@ export function logs(app) {
 
       const ms = `${Date.now() - newEntry.createdAt}`.padStart(2, ' ');
       const message = `[ze:api:logs]: ${ms}ms ${newEntry.message}`;
-      console.log(message);
       wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ entry: newEntry, message }));

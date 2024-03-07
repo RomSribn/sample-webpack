@@ -15,8 +15,12 @@ compatibility_date = "2023-10-02"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
  [[kv_namespaces]]
- binding = "ze_tags"
- id = "474ef5c725f74362be5ed84accc82b89"
+ binding = "ze_app_list"
+ id = "1e9d87a9f41447119f98ef8d50156e34"
+
+ [[kv_namespaces]]
+ binding = "ze_envs"
+ id = "caea45f912c24e4887423422b52a877c"
 
  [[kv_namespaces]]
  binding = "ze_snapshots"

@@ -1,35 +1,19 @@
-import { Env } from '../index';
-import { TagsHeader } from './post-upload-tags';
 import { AppendLivereloadHandler } from '../utility/util-attach-livereload';
-import { getAppNameFromHostname } from '../utility/util-get-app-name-from-hostname';
+import { getZeApp } from '../utils/get-ze-app-from-uri';
+import { Env } from '../env';
+import { Snapshot } from 'zephyr-edge-contract';
 
 const tag = 'latest';
 export async function getWildcard(request: Request, env: Env) {
 	const url = new URL(request.url);
 	const isRootRequest = url.pathname === '/' || url.pathname === '';
 	const pathname = isRootRequest ? 'index.html' : url.pathname.substring(1);
-	const app = getAppNameFromHostname(url);
 
-	if (!app) {
-		return new Response('App Not Found', { status: 404 });
-	}
-
-	const tags = await env.ze_tags.get<TagsHeader>(app, { type: 'json' });
-
-	let snapshot;
-
-	if (!tags) {
-		const snap = await env.ze_snapshots.get(app, { type: 'json' });
-		if (!snap) {
-			return new Response('Snapshot Not Found', { status: 404 });
-		}
-		snapshot = snap;
-	} else {
-		snapshot = tags.tags[tag];
-	}
+	const full_app_name = url.hostname;
+	const snapshot = await env.ze_envs.get<Snapshot>(full_app_name, { type: 'json' });
 
 	// todo: take in account deploys from windows
-	const asset = snapshot.assets[pathname];
+	const asset = snapshot?.assets[pathname];
 	if (!asset) {
 		return new Response('Asset Not Found in Snapshot', { status: 404 });
 	}

@@ -31,24 +31,18 @@ export interface AuthOptions {
 }
 
 export function getAuthenticationURL(options: AuthOptions): string {
-  const { state, responseType = 'code', scope = 'openid email' } = options;
+  const { state } = options;
 
   const auth0RedirectUrl = new URL(
-    'user-token/generate',
+    'authorize',
     environment.ZEPHYR_API_ENDPOINT,
   );
 
-  const authParams = new URLSearchParams({
-    response_type: responseType,
-    client_id: environment.AUTH0_CLIENT_ID,
-    redirect_uri: auth0RedirectUrl.href,
-    scope: scope,
-    state: state,
-  });
+  const loginUrl = new URL('v2/auth/login', environment.ZEPHYR_API_ENDPOINT);
+  loginUrl.searchParams.append('state', state);
+  loginUrl.searchParams.append('redirect-url', auth0RedirectUrl.href);
 
-  return `https://${
-    environment.AUTH0_DOMAIN
-  }/authorize?${authParams.toString()}`;
+  return loginUrl.href;
 }
 
 function subscribeToWsEvents(sessionKey: string): Promise<string> {
@@ -73,7 +67,6 @@ function subscribeToWsEvents(sessionKey: string): Promise<string> {
     });
 
     roomSocket.on('access-token', (token) => {
-      console.log('TOKEN:', token);
       cleanup();
       resolve(token);
     });

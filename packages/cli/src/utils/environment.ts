@@ -18,7 +18,8 @@ const api_prod_config: ApiConfig = {
   ZEPHYR_API_ENDPOINT: 'https://api.zephyr-cloud.io',
 };
 
-export const environment: ApiConfig =
-  process.env['ZEPHYR_ENV'] === 'ze-dev' ? api_dev_config : api_prod_config;
+export const environment: ApiConfig = process.env['ZE_DEV']
+  ? api_dev_config
+  : api_prod_config;
 
 export default environment;

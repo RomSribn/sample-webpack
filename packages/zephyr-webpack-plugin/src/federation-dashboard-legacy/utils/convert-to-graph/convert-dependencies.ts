@@ -7,7 +7,7 @@ export interface ConvertedDependencies {
   optionalDependencies?: LocalPackageJson[];
 }
 
-type NpmModules = Map<string, Record<string, LocalPackageJson>>;
+export type NpmModules = Map<string, Record<string, LocalPackageJson>>;
 
 export function convertDependencies(params: {
   package: TopLevelPackage;
@@ -17,18 +17,18 @@ export function convertDependencies(params: {
     dependencies: convertDeps(params.npmModules, params.package.dependencies),
     devDependencies: convertDeps(
       params.npmModules,
-      params.package.devDependencies
+      params.package.devDependencies,
     ),
     optionalDependencies: convertDeps(
       params.npmModules,
-      params.package.optionalDependencies
+      params.package.optionalDependencies,
     ),
   };
 }
 
 function convertDeps(
   npmModules: NpmModules,
-  deps?: Record<string, string>
+  deps?: Record<string, string>,
 ): LocalPackageJson[] | undefined {
   if (!deps) return;
 
@@ -39,7 +39,7 @@ function convertDeps(
 
     if (dataFromGraph) {
       const foundInGraph = Object.values(dataFromGraph).find((depData) =>
-        depData.version.startsWith(versionVal)
+        depData.version.startsWith(versionVal),
       );
 
       if (foundInGraph) {

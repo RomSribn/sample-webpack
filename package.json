@@ -15,6 +15,7 @@
       "apps/*",
       "examples/*",
       "examples/react-18/**/*",
+      "libs/*",
       "packages/*",
       "workers/*"
     ],
@@ -49,10 +50,11 @@
     "@swc/jest": "0.2.29",
     "@testing-library/react": "14.1.2",
     "@types/jest": "^29.5.11",
-    "@types/node": "20.11.2",
+    "@types/node": "^20.11.2",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
     "babel-jest": "^29.7.0",
+    "dotenv": "16.3.2",
     "esbuild": "^0.19.11",
     "eslint": "~8.56.0",
     "eslint-config-prettier": "^9.1.0",
@@ -64,6 +66,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jest-environment-node": "^29.7.0",
+    "node-fetch": "3.3.2",
     "nx": "17.2.8",
     "prettier": "^3.2.2",
     "react-refresh": "^0.14.0",
@@ -73,9 +76,7 @@
     "typescript": "~5.3.3",
     "url-loader": "^4.1.1",
     "verdaccio": "^5.29.0",
-    "wrangler": "^3.22.4",
-    "node-fetch": "3.3.2",
-    "dotenv": "16.3.2"
+    "wrangler": "^3.22.4"
   },
   "dependencies": {
     "@swc/helpers": "~0.5.3",

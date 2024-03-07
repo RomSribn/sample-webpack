@@ -1,7 +1,7 @@
 import { Compiler } from 'webpack';
 import { request } from './utils/ze-http-request';
-import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
 import { buildid_endpoint } from '../config/endpoints';
+import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
 const { port, hostname } = buildid_endpoint;
 export async function getBuildId(

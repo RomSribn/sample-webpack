@@ -1,5 +1,5 @@
 {
-  "name": "@zephyr-side-panel/source",
+  "name": "zephyr-mono-root",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
     "local-registry": {

@@ -1,6 +1,6 @@
 import { Compiler } from 'webpack';
 import { logger } from './utils/ze-log-event';
-import { ZeWebpackPluginOptions } from './ze-webpack-plugin';
+import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
 export function logBuildSteps(
   pluginOptions: ZeWebpackPluginOptions,

@@ -1,55 +1,55 @@
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
-import { RemoteDescriptor } from './remotes-selector';
-
-export interface ApplicationList {
-  list: { name: string; url: string }[];
-  origin: string;
-  zedomain: string;
-  cursor: string;
-}
-
-export interface ApplicationVersion {
-  app: string;
-  version: string;
-  user: string;
-  build: string;
-  versions: string[];
-  tags: Record<string, { id: string }>;
-  snapshot: {
-    id: string;
-    mfConfig: {
-      name: string;
-      // todo: remote url should be converted to app descriptor at edge
-      // {url: 'edge-url', fallback: 'fallback-url', name: 'app-name', version: 'app-version'}
-      remotes: Record<string, RemoteDescriptor>;
-    };
-  };
-}
+import { useContext } from 'react';
+import { Autocomplete, Popper, TextField } from '@mui/material';
+// context
+import { AppContext } from '../context/app-context';
+// icons
+import { ArrowDownIcon } from '../../assets/icons';
+import { ZeAppVersion } from 'zephyr-edge-contract';
+import { type Application } from '../hooks/queries';
 
 interface ApplicationSelectorProps {
-  appOptions: string[];
-  appVersion?: ApplicationVersion;
-  onChange: (appName: string | undefined) => void;
+  applications: Application[];
+  appVersion?: ZeAppVersion;
+  onChange: (application: Application) => void;
 }
 
-// @ts-nocheck
 export function ApplicationSelector({
   appVersion,
-  appOptions,
+  applications,
   onChange,
 }: ApplicationSelectorProps) {
+  const { currentApplication } = useContext(AppContext);
   return (
     <fieldset name="application">
       <label>Name</label>
       <Autocomplete
+        className="custom-select"
+        popupIcon={<ArrowDownIcon width={12} height={12} />}
+        PopperComponent={({ ...props }) => (
+          <Popper {...props} className="custom-select__popper" />
+        )}
         disableClearable={true}
-        defaultValue={appVersion?.app}
-        onChange={(event, newInputValue) => {
-          onChange(newInputValue);
+        defaultValue={currentApplication ?? undefined}
+        onChange={(_, newApplication) => {
+          onChange(newApplication);
         }}
-        options={appOptions}
-        renderInput={(params) => <TextField {...params as any} />}
+        options={applications.sort(
+          (a, b) =>
+            -(b.organization.name + b.project.name).localeCompare(
+              a.organization.name + a.project.name,
+            ),
+        )}
+        groupBy={(option) =>
+          option.organization.name + '/' + option.project.name
+        }
+        getOptionLabel={(option) => option.name}
+        renderInput={(params) => (
+          <TextField
+            id={params.id}
+            inputProps={params.inputProps}
+            InputProps={params.InputProps}
+          />
+        )}
         key={appVersion?.app}
       />
     </fieldset>

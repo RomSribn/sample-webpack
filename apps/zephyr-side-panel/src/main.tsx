@@ -15,8 +15,8 @@ const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <StrictMode>
     <ThemeProvider theme={darkTheme}>
-      <CssBaseline></CssBaseline>
+      <CssBaseline enableColorScheme />
       <App />
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 );

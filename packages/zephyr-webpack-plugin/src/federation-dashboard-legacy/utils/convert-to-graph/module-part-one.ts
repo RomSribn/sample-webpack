@@ -2,6 +2,8 @@ import { join, sep } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { getLicenses, LocalPackageJson } from './get-licenses';
 import { StatsModule } from 'webpack';
+import { NpmModules } from './convert-dependencies';
+import { ModuleObject } from './module-part-two';
 
 export interface Consume {
   consumingApplicationID: string;
@@ -10,7 +12,15 @@ export interface Consume {
   usedIn: Set<string>;
 }
 
-export function modulePartOne(modules: StatsModule[] | undefined) {
+interface ModulePartOneReturn {
+  consumes: Consume[];
+  modulesObj: Record<string, ModuleObject>;
+  npmModules: NpmModules;
+}
+
+export function modulePartOne(
+  modules: StatsModule[] | undefined,
+): ModulePartOneReturn {
   const consumes: Consume[] = [];
   const consumesByName: Record<string, Consume> = {};
   const modulesObj: Record<
@@ -35,12 +45,12 @@ export function modulePartOne(modules: StatsModule[] | undefined) {
 
         let applicationID: string | null = data[2].replace(
           'webpack/container/reference/',
-          ''
+          '',
         );
 
         if (applicationID.includes('?')) {
           applicationID = new URLSearchParams(applicationID.split('?')[1]).get(
-            'remoteName'
+            'remoteName',
           );
         }
 
@@ -76,7 +86,7 @@ export function modulePartOne(modules: StatsModule[] | undefined) {
             requires: [],
             file: file.import[0],
           };
-        }
+        },
       );
     } else if (nameForCondition && nameForCondition.includes('node_modules')) {
       const contextArray = nameForCondition.split(sep);
@@ -89,7 +99,7 @@ export function modulePartOne(modules: StatsModule[] | undefined) {
 
       const packageJsonFile = join(context, 'package.json');
       const packageJson = JSON.parse(
-        readFileSync(packageJsonFile, { encoding: 'utf-8' })
+        readFileSync(packageJsonFile, { encoding: 'utf-8' }),
       ) as LocalPackageJson;
 
       const existingPackage = npmModules.get(packageJson.name);

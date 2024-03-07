@@ -5,12 +5,12 @@ import { session } from '../storage/session';
 import { environment } from '../../environments/environment';
 import { navigate } from '../utils/navigate';
 
-const zephyrWsEndpoint = 'ws://'
+// const zephyrWsEndpoint = 'ws://';
 
 const {
   AUTH0_CLIENT_ID: clientId,
   AUTH0_DOMAIN: domain,
-  ZEPHYR_API_ENDPOINT: zephyrApiEndpoint
+  ZEPHYR_API_ENDPOINT: zephyrApiEndpoint,
 } = environment;
 
 export async function isTokenValid(token: string): Promise<void> {
@@ -34,17 +34,26 @@ export async function loginWithLink(redirectUrl: string): Promise<void> {
   await subscribeToWsEvents(state, redirectUrl);
 }
 
+export async function logout(): Promise<void> {
+  const logoutUrl = new URL('v2/logout', `https://${domain}`);
+  logoutUrl.searchParams.append('client_id', clientId);
+  logoutUrl.searchParams.append(
+    'returnTo',
+    'http://edge.lan:8787/__my_app_list',
+  );
+  await navigate(logoutUrl.href);
+  await session.removeAccessToken();
+  await io(zephyrApiEndpoint).disconnect();
+
+  return Promise.resolve();
+}
+
 function getAuthenticationURL(state: string): string {
   const auth0RedirectUrl = new URL('authorize', zephyrApiEndpoint);
-
-  return [
-    `https://${domain}/authorize`,
-    `?response_type=code`,
-    `&client_id=${clientId}`,
-    `&redirect_uri=${auth0RedirectUrl.href}`,
-    `&scope=openid email`,
-    `&state=${state}`,
-  ].join('');
+  const loginUrl = new URL('v2/auth/login', zephyrApiEndpoint);
+  loginUrl.searchParams.append('state', state);
+  loginUrl.searchParams.append('redirect-url', auth0RedirectUrl.href);
+  return loginUrl.href;
 }
 
 function subscribeToWsEvents(

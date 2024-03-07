@@ -1,0 +1,11 @@
+export { AbTestingIcon } from './ab-testing';
+export { AppIcon } from './app-icon';
+export { ArrowDownIcon } from './arrow-down';
+export { BracketsCurlyIcon } from './brackets-curly';
+export { BurgerIcon } from './burger';
+export { DocumentIcon } from './document';
+export { LogoutIcon } from './logout';
+export { NewTabIcon } from './new-tab';
+export { StickerIcon } from './sticker';
+export { SyncIcon } from './sync';
+export { WarningIcon } from './warning-icon';
