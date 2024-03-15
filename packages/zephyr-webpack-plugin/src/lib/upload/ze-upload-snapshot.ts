@@ -26,7 +26,6 @@ export async function zeUploadSnapshot(
       action: 'snapshot:upload:failed',
       message: `failed uploading of ${buildEnv} snapshot to zephyr`,
     });
-    console.error(`Zephyr deployment canceled!`);
     return;
   } else {
     logEvent({

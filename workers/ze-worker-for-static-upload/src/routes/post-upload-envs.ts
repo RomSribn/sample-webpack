@@ -17,13 +17,16 @@ export async function postUploadEnvs(request: Request, env: Env) {
 	}
 
 	await Promise.all(
-		envs.urls.filter((url) => url !== envs.snapshot_id).map(async (url) => await env.ze_envs.put(url, JSON.stringify(snapshot))),
+		envs.urls
+      .filter((url) => url !== envs.snapshot_id)
+      .map(async (url) => await env.ze_envs.put(url, JSON.stringify(snapshot))),
 	);
 
 	// todo: replace this with zephyr api calls
 	// update app meta in app list with available version list
 
-	const app_meta = await env.ze_app_list.get<ZeAppListItem>(snapshot.app_id, 'json');
+	const app_meta = await env.ze_app_list
+    .get<ZeAppListItem>(snapshot.app_id, 'json');
 	const id = `${snapshot.snapshot_id.split('.')[0]}.${snapshot.app_id.split('.')[0]}`;
 	const newAppMeta: ZeAppListItem = {
 		id,

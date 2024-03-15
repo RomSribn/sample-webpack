@@ -7,12 +7,10 @@ import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 
 import {
-  Asset,
   Chunk,
   Compilation,
   Compiler,
   container,
-  DefinePlugin,
   Dependency,
   Module,
   sources,
@@ -26,12 +24,11 @@ import {
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
-import { getToken } from '../../../token/token';
 import { findPackageJson } from './find-package-json';
 import { computeVersionStrategy, gitSha } from './compute-version-strategy';
 import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';
 import { AddRuntimeRequirementToPromiseExternal } from './add-runtime-requirement-to-promise-external';
-import { Exposes, Source } from './federation-dashboard-types';
+import { Exposes } from './federation-dashboard-types';
 import { createFullAppName, createSnapshotId } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
 // convert this require to imports
@@ -39,9 +36,9 @@ import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AutomaticVendorFederation = require('@module-federation/automatic-vendor-federation');
 
-const PLUGIN_NAME = 'FederationDashboardPlugin';
+// const PLUGIN_NAME = 'FederationDashboardPlugin';
 
-const { RawSource } = sources;
+// const { RawSource } = sources;
 type ModuleFederationPlugin = typeof container.ModuleFederationPlugin;
 type ModuleFederationPluginOptions =
   ConstructorParameters<ModuleFederationPlugin>[0];
@@ -54,7 +51,7 @@ export class FederationDashboardPlugin {
   FederationPluginOptions: {
     name?: string;
     remotes?: unknown;
-    filename?: string;
+    // filename?: string;
     exposes?: Exposes;
   } = {};
 
@@ -63,12 +60,12 @@ export class FederationDashboardPlugin {
     this._options = Object.assign(
       {
         debug: false,
-        filename: 'dashboard.json',
+        // filename: 'dashboard.json',
         useAST: false,
         fetchClient: undefined,
       },
       options,
-    );
+    ) as FederationDashboardPluginOptions;
   }
 
   /**
@@ -101,29 +98,29 @@ export class FederationDashboardPlugin {
       );
     }
 
-    if (this.FederationPluginOptions) {
-      this.FederationPluginOptions.name =
-        this.FederationPluginOptions?.name?.replace('__REMOTE_VERSION__', '');
-      compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-        compilation.hooks.processAssets.tapPromise(
-          {
-            name: PLUGIN_NAME,
-            stage: Compilation.PROCESS_ASSETS_STAGE_REPORT,
-          },
-          () => this.processWebpackGraph(compilation),
-        );
-      });
-    }
+    // if (this.FederationPluginOptions) {
+    //   this.FederationPluginOptions.name =
+    //     this.FederationPluginOptions?.name?.replace('__REMOTE_VERSION__', '');
+    //   compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
+    //     compilation.hooks.processAssets.tapPromise(
+    //       {
+    //         name: PLUGIN_NAME,
+    //         stage: Compilation.PROCESS_ASSETS_STAGE_REPORT
+    //       },
+    //       () => this.processWebpackGraph(compilation)
+    //     );
+    //   });
+    // }
 
     // todo: valorkin find usage of this env variables
-    if (this.FederationPluginOptions?.name) {
-      new DefinePlugin({
-        'process.dashboardURL': JSON.stringify(this._options.dashboardURL),
-        'process.CURRENT_HOST': JSON.stringify(
-          this.FederationPluginOptions.name,
-        ),
-      }).apply(compiler);
-    }
+    // if (this.FederationPluginOptions?.name) {
+    //   new DefinePlugin({
+    //     'process.dashboardURL': JSON.stringify(this._options.dashboardURL),
+    //     'process.CURRENT_HOST': JSON.stringify(
+    //       this.FederationPluginOptions.name
+    //     )
+    //   }).apply(compiler);
+    // }
   }
 
   parseModuleAst(compilation: Compilation, callback?: () => void): void {
@@ -231,10 +228,7 @@ export class FederationDashboardPlugin {
     if (callback) callback();
   }
 
-  async processWebpackGraph(
-    curCompiler: Compilation,
-    callback?: () => void,
-  ): Promise<void> {
+  async processWebpackGraph(curCompiler: Compilation): Promise<unknown> {
     const liveStats = curCompiler.getStats();
     const stats = liveStats.toJson();
     if (this._options.useAST) {
@@ -293,110 +287,112 @@ export class FederationDashboardPlugin {
       version: version,
       app: this._options.app,
       git: this._options.git,
+      context: {
+        isCI: this._options.context.isCI,
+      },
     };
 
     // todo: extend data
     Object.assign(graphData!, data_overrides);
 
-    if (graphData) {
-      const dashData = (this._dashData = JSON.stringify(graphData));
-      if (this._options.dashboardURL && !this._options.nextjs) {
-        this.postDashboardData(dashData).catch((err) => {
-          if (err) {
-            curCompiler.errors.push(err);
-            throw err;
-          }
-        });
-      }
-      return Promise.resolve().then(() => {
-        const statsBuf = Buffer.from(dashData || '{}', 'utf-8');
-
-        const source: Source = {
-          source() {
-            return statsBuf;
-          },
-          size() {
-            return statsBuf.length;
-          },
-        };
-        // for dashboard.json
-        if (curCompiler.emitAsset && this._options.filename) {
-          const asset = curCompiler.getAsset(this._options.filename);
-          if (asset) {
-            curCompiler.updateAsset(this._options.filename, source as never);
-          } else {
-            curCompiler.emitAsset(this._options.filename, source as never);
-          }
-        }
-        // for versioned remote
-        if (
-          curCompiler.emitAsset &&
-          this.FederationPluginOptions.filename &&
-          Object.keys(this.FederationPluginOptions.exposes || {}).length !== 0
-        ) {
-          const remoteEntry = curCompiler.getAsset(
-            this.FederationPluginOptions.filename,
-          ) as Asset & { source: { _value?: string } };
-          const cleanVersion =
-            typeof rawData.version === 'string'
-              ? `_${rawData.version.split('.').join('_')}`
-              : `_${rawData.version}`;
-
-          let codeSource;
-          if (
-            remoteEntry &&
-            !remoteEntry.source._value &&
-            remoteEntry.source.source
-          ) {
-            codeSource = remoteEntry.source.source();
-          } else if (remoteEntry.source._value) {
-            codeSource = remoteEntry.source._value;
-          }
-
-          if (!codeSource) {
-            return callback && callback();
-          }
-
-          //string replace "dsl" with version_dsl to make another global.
-          const newSource = codeSource
-            .toString()
-            .replace(new RegExp(`__REMOTE_VERSION__`, 'g'), cleanVersion);
-
-          const rewriteTempalteFromMain = codeSource
-            .toString()
-            .replace(new RegExp(`__REMOTE_VERSION__`, 'g'), '');
-
-          const remoteEntryBuffer = Buffer.from(newSource, 'utf-8');
-          const originalRemoteEntryBuffer = Buffer.from(
-            rewriteTempalteFromMain,
-            'utf-8',
-          );
-
-          const remoteEntrySource = new RawSource(remoteEntryBuffer);
-
-          const originalRemoteEntrySource = new RawSource(
-            originalRemoteEntryBuffer,
-          );
-
-          if (remoteEntry && graphData?.version) {
-            curCompiler.updateAsset(
-              this.FederationPluginOptions.filename,
-              originalRemoteEntrySource,
-            );
-
-            curCompiler.emitAsset(
-              [graphData.version, this.FederationPluginOptions.filename].join(
-                '.',
-              ),
-              remoteEntrySource,
-            );
-          }
-        }
-        if (callback) {
-          return void callback();
-        }
-      });
+    if (!graphData) {
+      return;
     }
+    // const dashData = (this._dashData = JSON.stringify(graphData));
+    return this.postDashboardData(graphData).catch((err) => {
+      if (err) {
+        curCompiler.errors.push(err);
+        throw err;
+      }
+    });
+    // todo: this was generating dashboard plugin, not sure we need it anymore
+    /*return Promise.resolve().then(() => {
+      const statsBuf = Buffer.from(dashData || '{}', 'utf-8');
+
+      const source: Source = {
+        source() {
+          return statsBuf;
+        },
+        size() {
+          return statsBuf.length;
+        }
+      };
+      // for dashboard.json
+      if (curCompiler.emitAsset && this._options.filename) {
+        const asset = curCompiler.getAsset(this._options.filename);
+        if (asset) {
+          curCompiler.updateAsset(this._options.filename, source as never);
+        } else {
+          curCompiler.emitAsset(this._options.filename, source as never);
+        }
+      }
+      // for versioned remote
+      if (
+        curCompiler.emitAsset &&
+        this.FederationPluginOptions.filename &&
+        Object.keys(this.FederationPluginOptions.exposes || {}).length !== 0
+      ) {
+        const remoteEntry = curCompiler
+          .getAsset(this.FederationPluginOptions.filename) as Asset & { source: { _value?: string } };
+        const cleanVersion =
+          typeof rawData.version === 'string'
+            ? `_${rawData.version.split('.').join('_')}`
+            : `_${rawData.version}`;
+
+        let codeSource;
+        if (
+          remoteEntry &&
+          !remoteEntry.source._value &&
+          remoteEntry.source.source
+        ) {
+          codeSource = remoteEntry.source.source();
+        } else if (remoteEntry.source._value) {
+          codeSource = remoteEntry.source._value;
+        }
+
+        if (!codeSource) {
+          return callback && callback();
+        }
+
+        //string replace "dsl" with version_dsl to make another global.
+        const newSource = codeSource
+          .toString()
+          .replace(new RegExp(`__REMOTE_VERSION__`, 'g'), cleanVersion);
+
+        const rewriteTempalteFromMain = codeSource
+          .toString()
+          .replace(new RegExp(`__REMOTE_VERSION__`, 'g'), '');
+
+        const remoteEntryBuffer = Buffer.from(newSource, 'utf-8');
+        const originalRemoteEntryBuffer = Buffer.from(
+          rewriteTempalteFromMain,
+          'utf-8'
+        );
+
+        const remoteEntrySource = new RawSource(remoteEntryBuffer);
+
+        const originalRemoteEntrySource = new RawSource(
+          originalRemoteEntryBuffer
+        );
+
+        if (remoteEntry && graphData?.version) {
+          curCompiler.updateAsset(
+            this.FederationPluginOptions.filename,
+            originalRemoteEntrySource
+          );
+
+          curCompiler.emitAsset(
+            [graphData.version, this.FederationPluginOptions.filename].join(
+              '.'
+            ),
+            remoteEntrySource
+          );
+        }
+      }
+      if (callback) {
+        return void callback();
+      }
+    });*/
   }
 
   getRemoteEntryChunk(
@@ -543,31 +539,8 @@ export class FederationDashboardPlugin {
     return Array.from(directReasons);
   }*/
 
-  async postDashboardData(dashData: string): Promise<void> {
-    if (!this._options.dashboardURL) {
-      return Promise.resolve();
-    }
-    const client = this._options.fetchClient
-      ? this._options.fetchClient
-      : fetch;
-    try {
-      const token = await getToken();
-      const res = await client(this._options.dashboardURL, {
-        method: 'POST',
-        body: dashData,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + token,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!res.ok) throw new Error(res.statusText);
-    } catch (err) {
-      console.warn(
-        `Error posting data to dashboard URL: ${this._options.dashboardURL}`,
-      );
-      console.error(err);
-    }
+  async postDashboardData(dashData: unknown): Promise<void | unknown> {
+    console.log(dashData);
+    throw new Error('not implemented, override it');
   }
 }

@@ -18,7 +18,6 @@ async function cleanNamespace(namespaceId) {
   const headers = {
     Authorization: `Bearer ${apiToken}`,
     'Content-Type': 'application/json',
-    e,
   };
 
   // Get all keys
@@ -26,7 +25,7 @@ async function cleanNamespace(namespaceId) {
   const data = await response.json();
 
   // Delete each key
-  for (const item of data.result) {
+  for (const item of Object.keys(data.result ?? {})) {
     console.log(`Deleting ${item.name}`);
     const deleteUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${item.name}`;
     await fetch(deleteUrl, { method: 'DELETE', headers });

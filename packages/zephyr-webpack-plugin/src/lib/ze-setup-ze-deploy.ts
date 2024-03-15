@@ -6,6 +6,9 @@ import { zeUploadAssets } from './upload/ze-upload-assets';
 import { zeBuildAssetsMap } from './payload-builders/ze-build-assets-map';
 import { createSnapshot } from './payload-builders/ze-build-snapshot';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
+import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
+import { zeUploadBuildStats } from './upload/ze-upload-build-stats';
+import { edge_endpoint } from '../config/endpoints';
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
@@ -41,6 +44,26 @@ export function setupZeDeploy(
           count: Object.keys(assets).length,
         });
         if (!assetsUploadSuccess) return;
+
+        // todo: upload app version and send JWT with env URLs to edge
+        // eslint-disable-next-line
+        const dashboardPlugin = (pluginOptions as any)
+          .dashboard as FederationDashboardPlugin;
+
+        // todo: set proper metadata for dashboard plugin
+        // eslint-disable-next-line
+        dashboardPlugin.postDashboardData = async (dashData: any) => {
+          dashData.remote = pluginOptions.mfConfig?.filename;
+          // todo: shouldn't be this set for app inside of ze-api?
+          dashData.edge = {
+            hostname: edge_endpoint.hostname,
+            port: edge_endpoint.port
+          }
+          return await zeUploadBuildStats(dashData)
+        };
+
+        const envs = await dashboardPlugin.processWebpackGraph(compilation);
+        // end of dashboard plugin hack around
 
         await zeEnableSnapshotOnEdge(pluginOptions, snapshot);
 

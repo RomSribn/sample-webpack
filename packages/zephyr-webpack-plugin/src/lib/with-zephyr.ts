@@ -1,6 +1,8 @@
+import { Configuration, container } from 'webpack';
+import isCI from 'is-ci';
+
 import { getPackageJson } from './utils/ze-util-find-app-name';
 import { getGitInfo } from './utils/ze-util-get-git-info';
-import { Configuration, container } from 'webpack';
 import {
   replace_remote_in_mf_config,
   replace_remote_with_delegate,
@@ -106,7 +108,7 @@ export function withZephyr(
     // todo: application uid
     // todo: npm-like version
 
-    config.plugins?.push(
+    /*    config.plugins?.push(
       new FederationDashboardPlugin({
         app: {
           name: packageJson.name,
@@ -115,24 +117,28 @@ export function withZephyr(
           project,
         },
         git: gitInfo?.git,
+        context: {
+          isCI
+        },
         // debug: true,
         // versionStrategy: 'buildHash',
         filename: 'dashboard.json',
         // environment: 'development',
         // dashboardURL: `http://localhost:3333/update`,
         dashboardURL: `http://localhost:3333/v2/builder-packages-api/upload-from-dashboard-plugin`,
+        // dashboardURL: `https://api-dev.zephyr-cloud.io/v2/builder-packages-api/upload-from-dashboard-plugin`,
         metadata: {
           // todo: domain
-          baseUrl: 'http://localhost:3000',
+          baseUrl: 'https://cf.valorkin.dev',
           source: {
             // todo: git remote + context
             url: 'https://github.com/ZephyrCloudIO/zephyr-cloud-io/tree/main/examples/react-18/template/host',
           },
-          // todo: full remote url from MF config
+          // todo: full remote url from ZeWebpackPlugin
           remote: 'http://localhost:3000/remoteEntry.js',
         },
       }),
-    );
+    );*/
 
     return config;
   };

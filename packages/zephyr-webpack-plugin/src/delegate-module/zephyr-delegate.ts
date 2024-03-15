@@ -60,7 +60,6 @@ export function replace_remote_with_delegate(
 function delegate_module_template(): unknown {
   return new Promise((resolve, reject) => {
     const remoteKey = '__REMOTE_KEY__';
-    console.log(`ze delegate module for ${remoteKey}`);
     // const defaultUrl = '_DEFAULT_URL_';
     let edgeUrl = '_EDGE_URL_';
     const getEdgeLink = (): { protocol: string; domain: string } => {

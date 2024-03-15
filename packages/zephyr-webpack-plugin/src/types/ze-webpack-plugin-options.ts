@@ -21,6 +21,10 @@ export interface ZeWebpackPluginOptions {
     commit: string;
   };
   mfConfig?: {
-    remotes: unknown;
+    name: string;
+    filename: string;
+    exposes?: Record<string, string>
+    remotes?: Record<string, string>;
+    shared?: Record<string, unknown>
   };
 }

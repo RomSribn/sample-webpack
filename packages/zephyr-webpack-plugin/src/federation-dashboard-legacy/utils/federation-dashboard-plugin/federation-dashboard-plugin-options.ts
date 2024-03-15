@@ -1,4 +1,7 @@
+import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
+
 export interface FederationDashboardPluginOptions {
+  zeOptions: ZeWebpackPluginOptions;
   app?: {
     // git org
     org: string;
@@ -15,6 +18,10 @@ export interface FederationDashboardPluginOptions {
     email: string;
     branch: string;
     commit: string;
+  };
+
+  context: {
+    isCI: boolean;
   };
 
   debug: boolean;

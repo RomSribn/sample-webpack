@@ -1,6 +1,6 @@
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { isDev } from '../../config/endpoints';
+import { api_env } from '../../config/endpoints';
 
 export interface RequestOptions {
   hostname: string;
@@ -15,7 +15,7 @@ export async function request<T = unknown>(
   data: unknown,
   forceHttps?: boolean,
 ): Promise<T | string> {
-  const _https = !forceHttps && isDev ? http : https;
+  const _https = !forceHttps && api_env ? http : https;
   return new Promise((resolve, reject) => {
     const req = _https.request(options, (res: http.IncomingMessage) => {
       const response: Buffer[] = [];
