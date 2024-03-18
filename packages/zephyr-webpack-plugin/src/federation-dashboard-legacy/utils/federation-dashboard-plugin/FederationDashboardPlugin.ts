@@ -13,7 +13,6 @@ import {
   container,
   Dependency,
   Module,
-  sources,
   Stats,
   StatsChunk,
   StatsCompilation,

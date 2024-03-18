@@ -2,11 +2,12 @@ import { logger } from '../utils/ze-log-event';
 import { uploadEnvs } from './ze-upload-file';
 import { Snapshot, ZeEnvs } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
-import { edge_endpoint } from '../../config/endpoints';
+import { ZeUploadBuildStats } from './ze-upload-build-stats';
 
 export async function zeEnableSnapshotOnEdge(
   pluginOptions: ZeWebpackPluginOptions,
   snapshot: Snapshot,
+  envs_jwt: ZeUploadBuildStats,
 ): Promise<void> {
   const logEvent = logger(pluginOptions);
 
@@ -21,11 +22,8 @@ export async function zeEnableSnapshotOnEdge(
   // todo: upload context to API and get
   // todo: get urls from ze API
   const envs: ZeEnvs = {
-    snapshot_id: snapshot.snapshot_id,
-    urls: [
-      `${snapshot.app_id}.${edge_endpoint.hostname}`,
-      `${snapshot.snapshot_id}.${edge_endpoint.hostname}`,
-    ],
+    snapshot_id: envs_jwt.app_version.application_uid,
+    urls: envs_jwt.urls,
   };
 
   const latest = await uploadEnvs(envs);

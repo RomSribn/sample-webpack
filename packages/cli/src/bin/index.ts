@@ -14,8 +14,9 @@ program
 program
   .command('login')
   .description('Login to Zephyr Cloud')
-  .action(async () => {
-    if (await getToken()) {
+  .option('--force', 'force login', false)
+  .action(async (options) => {
+    if (!options.force && (await getToken())) {
       console.log('You are already logged in');
       return;
     }

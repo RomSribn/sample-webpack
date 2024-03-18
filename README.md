@@ -45,15 +45,15 @@ ZE_DEV=true npx dist/packages/cli login
 run with local edge
 
 ```bash
-ZE_DEV=true npx nx run sample-webpack-application:build --watch --skip-nx-cache
+ZE_DEV=local npx nx run sample-webpack-application:build --watch --skip-nx-cache
 ```
 
 ```bash
-ZE_DEV=true npx nx run-many -t build --parallel=1 --skip-nx-cache -p team-blue team-red team-green
+ZE_DEV=local npx nx run-many -t build --parallel=1 --skip-nx-cache -p team-blue team-red team-green
 ```
 
 ```bash
-ZE_DEV=true npx nx run team-green:build --skip-nx-cache --watch
+ZE_DEV=local npx nx run team-green:build --skip-nx-cache --watch
 ```
 
 open http://edge.lan:8787

@@ -7,7 +7,10 @@ import { zeBuildAssetsMap } from './payload-builders/ze-build-assets-map';
 import { createSnapshot } from './payload-builders/ze-build-snapshot';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
-import { zeUploadBuildStats } from './upload/ze-upload-build-stats';
+import {
+  ZeUploadBuildStats,
+  zeUploadBuildStats,
+} from './upload/ze-upload-build-stats';
 import { edge_endpoint } from '../config/endpoints';
 
 export function setupZeDeploy(
@@ -57,15 +60,17 @@ export function setupZeDeploy(
           // todo: shouldn't be this set for app inside of ze-api?
           dashData.edge = {
             hostname: edge_endpoint.hostname,
-            port: edge_endpoint.port
-          }
-          return await zeUploadBuildStats(dashData)
+            port: edge_endpoint.port,
+          };
+          return await zeUploadBuildStats(dashData);
         };
 
-        const envs = await dashboardPlugin.processWebpackGraph(compilation);
+        const envs = (await dashboardPlugin.processWebpackGraph(
+          compilation,
+        )) as { value: ZeUploadBuildStats };
         // end of dashboard plugin hack around
 
-        await zeEnableSnapshotOnEdge(pluginOptions, snapshot);
+        await zeEnableSnapshotOnEdge(pluginOptions, snapshot, envs.value);
 
         logEvent({
           level: 'info',

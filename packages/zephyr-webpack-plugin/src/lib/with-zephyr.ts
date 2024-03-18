@@ -1,5 +1,4 @@
 import { Configuration, container } from 'webpack';
-import isCI from 'is-ci';
 
 import { getPackageJson } from './utils/ze-util-find-app-name';
 import { getGitInfo } from './utils/ze-util-get-git-info';
@@ -11,8 +10,6 @@ import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
 import { createFullAppName } from 'zephyr-edge-contract';
 import { edge_endpoint } from '../config/endpoints';
-import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
-
 const { ModuleFederationPlugin } = container;
 
 function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {

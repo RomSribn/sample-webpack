@@ -43,7 +43,7 @@ const default_zewebpack_options = {
   },
   dashboard: {
     apply: () => {},
-  } as any,
+  } as unknown,
 };
 
 export class ZeWebpackPlugin {

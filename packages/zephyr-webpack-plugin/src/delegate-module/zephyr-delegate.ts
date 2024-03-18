@@ -59,6 +59,7 @@ export function replace_remote_with_delegate(
 
 function delegate_module_template(): unknown {
   return new Promise((resolve, reject) => {
+    // const remote_entry_url = '__REMOTE_ENTRY_URL__';
     const remoteKey = '__REMOTE_KEY__';
     // const defaultUrl = '_DEFAULT_URL_';
     let edgeUrl = '_EDGE_URL_';

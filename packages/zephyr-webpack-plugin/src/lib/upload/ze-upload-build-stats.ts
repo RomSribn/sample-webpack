@@ -36,3 +36,12 @@ export async function zeUploadBuildStats(
   }
   return;
 }
+
+export interface ZeUploadBuildStats {
+  app_version: {
+    id: string;
+    // snapshot id
+    application_uid: string;
+  };
+  urls: string[];
+}
