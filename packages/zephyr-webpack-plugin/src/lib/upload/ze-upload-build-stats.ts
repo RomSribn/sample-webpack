@@ -42,6 +42,7 @@ export interface ZeUploadBuildStats {
     id: string;
     // snapshot id
     application_uid: string;
+    version: string;
   };
   urls: string[];
 }

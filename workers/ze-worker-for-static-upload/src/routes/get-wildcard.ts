@@ -1,9 +1,7 @@
 import { AppendLivereloadHandler } from '../utility/util-attach-livereload';
-import { getZeApp } from '../utils/get-ze-app-from-uri';
 import { Env } from '../env';
 import { Snapshot } from 'zephyr-edge-contract';
 
-const tag = 'latest';
 export async function getWildcard(request: Request, env: Env) {
 	const url = new URL(request.url);
 	const isRootRequest = url.pathname === '/' || url.pathname === '';

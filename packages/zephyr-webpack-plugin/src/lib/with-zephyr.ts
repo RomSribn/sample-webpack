@@ -9,7 +9,7 @@ import {
 import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
 import { createFullAppName } from 'zephyr-edge-contract';
-import { edge_endpoint } from '../config/endpoints';
+
 const { ModuleFederationPlugin } = container;
 
 function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
@@ -39,8 +39,8 @@ export function withZephyr(
     const { org, project } = gitInfo.app;
 
     const fullAppName = createFullAppName({
-      org: org,
-      project: project,
+      org,
+      project,
       name: packageJson?.name,
     });
 
@@ -55,7 +55,6 @@ export function withZephyr(
       org,
       project,
       application: undefined,
-      edgeUrl: edge_endpoint.hostname,
     };
 
     const mfConfigs = getCopyOfMFOptions(config);
@@ -69,6 +68,7 @@ export function withZephyr(
         replace_remote_in_mf_config(mfConfig as any, delegate_config);
       });
 
+    // todo: make sample wich use direct mf config via ze options
     zephyrOptions.forEach((zephyrOption) => {
       if (!zephyrOption) return;
 
@@ -100,42 +100,6 @@ export function withZephyr(
         mfConfig: Array.isArray(mfConfigs) ? mfConfigs[0] : void 0,
       }),
     );
-
-    // todo: send token as auth bearer
-    // todo: application uid
-    // todo: npm-like version
-
-    /*    config.plugins?.push(
-      new FederationDashboardPlugin({
-        app: {
-          name: packageJson.name,
-          version: packageJson.version,
-          org,
-          project,
-        },
-        git: gitInfo?.git,
-        context: {
-          isCI
-        },
-        // debug: true,
-        // versionStrategy: 'buildHash',
-        filename: 'dashboard.json',
-        // environment: 'development',
-        // dashboardURL: `http://localhost:3333/update`,
-        dashboardURL: `http://localhost:3333/v2/builder-packages-api/upload-from-dashboard-plugin`,
-        // dashboardURL: `https://api-dev.zephyr-cloud.io/v2/builder-packages-api/upload-from-dashboard-plugin`,
-        metadata: {
-          // todo: domain
-          baseUrl: 'https://cf.valorkin.dev',
-          source: {
-            // todo: git remote + context
-            url: 'https://github.com/ZephyrCloudIO/zephyr-cloud-io/tree/main/examples/react-18/template/host',
-          },
-          // todo: full remote url from ZeWebpackPlugin
-          remote: 'http://localhost:3000/remoteEntry.js',
-        },
-      }),
-    );*/
 
     return config;
   };

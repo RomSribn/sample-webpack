@@ -7,7 +7,7 @@ import { Option } from './option';
 import { AppContext } from '../../context/app-context';
 // icons
 import { ArrowDownIcon } from '../../../assets/icons';
-import { type ApplicationTag } from '../../hooks/queries';
+import { ApplicationTag } from '../../hooks/queries/application-tag';
 
 // TODO: remove this when the real data is available.
 const DEFAULT_TAG = 'latest';

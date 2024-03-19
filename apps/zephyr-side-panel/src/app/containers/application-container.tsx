@@ -9,16 +9,18 @@ import { AppContext } from '../context/app-context';
 // import { navigate } from '../utils/navigate';
 import { getActiveTabId } from '../utils/get-active-tab-id';
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
-import {
-  useApplicationList,
-  useApplicationTagList,
-  useApplicationVersionList,
-  type Application,
-  type ApplicationTag,
-  type ApplicationVersion,
-} from '../hooks/queries';
+
 import { ApplicationVersionSelector } from './application-version-selector';
 import { ZeAppVersionItem } from 'zephyr-edge-contract';
+import { Application, useApplicationList } from '../hooks/queries/application';
+import {
+  ApplicationTag,
+  useApplicationTagList,
+} from '../hooks/queries/application-tag';
+import {
+  ApplicationVersion,
+  useApplicationVersionList,
+} from '../hooks/queries/application-version';
 
 export function ApplicationContainer() {
   const {

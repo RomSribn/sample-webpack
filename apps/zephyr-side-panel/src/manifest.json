@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Ze side panel",
-  "version": "1.0",
-  "description": "Make your module federation easy",
+  "name": "Zephyr control",
+  "version": "0.5",
+  "description": "Made your federation easy",
   "minimum_chrome_version": "116",
   "background": {
     "service_worker": "main.js",

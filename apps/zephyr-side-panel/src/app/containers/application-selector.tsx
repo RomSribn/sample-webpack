@@ -5,7 +5,7 @@ import { AppContext } from '../context/app-context';
 // icons
 import { ArrowDownIcon } from '../../assets/icons';
 import { ZeAppVersion } from 'zephyr-edge-contract';
-import { type Application } from '../hooks/queries';
+import { Application } from '../hooks/queries/application';
 
 interface ApplicationSelectorProps {
   applications: Application[];

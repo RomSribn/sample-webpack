@@ -4,7 +4,7 @@ import { Autocomplete, Popper, TextField, Box } from '@mui/material';
 import { AppContext } from '../context/app-context';
 // icons
 import { ArrowDownIcon } from '../../assets/icons';
-import { type ApplicationEnvironment } from '../hooks/queries';
+import { ApplicationEnvironment } from '../hooks/queries/application-environment';
 
 interface EnvironmentSelectorProps {
   environmentList: ApplicationEnvironment[];

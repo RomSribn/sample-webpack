@@ -25,11 +25,25 @@
         "webpackConfig": "apps/zephyr-side-panel/webpack.config.js"
       },
       "configurations": {
-        "development": {
+        "local": {
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
           "vendorChunk": true
+        },
+        "development": {
+          "fileReplacements": [
+            {
+              "replace": "apps/zephyr-side-panel/src/environments/environment.ts",
+              "with": "apps/zephyr-side-panel/src/environments/environment.dev.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "media",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
         },
         "production": {
           "fileReplacements": [
@@ -53,11 +67,16 @@
       "options": {
         "port": 3333,
         "buildTarget": "zephyr-side-panel:build",
-        "hmr": true
+        "hmr": false
       },
       "configurations": {
+        "local": {
+          "buildTarget": "zephyr-side-panel:build:local",
+          "hmr": false
+        },
         "development": {
-          "buildTarget": "zephyr-side-panel:build:development"
+          "buildTarget": "zephyr-side-panel:build:development",
+          "hmr": false
         },
         "production": {
           "buildTarget": "zephyr-side-panel:build:production",

@@ -1,5 +1,5 @@
 import { Context, createContext, Consumer } from 'react';
-import { type Application } from '../hooks/queries';
+import { Application } from '../hooks/queries/application';
 
 type AppContextType = {
   /**

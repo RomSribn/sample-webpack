@@ -2,8 +2,8 @@ import { HTMLAttributes } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 // @mui
 import { Box, Tooltip } from '@mui/material';
+import { ApplicationTag } from '../../hooks/queries/application-tag';
 // types
-import { type ApplicationTag } from '../../hooks/queries';
 
 const TAG_ID_LIMIT = 5;
 const getLimitedTagId = (tagId: string) =>

@@ -42,8 +42,9 @@ const default_zewebpack_options = {
     commit: '',
   },
   dashboard: {
-    apply: () => {},
-  } as unknown,
+    // eslint-disable-next-line
+    apply: (compiler: Compiler) => {},
+  },
 };
 
 export class ZeWebpackPlugin {

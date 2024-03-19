@@ -5,8 +5,8 @@ import { Popper, TextField, Autocomplete } from '@mui/material';
 import { AppContext } from '../context/app-context';
 // icons
 import { ArrowDownIcon } from '../../assets/icons';
+import { ApplicationVersion } from '../hooks/queries/application-version';
 // types
-import { type ApplicationVersion } from '../hooks/queries';
 
 interface ApplicationVersionProps {
   applicationVersionList: ApplicationVersion[];

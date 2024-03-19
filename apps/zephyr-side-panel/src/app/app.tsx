@@ -11,9 +11,9 @@ import { router } from './router';
 
 import { getActiveTabUrl } from './utils/get-active-tab-url';
 import { tabsOnUpdated } from './utils/chrome-tabs-on-updated';
+import { Application } from './hooks/queries/application';
 
 // types
-import { type Application } from './hooks/queries';
 
 const queryClient = new QueryClient();
 
