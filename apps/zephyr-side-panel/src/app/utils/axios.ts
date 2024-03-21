@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosRequestHeaders } from 'axios';
 
 import { accessToken } from '../auth/refresh-token';
 // env
-import { environment } from '../../environments/environment';
+import { envValue } from '../../environments/env-value';
 
 export type AxiosResponseError = AxiosError<{
   message: string;
@@ -11,7 +11,7 @@ export type AxiosResponseError = AxiosError<{
 }>;
 
 const axiosInstance = axios.create({
-  baseURL: `${environment.ZEPHYR_API_ENDPOINT}/v2/side-panel`,
+  baseURL: `${envValue.value?.ZEPHYR_API_ENDPOINT}/v2/side-panel`,
 });
 
 export function AxiosInterceptor({ children }: { children: ReactNode }) {

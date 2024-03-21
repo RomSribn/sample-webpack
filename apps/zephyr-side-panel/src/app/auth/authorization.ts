@@ -2,16 +2,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { io } from 'socket.io-client';
 
 import { session } from '../storage/session';
-import { environment } from '../../environments/environment';
+import { envValue } from '../../environments/env-value';
 import { navigate } from '../utils/navigate';
-
-// const zephyrWsEndpoint = 'ws://';
 
 const {
   AUTH0_CLIENT_ID: clientId,
   AUTH0_DOMAIN: domain,
   ZEPHYR_API_ENDPOINT: zephyrApiEndpoint,
-} = environment;
+} = envValue.value;
 
 export async function isTokenValid(token: string): Promise<void> {
   const config = {
