@@ -68,21 +68,6 @@ export class ZeWebpackPlugin {
         isCI,
       },
       dashboardURL: telemetry_api_endpoint,
-      // dashboardURL: `https://api-dev.zephyr-cloud.io/v2/builder-packages-api/upload-from-dashboard-plugin`,
-      // filename: 'dashboard.json',
-      // debug: true,
-      // versionStrategy: 'buildHash',
-      // environment: 'development',
-      // metadata: {
-      //   // todo: domain
-      //   baseUrl: 'https://cf.valorkin.dev',
-      //   source: {
-      //     // todo: git remote + context
-      //     url: 'https://github.com/ZephyrCloudIO/zephyr-cloud-io/tree/main/examples/react-18/template/host',
-      //   },
-      //   // todo: full remote url from ZeWebpackPlugin
-      //   remote: 'http://localhost:3000/remoteEntry.js',
-      // },
     });
     this._options.dashboard.apply(compiler);
     setupZeDeploy(this._options, compiler);

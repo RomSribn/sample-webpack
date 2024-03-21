@@ -56,6 +56,7 @@ export function setupZeDeploy(
         // todo: set proper metadata for dashboard plugin
         // eslint-disable-next-line
         dashboardPlugin.postDashboardData = async (dashData: any) => {
+          dashData.app.buildId = pluginOptions.zeConfig.buildId;
           dashData.remote = pluginOptions.mfConfig?.filename;
           // todo: shouldn't be this set for app inside of ze-api?
           dashData.edge = {

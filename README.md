@@ -39,7 +39,7 @@ rm -rf ./workers/.wrangler
 ```
 
 ```bash
-ZE_DEV=true npx dist/packages/cli login
+ZE_DEV=local npx dist/packages/cli login
 ```
 
 run with local edge

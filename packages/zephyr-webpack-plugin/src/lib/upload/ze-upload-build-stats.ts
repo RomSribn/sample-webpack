@@ -1,10 +1,7 @@
 import { getToken } from '../../token/token';
 import { telemetry_api_endpoint } from '../../config/endpoints';
 
-// todo: valorkin use edge provider of API endoi
 const dashboardURL = telemetry_api_endpoint;
-// const dashboardURL = `http://localhost:3333/v2/builder-packages-api/upload-from-dashboard-plugin`;
-//const dashboardURL = `https://api-dev.zephyr-cloud.io/v2/builder-packages-api/upload-from-dashboard-plugin`,
 
 export async function zeUploadBuildStats(
   dashData: unknown,
