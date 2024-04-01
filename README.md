@@ -1,3 +1,25 @@
+# main parts
+
+1. chrome side panel
+2. terminal cli for login
+3. webpack build plugin
+4. deprecate: zephyr-api
+5. examples folder
+6. lib: zephyr-edge-contract with shared types
+7. CloudFlare edge worker: ze-worker-to-generate-build-id - to generate build id
+8. CloudFlare edge worker: ze-worker-for-static-upload - to upload and serve files
+
+## How to run locally
+
+- install dependencies
+- setup local dns (once)
+- run local edge
+- run local zephyr-api\ui
+- deprecate: run local event server
+- run one of sample apps (sample-webpack-app or react-micro-frontends)
+
+## configure local dns for local edge
+
 Local DNS proxy to make wildcard links work locally (\*.edge.lan)
 
 - for win [Acrylic DNS Proxy](https://mayakron.altervista.org/support/acrylic/Home.htm)
@@ -10,11 +32,11 @@ sudo brew services start dnsmasq
 
 add to Acrylic hosts:
 
-- `127.0.0.1 edge.lan *.edge.lan *.*.*.*.edge.lan`
+- `127.0.0.1 edge.lan *.edge.lan`
 
 `npm ci`
 
-build side panel:
+## side panel:
 
 ```bash
 npx nx run zephyr-side-panel:build:development

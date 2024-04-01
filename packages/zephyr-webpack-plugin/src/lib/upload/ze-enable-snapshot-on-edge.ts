@@ -26,6 +26,14 @@ export async function zeEnableSnapshotOnEdge(
     urls: envs_jwt.urls,
   };
 
+  envs_jwt.urls.forEach((url) => {
+    logEvent({
+      level: 'trace',
+      action: 'deploy:url',
+      message: `deployed to https://${url}`,
+    });
+  });
+
   const latest = await uploadEnvs(envs);
 
   if (latest) {
