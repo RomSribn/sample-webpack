@@ -1,4 +1,4 @@
-import { getToken } from '../../token/token';
+import { getToken } from 'zephyr-edge-contract';
 import { telemetry_api_endpoint } from '../../config/endpoints';
 
 const dashboardURL = telemetry_api_endpoint;

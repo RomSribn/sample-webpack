@@ -1,5 +1,4 @@
-import { createFullAppName } from 'zephyr-edge-contract';
-import { getToken } from '../token/token';
+import { createFullAppName, getToken } from 'zephyr-edge-contract';
 
 interface DelegateConfig {
   org: string;

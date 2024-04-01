@@ -3,6 +3,8 @@ import { request } from './utils/ze-http-request';
 import { buildid_endpoint } from '../config/endpoints';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
+import { checkAuth } from 'zephyr-edge-contract';
+
 const { port, hostname } = buildid_endpoint;
 export async function getBuildId(
   key: string,
@@ -28,6 +30,8 @@ export function setupBuildId(
   compiler: Compiler,
 ): void {
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
+    await checkAuth();
+
     zeConfig.buildId = void 0;
     if (!zeConfig.user) {
       // todo: user should login first to use zephyr cloud

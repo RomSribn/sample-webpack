@@ -1,7 +1,10 @@
-import open from 'open';
+import * as open from 'open';
 import { v4 as uuidv4 } from 'uuid';
-import { environment } from '../utils/environment';
-import { createSocket, disposeSocket } from '../utils/websocket';
+import { jwtDecode } from 'jwt-decode';
+
+import { createSocket, disposeSocket } from './websocket';
+import { getToken, saveToken, clearAll } from './token';
+import { environment } from './environment';
 
 export function generateSessionKey(): string {
   return uuidv4().replace(/-/g, '');
@@ -43,6 +46,54 @@ export function getAuthenticationURL(options: AuthOptions): string {
   loginUrl.searchParams.append('redirect-url', auth0RedirectUrl.href);
 
   return loginUrl.href;
+}
+/**
+ * Check if the user is already authenticated. If not, open a browser window to authenticate.
+ * Display a message to the console.
+ * @return The token as a string.
+ */
+export async function checkAuth(): Promise<string> {
+  const token = await getToken();
+
+  if (token) {
+    // Check if the token has a valid expiration date.
+    if (isTokenStillValid(token)) {
+      console.log('\u2714 You are already logged in'); // Check mark symbol.
+      return token;
+    }
+    await clearAll();
+  }
+
+  // No valid token found; initiate authentication.
+  const newToken = await authenticateUser();
+  console.log('\u2705 You are logged in'); // White check mark with green outline.
+
+  return newToken;
+}
+
+/**
+ * Decides whether the token is still valid based on its expiration time.
+ * @param token The token to check.
+ * @return boolean indicating if the token is still valid.
+ */
+export function isTokenStillValid(token: string): boolean {
+  const decodedToken = jwtDecode(token);
+
+  if (!decodedToken.exp) {
+    return false;
+  }
+
+  return new Date(decodedToken.exp * 1000) > new Date();
+}
+
+/**
+ * Initiates user authentication and handles token storage.
+ * @return The new token as a string.
+ */
+async function authenticateUser(): Promise<string> {
+  const token = await getPersonalAccessTokenFromWebsocket();
+  await saveToken(token);
+  return token;
 }
 
 function subscribeToWsEvents(sessionKey: string): Promise<string> {

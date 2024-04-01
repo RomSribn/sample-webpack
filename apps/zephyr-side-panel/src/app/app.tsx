@@ -66,8 +66,8 @@ export function App() {
   >(dataContextDefaultState[PublishDataKeys.REMOTES]);
 
   session.accessToken.then((token) => setToken(token));
-  const refreshToken = () => {
-    setToken(accessToken());
+  const refreshToken = (token?: string) => {
+    setToken(token ?? accessToken());
   };
   if (!token) {
     session.accessToken.then(refreshToken);

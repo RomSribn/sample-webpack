@@ -23,6 +23,7 @@ import {
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
+import { getToken } from 'zephyr-edge-contract';
 import { findPackageJson } from './find-package-json';
 import { computeVersionStrategy, gitSha } from './compute-version-strategy';
 import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';

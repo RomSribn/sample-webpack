@@ -15,7 +15,6 @@
     "@babel/generator": "7.23.6",
     "@module-federation/automatic-vendor-federation": "1.2.1",
     "zephyr-edge-contract": "*",
-    "node-persist": "^4.0.1",
     "nx": "18.2.0"
   },
   "devDependencies": {
