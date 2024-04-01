@@ -14,7 +14,7 @@ export async function getBuildId(
     method: 'GET',
   };
 
-  const resp = await request<Record<string, string>>(options, void 0, true);
+  const resp = await request<Record<string, string>>(options, void 0);
   if (typeof resp === 'string' || !resp) {
     // todo: handle error
     return void 0;

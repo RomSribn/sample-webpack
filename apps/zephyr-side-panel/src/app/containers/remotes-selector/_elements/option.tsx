@@ -1,46 +1,47 @@
 import { HTMLAttributes } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 // @mui
-import { Box } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
+// utils
+import { getEllipsisString } from '../../../utils/get-ellipsis-string';
 
-// types
-import { ZeAppTagValue, ZeAppVersionItem } from 'zephyr-edge-contract';
+import { tagKey, SelectorOptionType } from '../index';
 
-interface ParsedZeAppVersionItem extends ZeAppTagValue {
-  tagKey: string;
-}
-
-interface OptionProps extends HTMLAttributes<HTMLLIElement> {
-  option: ZeAppVersionItem | ParsedZeAppVersionItem;
+export interface OptionProps extends HTMLAttributes<HTMLLIElement> {
+  option: SelectorOptionType;
 }
 /**
  * The option of the application remote select. Includes the versions and tags varioant.
  */
 const Option = ({ option, ...listProps }: OptionProps) => (
-  <li {...listProps}>
-    {'tagKey' in option ? (
-      <>
-        <Box>
-          <div>
-            <span className="application-group-select__version">
-              {option.version}
+  <Tooltip title={option?.version} placement="top">
+    <li {...listProps}>
+      {tagKey in option ? (
+        <>
+          <Box>
+            <div>
+              <span className="application-group-select__version">
+                {getEllipsisString(option.version)}
+              </span>
+              <span className="application-group-select__date">
+                {formatDistanceToNow(option.createdAt, { addSuffix: true })}
+              </span>
+            </div>
+            <span className="application-group-select__author">
+              {option.author}
             </span>
-            <span className="application-group-select__date">
-              {formatDistanceToNow(option.createdAt, { addSuffix: true })}
-            </span>
-          </div>
-          <span className="application-group-select__author">
-            {option.author}
+          </Box>
+          <span className="tag-label">
+            {getEllipsisString(option.name, 10)}
           </span>
-        </Box>
-        <span className="tag-label">{option.tagKey}</span>
-      </>
-    ) : (
-      <span className="application-group-select__version">
-        {option.version}
-      </span>
-    )}
-  </li>
+        </>
+      ) : (
+        <span className="application-group-select__version">
+          {option.version}
+        </span>
+      )}
+    </li>
+  </Tooltip>
 );
 
 export { Option };

@@ -6,9 +6,11 @@ import { Navigation } from '../containers/navigation';
 import { PublishButton } from '../components/publish-button';
 // context, constants
 import { AppContext } from '../context/app-context';
+import { DataContext, PublishDataKeys } from '../context/data-context';
 import { routeTitles } from '../router/route-names';
 // hooks
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
+import { useApplicationList } from '../hooks/queries/application';
 
 interface AppControlContainerProps {
   children: ReactNode;
@@ -20,8 +22,27 @@ interface AppControlContainerProps {
 export function Layout({ children, auth }: Readonly<AppControlContainerProps>) {
   const location = useLocation();
   const { isDeployed, url = '' } = useContext(AppContext);
+  const { application, setData } = useContext(DataContext);
   const { data: appVersion } = useFetchAppVersionQuery({ url });
+  const { applicationList } = useApplicationList();
 
+  if (
+    appVersion &&
+    applicationList &&
+    application.application_uid !== appVersion.application_uid
+  ) {
+    const [, project, org] = appVersion.application_uid.split('.');
+    setData(
+      {
+        application_uid: appVersion.application_uid,
+        remote_host: appVersion.remote_host,
+        name: appVersion.name,
+        project: { name: project },
+        organization: { name: org },
+      },
+      PublishDataKeys.APPLICATION,
+    );
+  }
   const deployStatus = useMemo(
     () => (isDeployed ? 'success' : 'warning'),
     [isDeployed],

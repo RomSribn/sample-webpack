@@ -9,44 +9,38 @@ export interface GetApplicationTagListParams {
 }
 
 export interface ApplicationTag {
-  id: string;
   name: string;
+  author: string;
+  version: string;
+  createdAt: string;
+  application_uid: string;
+  snapshot_id: string;
+  remote_host: string;
+  remote_entry_url: string;
 }
 
 export const applicationTagQuery = createQueryKeys('application-tag', {
-  getApplicationTagList: ({
-    organization,
-    project,
-    application,
-  }: GetApplicationTagListParams) => ({
-    queryKey: [':', organization, project, application],
+  getApplicationTagList: ({ application_uid }: { application_uid: string | undefined }) => ({
+    queryKey: [':', application_uid],
     queryFn: async () => {
-      if (!organization || !project || !application)
+      if (!application_uid) {
         return Promise.resolve(undefined);
+      }
+      const url = `/v2/side-panel/application-tag-list?application_uid=${application_uid}`;
       return axios
-        .get<{
-          entities: ApplicationTag[];
-        }>(`${organization}/${project}/${application}/application-tag-list`)
+        .get<{ entities: ApplicationTag[]; }>(url)
         .then((res) => res.data.entities);
-    },
-  }),
+    }
+  })
 });
 
-export function useApplicationTagList({
-  organization,
-  project,
-  application,
-}: GetApplicationTagListParams) {
+export function useApplicationTagList(application_uid: string | undefined) {
   const {
     isLoading,
     data: applicationTagList,
-    error,
+    error
   } = useQuery<ApplicationTag[]>(
-    applicationTagQuery.getApplicationTagList({
-      organization,
-      project,
-      application,
-    }) as never,
+    applicationTagQuery.getApplicationTagList({ application_uid }) as never
   );
 
   return { applicationTagList, isLoading, error };

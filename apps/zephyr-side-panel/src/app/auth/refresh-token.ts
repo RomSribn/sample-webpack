@@ -4,8 +4,9 @@ import { isTokenValid } from './authorization';
 let _accessToken: string | undefined;
 let intervalId: number | undefined;
 
-export function accessToken() {
-  return _accessToken;
+/** seems like a bad idea */
+export function accessToken(): string {
+  return _accessToken ?? '';
 }
 
 export async function setAccessToken(token: string) {
@@ -16,7 +17,7 @@ export async function setAccessToken(token: string) {
 export async function disableTokenRefresh() {
   _clearInterval();
   _accessToken = void 0;
-  await session.setAccessToken();
+  await session.removeAccessToken();
 }
 
 async function checkIsValidToken() {

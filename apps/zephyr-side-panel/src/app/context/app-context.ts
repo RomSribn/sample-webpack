@@ -1,7 +1,6 @@
 import { Context, createContext, Consumer } from 'react';
-import { Application } from '../hooks/queries/application';
 
-type AppContextType = {
+interface AppContextType {
   /**
    * user access token
    */
@@ -26,21 +25,12 @@ type AppContextType = {
    * update url of the main application
    */
   setUrl: (url: string) => void;
-  /**
-   * current selected application
-   */
-  currentApplication: Application | null;
-  /**
-   * update current selected application
-   */
-  serCurrentApplication: (application: Application) => void;
-};
+}
 
 const defaultState: AppContextType = {
   token: '',
   url: '',
   isDeployed: true,
-  currentApplication: null,
   refreshToken: () => {
     /**/
   },
@@ -48,9 +38,6 @@ const defaultState: AppContextType = {
     /**/
   },
   setUrl: () => {
-    /**/
-  },
-  serCurrentApplication: () => {
     /**/
   },
 };
@@ -65,8 +52,6 @@ const AppProvider = AppContext.Provider;
  * @param {AppContextType['setIsDeployed']} setIsDeployed update deployed status of the main application.
  * @param {AppContextType['url']} url url of the main application.
  * @param {AppContextType['setUrl']} setUrl update url of the main application.
- * @param {AppContextType['currentApplication']} currentApplication current selected application.
- * @param {AppContextType['serCurrentApplication']} serCurrentApplication update current selected application.
  */
 const AppConsumer: Consumer<AppContextType> = AppContext.Consumer;
 

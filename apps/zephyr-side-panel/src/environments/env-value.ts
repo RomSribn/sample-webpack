@@ -1,5 +1,6 @@
 export interface Environment {
   readonly production: boolean;
+  readonly ZEPHYR_UI: string;
   readonly AUTH0_CLIENT_ID: string;
   readonly AUTH0_DOMAIN: string;
   readonly ZEPHYR_API_ENDPOINT: string;

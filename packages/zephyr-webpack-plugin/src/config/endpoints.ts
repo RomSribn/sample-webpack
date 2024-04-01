@@ -7,25 +7,26 @@ interface EdgeEndpoint {
 }
 
 // edge worker endpoint
-const local_edge_endpoint: EdgeEndpoint = {
-  port: 8787,
-  hostname: 'edge.lan',
-};
+// const local_edge_endpoint: EdgeEndpoint = {
+//   port: 8787,
+//   hostname: 'edge.lan',
+// };
 
 const dev_edge_endpoint: EdgeEndpoint = {
   port: 443,
-  hostname: 'cf.valorkin.dev',
+  hostname: 'ze.valorkin.dev',
 };
 
 const prod_edge_endpoint: EdgeEndpoint = {
   port: 443,
-  hostname: 'cf.valorkin.dev',
+  hostname: 'ze.valorkin.dev',
 };
 
 export const edge_endpoint: EdgeEndpoint = ((env: string) => {
   switch (env) {
     case 'local':
-      return local_edge_endpoint;
+      // return local_edge_endpoint;
+      return dev_edge_endpoint;
     case 'dev':
       return dev_edge_endpoint;
     default:

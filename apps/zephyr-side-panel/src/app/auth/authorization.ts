@@ -35,10 +35,7 @@ export async function loginWithLink(redirectUrl: string): Promise<void> {
 export async function logout(): Promise<void> {
   const logoutUrl = new URL('v2/logout', `https://${domain}`);
   logoutUrl.searchParams.append('client_id', clientId);
-  logoutUrl.searchParams.append(
-    'returnTo',
-    'http://edge.lan:8787/__my_app_list',
-  );
+  logoutUrl.searchParams.append('returnTo', envValue.value.ZEPHYR_UI);
   await navigate(logoutUrl.href);
   await session.removeAccessToken();
   await io(zephyrApiEndpoint).disconnect();

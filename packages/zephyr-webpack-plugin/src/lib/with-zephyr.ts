@@ -2,10 +2,7 @@ import { Configuration, container } from 'webpack';
 
 import { getPackageJson } from './utils/ze-util-find-app-name';
 import { getGitInfo } from './utils/ze-util-get-git-info';
-import {
-  replace_remote_in_mf_config,
-  replace_remote_with_delegate,
-} from '../delegate-module/zephyr-delegate';
+import { replace_remote_in_mf_config } from '../delegate-module/zephyr-delegate';
 import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
 import { createFullAppName } from 'zephyr-edge-contract';
@@ -27,7 +24,7 @@ function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
 export function withZephyr(
   _zephyrOptions?: ZephyrPluginOptions | ZephyrPluginOptions[],
 ) {
-  return function configure(config: Configuration) {
+  return async function configure(config: Configuration) {
     //  sources of app name: ze config(git org + git repo + package json name)
     const packageJson = getPackageJson(config.context);
     const gitInfo = getGitInfo();
@@ -59,14 +56,17 @@ export function withZephyr(
 
     const mfConfigs = getCopyOfMFOptions(config);
 
-    config.plugins
+    const depsResolutionTasks = config.plugins
       ?.filter(
         (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
       )
-      ?.forEach((mfConfig) => {
+      ?.map(async (mfConfig) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        replace_remote_in_mf_config(mfConfig as any, delegate_config);
+        return await replace_remote_in_mf_config(mfConfig, delegate_config);
       });
+    if (depsResolutionTasks) {
+      await Promise.all(depsResolutionTasks);
+    }
 
     // todo: make sample wich use direct mf config via ze options
     zephyrOptions.forEach((zephyrOption) => {
@@ -78,12 +78,13 @@ export function withZephyr(
           filename: 'remoteEntry.js',
           shared: packageJson?.dependencies,
           exposes: zephyrOption?.exposes,
-          remotes: zephyrOption.remotes?.map((application) =>
-            replace_remote_with_delegate(
-              application,
-              Object.assign({}, delegate_config, { application }),
-            ),
-          ),
+          // todo: rework this part
+          // remotes: zephyrOption.remotes?.map((application) =>
+          //   replace_remote_with_delegate(
+          //     application,
+          //     Object.assign({}, delegate_config, { application })
+          //   )
+          // )
         }),
       );
     });

@@ -1,12 +1,4 @@
-import { __debug_active_tab_url, __isDebug } from './_debugger';
-
-export async function getActiveTabUrl(
-  url?: string
-): Promise<string | undefined> {
-  if (__isDebug) {
-    return __debug_active_tab_url();
-  }
-
+export async function getActiveTabUrl(url?: string): Promise<string> {
   if (url) {
     return url;
   }
@@ -17,5 +9,5 @@ export async function getActiveTabUrl(
 
   const tabs = await chrome.tabs.query({ currentWindow: true, active: true });
 
-  return tabs.length > 0 ? tabs[0].url : '';
+  return tabs.length > 0 && tabs[0].url ? tabs[0].url : '';
 }

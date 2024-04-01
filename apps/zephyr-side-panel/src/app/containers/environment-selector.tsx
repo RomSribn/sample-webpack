@@ -1,7 +1,11 @@
 import { useState, useContext } from 'react';
 import { Autocomplete, Popper, TextField, Box } from '@mui/material';
+// components
+import { SelectorSkeleton } from '../components/selector-skeleton';
 // context
-import { AppContext } from '../context/app-context';
+import { DataContext } from '../context/data-context';
+// types
+import { ZeAppVersionResponse } from 'zephyr-edge-contract';
 // icons
 import { ArrowDownIcon } from '../../assets/icons';
 import { ApplicationEnvironment } from '../hooks/queries/application-environment';
@@ -9,13 +13,17 @@ import { ApplicationEnvironment } from '../hooks/queries/application-environment
 interface EnvironmentSelectorProps {
   environmentList: ApplicationEnvironment[];
   onChange: (environment: ApplicationEnvironment) => void;
+  appVersion?: ZeAppVersionResponse;
+  isAppVersionLoading: boolean;
 }
 
 export function EnvironmentSelector({
   environmentList,
   onChange,
-}: EnvironmentSelectorProps) {
-  const { currentApplication } = useContext(AppContext);
+  appVersion,
+  isAppVersionLoading,
+}: Readonly<EnvironmentSelectorProps>) {
+  const { application } = useContext(DataContext);
   const [currentEnvironment, setCurrentEnvironment] =
     useState<ApplicationEnvironment | null>(null);
 
@@ -27,6 +35,9 @@ export function EnvironmentSelector({
       </a>
     </Box>
   );
+
+  if (isAppVersionLoading) return <SelectorSkeleton />;
+  if (!appVersion) return null;
 
   return (
     <fieldset name="environment">
@@ -51,7 +62,7 @@ export function EnvironmentSelector({
             InputProps={params.InputProps}
           />
         )}
-        key={currentApplication?.id}
+        key={application.name}
       />
       {renderEnvLink}
     </fieldset>

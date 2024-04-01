@@ -6,13 +6,13 @@ import {
 
 import {
   fetchAppVersion,
-  type FetchAppVersionResponse,
   type FetchAppVersionOptions,
 } from '../../api-calls/fetch-app-version';
+import { ZeAppVersionResponse } from 'zephyr-edge-contract';
 
 export async function prefetchAppVersion(
   queryClient: QueryClient,
-  fetchDataOptions: FetchAppVersionOptions
+  fetchDataOptions: FetchAppVersionOptions,
 ): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: ['app-version', fetchDataOptions],
@@ -23,11 +23,11 @@ export async function prefetchAppVersion(
 export function useFetchAppVersionQuery(
   fetchDataOptions: FetchAppVersionOptions,
   options: Omit<
-    UseQueryOptions<FetchAppVersionResponse>,
+    UseQueryOptions<ZeAppVersionResponse>,
     'queryKey' | 'queryFn'
-  > = {}
+  > = {},
 ) {
-  return useQuery<FetchAppVersionResponse>({
+  return useQuery<ZeAppVersionResponse>({
     queryKey: ['app-version', fetchDataOptions],
     queryFn: () => fetchAppVersion(fetchDataOptions),
     ...options,

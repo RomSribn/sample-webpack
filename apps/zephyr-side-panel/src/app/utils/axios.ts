@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import axios, { AxiosError, AxiosRequestHeaders } from 'axios';
 
-import { accessToken } from '../auth/refresh-token';
 // env
 import { envValue } from '../../environments/env-value';
+import { session } from '../storage/session';
 
 export type AxiosResponseError = AxiosError<{
   message: string;
@@ -11,13 +11,15 @@ export type AxiosResponseError = AxiosError<{
 }>;
 
 const axiosInstance = axios.create({
-  baseURL: `${envValue.value?.ZEPHYR_API_ENDPOINT}/v2/side-panel`,
+  baseURL: `${envValue.value?.ZEPHYR_API_ENDPOINT}`,
 });
 
 export function AxiosInterceptor({ children }: { children: ReactNode }) {
   const reqInterceptor = async (config: { headers: AxiosRequestHeaders }) => {
+    const token = await session.accessToken;
+    // todo: compare to refresh toke and update
     if (!config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${accessToken()}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -36,4 +38,3 @@ export function AxiosInterceptor({ children }: { children: ReactNode }) {
 }
 
 export { axiosInstance as axios };
-export default axiosInstance;

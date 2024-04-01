@@ -9,44 +9,38 @@ export interface GetApplicationVersionListParams {
 }
 
 export interface ApplicationVersion {
-  id: string;
   name: string;
+  author: string;
+  version: string;
+  createdAt: string;
+  application_uid: string;
+  snapshot_id: string;
+  remote_host: string;
+  remote_entry_url: string;
 }
 
 export const applicationVersionQuery = createQueryKeys('application-version', {
-  getApplicationVersionList: ({
-    organization,
-    project,
-    application,
-  }: GetApplicationVersionListParams) => ({
-    queryKey: [':', organization, project, application],
+  getApplicationVersionList: ({ application_uid }: { application_uid: string | undefined }) => ({
+    queryKey: [':', application_uid],
     queryFn: async () => {
-      if (!organization || !project || !application)
+      if (!application_uid) {
         return Promise.resolve(undefined);
+      }
+      const url = `/v2/side-panel/application-version-list?application_uid=${application_uid}`;
       return axios
-        .get<{
-          entities: ApplicationVersion[];
-        }>(`${organization}/${project}/${application}/application-version-list`)
+        .get<{ entities: ApplicationVersion[]; }>(url)
         .then((res) => res.data.entities);
-    },
-  }),
+    }
+  })
 });
 
-export function useApplicationVersionList({
-  organization,
-  project,
-  application,
-}: GetApplicationVersionListParams) {
+export function useApplicationVersionList(application_uid: string | undefined) {
   const {
     isLoading,
     data: applicationVersionList,
-    error,
+    error
   } = useQuery<ApplicationVersion[]>(
-    applicationVersionQuery.getApplicationVersionList({
-      organization,
-      project,
-      application,
-    }) as never,
+    applicationVersionQuery.getApplicationVersionList({ application_uid }) as never
   );
 
   return { applicationVersionList, isLoading, error };

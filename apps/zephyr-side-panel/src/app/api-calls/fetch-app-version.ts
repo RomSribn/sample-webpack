@@ -1,27 +1,22 @@
-import { fetchJSON } from '../utils/fetch-url';
 import { getActiveTabUrl } from '../utils/get-active-tab-url';
-import { ZeAppVersion } from 'zephyr-edge-contract';
+import { axios } from '../utils/axios';
+import { ZeAppVersionResponse } from 'zephyr-edge-contract';
 
 export type FetchAppVersionOptions = {
   url: string;
 };
 
-export type FetchAppVersionResponse = ZeAppVersion | undefined;
-
-export const fetchAppVersion = async ({
+export async function fetchAppVersion({
   url,
-}: FetchAppVersionOptions): Promise<FetchAppVersionResponse> => {
+}: FetchAppVersionOptions): Promise<ZeAppVersionResponse> {
   const activeURL = await getActiveTabUrl(url);
 
-  if (!activeURL) {
-    return void 0;
-  }
-
   // request current version of the app
-  const _url = new URL(activeURL);
-  const res = (await fetchJSON(`${_url.origin}/__app_version`).catch((e) =>
-    console.log(e),
-  )) as FetchAppVersionResponse;
-  console.log(res);
-  return res;
-};
+  return axios
+    .get<{
+      value: ZeAppVersionResponse;
+    }>(
+      `/v2/side-panel/application-remote-versions?host_url=${encodeURIComponent(activeURL)}`,
+    )
+    .then((res) => res.data?.value);
+}

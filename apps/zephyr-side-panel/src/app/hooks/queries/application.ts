@@ -3,14 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
 
 export interface Application {
-  id: string;
+  application_uid: string;
   name: string;
+  remote_host: string;
   organization: {
-    id: string;
     name: string;
   };
   project: {
-    id: string;
     name: string;
   };
 }
@@ -20,7 +19,7 @@ export const applicationQuery = createQueryKeys('application', {
     queryKey: null,
     queryFn: () =>
       axios
-        .get<{ entities: Application[] }>('/application-list')
+        .get<{ entities: Application[] }>('/v2/side-panel/application-list')
         .then((res) => res.data.entities),
   },
 });
@@ -30,7 +29,8 @@ export function useApplicationList() {
     isLoading,
     data: applicationList,
     error,
+    refetch: applicationListRefetch,
   } = useQuery<Application[]>(applicationQuery.getApplicationList as never);
 
-  return { applicationList, isLoading, error };
+  return { applicationList, isLoading, error, applicationListRefetch };
 }

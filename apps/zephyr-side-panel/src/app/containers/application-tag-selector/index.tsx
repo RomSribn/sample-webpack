@@ -1,16 +1,21 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 // @mui
-import { Popper, Autocomplete, TextField } from '@mui/material';
-// elements
-import { Option } from './option';
+import { Autocomplete, TextField } from '@mui/material';
+// components, elements
+import { SelectorSkeleton } from '../../components/selector-skeleton';
+import { CustomOption } from './custom-option';
+import { CustomPopper } from './custom-popper';
 // context
-import { AppContext } from '../../context/app-context';
+import {
+  DataContext,
+  PublishDataKeys,
+  defaultState,
+} from '../../context/data-context';
 // icons
 import { ArrowDownIcon } from '../../../assets/icons';
 import { ApplicationTag } from '../../hooks/queries/application-tag';
-
-// TODO: remove this when the real data is available.
-const DEFAULT_TAG = 'latest';
+// types, states
+import { ZeAppVersion } from 'zephyr-edge-contract';
 
 interface ApplicationTagSelectorProps {
   /**
@@ -25,6 +30,14 @@ interface ApplicationTagSelectorProps {
    * The callback to handle the application tag change.
    */
   onAppTagChange: (tag: ApplicationTag) => void;
+  /**
+   * Current application version.
+   */
+  appVersion?: ZeAppVersion;
+  /**
+   * The loading state of the application version.
+   */
+  isAppVersionLoading: boolean;
 }
 /**
  * Application tag root selector.
@@ -33,13 +46,28 @@ const ApplicationTagSelector = ({
   title,
   tags,
   onAppTagChange,
+  appVersion,
+  isAppVersionLoading,
 }: ApplicationTagSelectorProps) => {
-  const { setIsDeployed } = useContext(AppContext);
+  const { tag, application, setData } = useContext(DataContext);
 
-  const onChange = (_: unknown, newTag: ApplicationTag) => {
+  const onChange = (newTag?: ApplicationTag) => {
+    if (!newTag) return;
+
     onAppTagChange(newTag);
-    setIsDeployed(newTag.id === DEFAULT_TAG);
+    setData(newTag, PublishDataKeys.TAG);
   };
+
+  // set tag on the first load
+  useEffect(() => {
+    const initialTag = tags.find((tag) => tag.name === appVersion?.tag);
+    if (!initialTag || tag.application_uid) return;
+    setData(initialTag, PublishDataKeys.TAG);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appVersion?.tag, application, setData, tags]);
+
+  if (isAppVersionLoading) return <SelectorSkeleton />;
+  if (!appVersion) return null;
 
   return (
     <fieldset name="application-tag">
@@ -47,33 +75,34 @@ const ApplicationTagSelector = ({
       <Autocomplete
         className="custom-select"
         popupIcon={<ArrowDownIcon width={12} height={12} />}
-        PopperComponent={({ ...props }) => (
-          <Popper
-            {...props}
-            className="custom-select__popper application-group-select"
-            style={{
-              ...props.style,
-              height: '4px',
-            }}
-          />
-        )}
+        PopperComponent={CustomPopper}
         renderGroup={(params) => (
           <li key={params.key}>
             <div>{params.group}</div>
             <div>{params.children}</div>
           </li>
         )}
-        disableClearable={true}
-        onChange={onChange}
+        disableClearable={false}
         getOptionLabel={(option) => option.name}
         options={tags}
+        value={tag}
+        onInputChange={(event, newInputValue, reason) => {
+          if (reason !== 'clear') return;
+          setData(defaultState[PublishDataKeys.TAG], PublishDataKeys.TAG);
+        }}
         renderOption={(props, tag) => (
-          <Option {...props} tag={tag} contentEditable="true" />
+          <CustomOption
+            {...props}
+            handleChange={onChange}
+            tag={tag}
+            contentEditable="true"
+          />
         )}
         renderInput={({ id, inputProps, InputProps }) => (
           <TextField id={id} inputProps={inputProps} InputProps={InputProps} />
         )}
-        key={title}
+        // reset autocomplete on application change
+        key={application.application_uid}
       />
     </fieldset>
   );

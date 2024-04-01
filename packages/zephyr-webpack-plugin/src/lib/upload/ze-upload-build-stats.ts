@@ -36,10 +36,9 @@ export async function zeUploadBuildStats(
 
 export interface ZeUploadBuildStats {
   app_version: {
-    id: string;
-    // snapshot id
     application_uid: string;
-    version: string;
+    // snapshot id
+    snapshot_id: string;
   };
   urls: string[];
 }

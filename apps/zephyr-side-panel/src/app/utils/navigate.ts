@@ -1,11 +1,4 @@
-import { __debug_navigate, __isDebug } from './_debugger';
-
 export async function navigate(url: string) {
-  if (__isDebug) {
-    __debug_navigate(url);
-    return;
-  }
-
   if (!chrome.tabs) {
     window.location.assign(url);
     return;

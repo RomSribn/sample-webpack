@@ -1,36 +1,94 @@
-import { useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  QueryClient,
+  QueryCache,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 
+import { ProviderComposer, provider } from './components/provider-compose';
+
 import { accessToken, setStorageListener } from './auth/refresh-token';
+import { logout } from './auth/authorization';
 import { session } from './storage/session';
-import { AppProvider } from './context/app-context';
-import { AxiosInterceptor } from './utils/axios';
+
+import {
+  AppProvider,
+  AppContextType,
+  defaultState as appContextDefaultState,
+} from './context/app-context';
+import {
+  DataProvider,
+  DataContextType,
+  PublishDataKeys,
+  SetDataProp,
+  defaultState as dataContextDefaultState,
+} from './context/data-context';
 
 import { router } from './router';
 
 import { getActiveTabUrl } from './utils/get-active-tab-url';
 import { tabsOnUpdated } from './utils/chrome-tabs-on-updated';
-import { Application } from './hooks/queries/application';
+import { AxiosInterceptor, AxiosResponseError } from './utils/axios';
 
-// types
-
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (e) => {
+      if (e.name === 'AxiosError') {
+        const error = e as unknown as AxiosResponseError;
+        if (error?.response?.status === 403) {
+          logout();
+        }
+      }
+    },
+  }),
+});
 
 export function App() {
-  const [token, setToken] = useState<string>(() => accessToken() ?? '');
-  const [isDeployed, setIsDeployed] = useState<boolean>(true);
-  const [url, setUrl] = useState<string | undefined>();
-  const [currentApplication, setCurrentApplication] =
-    useState<Application | null>(null);
+  const [token, setToken] = useState<AppContextType['token']>(
+    appContextDefaultState.token,
+  );
+  const [isDeployed, setIsDeployed] = useState<AppContextType['isDeployed']>(
+    appContextDefaultState.isDeployed,
+  );
+  const [url, setUrl] = useState<AppContextType['url']>();
+  const [application, setApplication] = useState<
+    DataContextType[PublishDataKeys.APPLICATION]
+  >(dataContextDefaultState[PublishDataKeys.APPLICATION]);
+  const [tag, setTag] = useState<DataContextType[PublishDataKeys.TAG]>(
+    dataContextDefaultState[PublishDataKeys.TAG],
+  );
+  const [version, setVersion] = useState<
+    DataContextType[PublishDataKeys.VERSION]
+  >(dataContextDefaultState[PublishDataKeys.VERSION]);
+  const [remotes, setRemotes] = useState<
+    DataContextType[PublishDataKeys.REMOTES]
+  >(dataContextDefaultState[PublishDataKeys.REMOTES]);
 
+  session.accessToken.then((token) => setToken(token));
   const refreshToken = () => {
-    setToken(accessToken() ?? '');
+    setToken(accessToken());
   };
-
   if (!token) {
     session.accessToken.then(refreshToken);
   }
+
+  const setData = useCallback((data: SetDataProp, key: PublishDataKeys) => {
+    switch (key) {
+      case PublishDataKeys.APPLICATION:
+        setApplication(data as DataContextType[PublishDataKeys.APPLICATION]);
+        break;
+      case PublishDataKeys.TAG:
+        setTag(data as DataContextType[PublishDataKeys.TAG]);
+        break;
+      case PublishDataKeys.VERSION:
+        setVersion(data as DataContextType[PublishDataKeys.VERSION]);
+        break;
+      case PublishDataKeys.REMOTES:
+        setRemotes(data as DataContextType[PublishDataKeys.REMOTES]);
+        break;
+    }
+  }, []);
 
   // initial load
   useEffect(() => {
@@ -49,25 +107,33 @@ export function App() {
   }, []);
 
   return (
-    <AxiosInterceptor>
-      <QueryClientProvider client={queryClient}>
-        <AppProvider
-          value={{
+    <ProviderComposer
+      providers={[
+        provider(AxiosInterceptor),
+        provider(QueryClientProvider, { client: queryClient }),
+        provider(AppProvider, {
+          value: {
             token,
             refreshToken,
             isDeployed,
-            currentApplication,
             setIsDeployed,
             url,
             setUrl,
-            serCurrentApplication: (application) =>
-              setCurrentApplication(application),
-          }}
-        >
-          <RouterProvider router={router} />
-        </AppProvider>
-      </QueryClientProvider>
-    </AxiosInterceptor>
+          },
+        }),
+        provider(DataProvider, {
+          value: {
+            application,
+            tag,
+            version,
+            remotes,
+            setData,
+          },
+        }),
+      ]}
+    >
+      <RouterProvider router={router} />
+    </ProviderComposer>
   );
 }
 

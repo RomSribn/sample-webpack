@@ -1,5 +1,7 @@
-import React from 'react';
+import { useContext } from 'react';
 import cx from 'classnames';
+
+import { DataContext } from '../context/data-context';
 
 interface PublishButtonProps {
   /**
@@ -15,11 +17,18 @@ interface PublishButtonProps {
 export function PublishButton({
   className,
   disabled = true,
-}: PublishButtonProps) {
+}: Readonly<PublishButtonProps>) {
+  const { setData, ...data } = useContext(DataContext);
+
+  const handleClick = () => {
+    console.log('Publishing updates', data);
+  };
+
   return (
     <button
       className={cx('publish-button', 'button', className)}
       disabled={disabled}
+      onClick={handleClick}
     >
       Publish updates
     </button>

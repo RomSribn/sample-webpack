@@ -22,7 +22,7 @@ export async function zeEnableSnapshotOnEdge(
   // todo: upload context to API and get
   // todo: get urls from ze API
   const envs: ZeEnvs = {
-    snapshot_id: envs_jwt.app_version.version,
+    snapshot_id: envs_jwt.app_version.snapshot_id,
     urls: envs_jwt.urls,
   };
 

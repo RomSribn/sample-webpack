@@ -1,10 +1,4 @@
-import { __isDebug } from './_debugger';
-
 export async function getActiveTabId(): Promise<number | undefined> {
-  if (__isDebug) {
-    return -1;
-  }
-
   if (chrome.tabs === undefined) {
     return -1;
   }

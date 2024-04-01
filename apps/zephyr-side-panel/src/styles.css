@@ -411,6 +411,19 @@ img.new-tab-icon + input {
   border: none;
 }
 
+.custom-select .MuiAutocomplete-endAdornment .MuiButtonBase-root {
+  color: var(--color__midnight--400);
+  width: 24px;
+  height: 24px;
+}
+
+.custom-select
+  .MuiButtonBase-root.MuiAutocomplete-clearIndicator
+  .MuiSvgIcon-root {
+  width: 0.8em;
+  height: 0.8em;
+}
+
 .custom-select__popper {
   top: 5px !important;
   color: var(--color__midnight--300);

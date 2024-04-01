@@ -1,70 +1,75 @@
-import { useMemo, useState, useContext } from 'react';
+import { useContext, useMemo } from 'react';
 // @mui
-import { Popper, Autocomplete } from '@mui/material';
-// elements
-import { Option, Input } from './_elements';
+import { Autocomplete, Popper } from '@mui/material';
+// elements, components
+import { SelectorSkeleton } from '../../components/selector-skeleton';
+import { Input, Option } from './_elements';
 // context
-import { AppContext } from '../../context/app-context';
+import { DataContext, PublishDataKeys } from '../../context/data-context';
+// hooks, types
+import {
+  useApplicationTagList,
+  ApplicationTag,
+} from '../../hooks/queries/application-tag';
+import {
+  useApplicationVersionList,
+  ApplicationVersion,
+} from '../../hooks/queries/application-version';
+import { ZeAppVersion } from 'zephyr-edge-contract';
 // icons
 import { ArrowDownIcon } from '../../../assets/icons';
-import { ZeAppRemoteVersions, ZeAppVersionItem } from 'zephyr-edge-contract';
+
+// necessary to differentiate between tags and version
+export const tagKey = 'tag';
+export type SelectorOptionType =
+  | ApplicationVersion
+  | (ApplicationTag & { [tagKey]: string });
 
 interface ApplicationSelectorProps {
   remoteKey: string;
   version: string;
-  remote: ZeAppRemoteVersions;
-  onChange: (
-    newVal: { app_uid: string; remote: ZeAppVersionItem } | undefined,
-  ) => void;
+  remote: ZeAppVersion;
+  onChange: (newVal: ZeAppVersion | undefined) => void;
+  isAppVersionLoading: boolean;
 }
 
 export function RemotesSelector({
   remoteKey,
   version,
-  remote,
+  remote: __remote,
   onChange: onRemoteChange,
-}: ApplicationSelectorProps) {
-  const { setIsDeployed } = useContext(AppContext);
+  isAppVersionLoading,
+}: Readonly<ApplicationSelectorProps>) {
+  const { remotes, setData } = useContext(DataContext);
+  const { applicationTagList } = useApplicationTagList(__remote.application_uid);
+  const { applicationVersionList } = useApplicationVersionList(__remote.application_uid);
 
-  const [selectedVersion, setSelectedVersion] = useState<string>(version);
-  const isDeployed = useMemo(
-    () => selectedVersion === version,
-    [selectedVersion, version],
+  // necessary to differentiate between tags and version
+  const tagList = useMemo<SelectorOptionType[] | undefined>(
+    () => applicationTagList?.map((tag) => ({ ...tag, [tagKey]: tag.name })),
+    [applicationTagList],
   );
 
-  const options = useMemo(() => {
-    if (!remote) return [];
+  const options = [...(tagList ?? []), ...(applicationVersionList ?? [])];
 
-    const versions = remote.versions;
-    const remotes = Object.entries(remote.tags).map(([tagKey, tagValue]) => ({
-      tagKey,
-      ...tagValue,
-    }));
+  const isDeployed = useMemo(
+    () => remotes[__remote.application_uid]?.version === version,
+    [__remote.application_uid, remotes, version],
+  );
 
-    return [...versions, ...remotes];
-  }, [remote]);
-
-  const onChange = (
-    _: unknown,
-    newValue:
-      | ZeAppVersionItem
-      | {
-          version: string;
-          author: string | undefined;
-          createdAt: number;
-          tagKey: string;
-        },
-  ) => {
-    const _remote = remote?.versions.find(
-      (version) => version.version === newValue.version,
-    );
-
-    setIsDeployed(newValue.version === version);
+  const onChange = (_: unknown, newValue: ApplicationVersion) => {
+    const _remote = version;
 
     if (!_remote) return;
-    setSelectedVersion(newValue.version);
-    onRemoteChange({ app_uid: remote.name, remote: _remote });
+    setData(
+      { ...remotes, [newValue.application_uid]: newValue },
+      PublishDataKeys.REMOTES,
+    );
+    onRemoteChange(newValue);
   };
+
+  if (isAppVersionLoading) return <SelectorSkeleton />;
+  if (!__remote) return <SelectorSkeleton />;
 
   return (
     <fieldset name={remoteKey} className="remotes-root">
@@ -73,8 +78,6 @@ export function RemotesSelector({
         className="custom-select"
         popupIcon={<ArrowDownIcon width={12} height={12} />}
         PopperComponent={({ ...props }) => {
-          console.log('props', props.style);
-
           return (
             <Popper
               {...props}
@@ -86,7 +89,7 @@ export function RemotesSelector({
             />
           );
         }}
-        groupBy={(option) => ('tagKey' in option ? 'Tags' : 'Versions')}
+        groupBy={(option) => (tagKey in option ? 'Tags' : 'Versions')}
         renderGroup={(params) => (
           <li key={params.key} className="MuiList-root">
             <div className="MuiListSubheader-root">{params.group}</div>
@@ -94,12 +97,10 @@ export function RemotesSelector({
           </li>
         )}
         disableClearable={true}
-        defaultValue={remote.versions.find(
-          (version) => version.version === remote.currentVersion,
-        )}
         onChange={onChange}
         options={options}
         getOptionLabel={(option) => option.version}
+        defaultValue={__remote as SelectorOptionType}
         renderOption={(props, option) => (
           <Option {...props} option={option} contentEditable="true" />
         )}

@@ -1,11 +1,12 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext } from 'react';
 
 import { ApplicationTagSelector } from './application-tag-selector';
 import { ApplicationSelector } from './application-selector';
 
 import { AppContext } from '../context/app-context';
+import { DataContext, PublishDataKeys } from '../context/data-context';
 
-// import { navigate } from '../utils/navigate';
+import { navigate } from '../utils/navigate';
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
 
 import { ApplicationVersionSelector } from './application-version-selector';
@@ -25,37 +26,26 @@ import {
 } from '../hooks/queries/application-version';
 
 export function EnvironmentContainer() {
-  const {
-    url = '',
-    setIsDeployed,
-    serCurrentApplication,
-    currentApplication,
-  } = useContext(AppContext);
-  const getParams = {
-    organization: currentApplication?.organization.name,
-    project: currentApplication?.project.name,
-    application: currentApplication?.name,
-  };
-
-  const { applicationList } = useApplicationList();
+  const { url = '', setUrl } = useContext(AppContext);
+  const { application, setData } = useContext(DataContext);
+  const { applicationList, applicationListRefetch } = useApplicationList();
   const { applicationEnvironmentList } =
-    useApplicatioEnvironmentnList(getParams);
-  const { applicationTagList } = useApplicationTagList(getParams);
-  const { applicationVersionList } = useApplicationVersionList(getParams);
-  const { data: appVersion } = useFetchAppVersionQuery({ url });
+    useApplicatioEnvironmentnList(application?.application_uid);
+  const { applicationTagList } = useApplicationTagList(application?.application_uid);
+  const { applicationVersionList } = useApplicationVersionList(application?.application_uid);
+  const { data: appVersion, isLoading: isAppVersionLoading } =
+    useFetchAppVersionQuery({ url });
 
   // load app version details on change
   const onAppChange = useCallback(
-    (application: Application) => {
+    (newApplication: Application) => {
+      applicationListRefetch();
       if (!applicationList) return;
-      serCurrentApplication(application);
-      // const newApp = applications.find((app) => app.name === appName);
-
-      // if (newApp?.url) {
-      //   navigate(newApp.url);
-      // }
+      setData(newApplication, PublishDataKeys.APPLICATION);
+      setUrl(newApplication.remote_host);
+      navigate(newApplication.remote_host);
     },
-    [applicationList, serCurrentApplication],
+    [applicationList, applicationListRefetch, setData, setUrl],
   );
 
   const onAppEnvironmentChange = useCallback(
@@ -66,38 +56,15 @@ export function EnvironmentContainer() {
     [],
   );
 
-  const onAppVersionChange = useCallback(
-    (_appVersion: ApplicationVersion) => {
-      if (!_appVersion || !applicationList) return;
-
-      // const newApp = applications.find(
-      //   (app) => app.name === appVersion?.app,
-      // );
-
-      // console.log(`on app version change ${_appVersion}`);
-      // if (!newApp) return;
-      // const _url = new URL(newApp.url);
-      // _url.hostname = `${_appVersion}.${_url.hostname
-      //   .split('.')
-      //   .slice(1)
-      //   .join('.')}`;
-
-      // navigate(_url.toString());
-    },
-    [appVersion?.app, applicationList],
-  );
-
-  const onAppTagChange = useCallback((tag: ApplicationTag) => {
-    console.log('selected tag', tag);
-
-    return tag;
+  const onAppVersionChange = useCallback((_appVersion: ApplicationVersion) => {
+    if (!_appVersion) return;
+    navigate(_appVersion.remote_host);
   }, []);
 
-  useEffect(() => {
-    if (appVersion) {
-      setIsDeployed(true);
-    }
-  }, [appVersion, setIsDeployed]);
+  const onAppTagChange = useCallback((tag: ApplicationTag) => {
+    navigate(tag.remote_host);
+    return tag;
+  }, []);
 
   return (
     <form name="envForm">
@@ -106,20 +73,26 @@ export function EnvironmentContainer() {
         applications={applicationList ?? []}
         onChange={onAppChange}
       />
-      {currentApplication && (
+      {application.application_uid && (
         <>
           <EnvironmentSelector
             environmentList={applicationEnvironmentList ?? []}
             onChange={onAppEnvironmentChange}
+            appVersion={appVersion}
+            isAppVersionLoading={isAppVersionLoading}
           />
           <ApplicationTagSelector
             title="Tags"
             tags={applicationTagList ?? []}
             onAppTagChange={onAppTagChange}
+            appVersion={appVersion}
+            isAppVersionLoading={isAppVersionLoading}
           />
           <ApplicationVersionSelector
             applicationVersionList={applicationVersionList ?? []}
             onAppVersionChange={onAppVersionChange}
+            appVersion={appVersion}
+            isAppVersionLoading={isAppVersionLoading}
           />
         </>
       )}

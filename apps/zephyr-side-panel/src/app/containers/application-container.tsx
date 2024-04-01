@@ -1,17 +1,20 @@
-import { useCallback, useMemo, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 
 import { RemotesSelector } from './remotes-selector';
 import { ApplicationTagSelector } from './application-tag-selector';
 import { ApplicationSelector } from './application-selector';
 
 import { AppContext } from '../context/app-context';
+import {
+  DataContext,
+  PublishDataKeys,
+  DataContextType,
+} from '../context/data-context';
 
-// import { navigate } from '../utils/navigate';
 import { getActiveTabId } from '../utils/get-active-tab-id';
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
 
 import { ApplicationVersionSelector } from './application-version-selector';
-import { ZeAppVersionItem } from 'zephyr-edge-contract';
 import { Application, useApplicationList } from '../hooks/queries/application';
 import {
   ApplicationTag,
@@ -21,73 +24,46 @@ import {
   ApplicationVersion,
   useApplicationVersionList,
 } from '../hooks/queries/application-version';
+import { navigate } from '../utils/navigate';
+import { ZeAppVersion } from 'zephyr-edge-contract';
 
 export function ApplicationContainer() {
-  const {
-    url = '',
-    setIsDeployed,
-    serCurrentApplication,
-    currentApplication,
-  } = useContext(AppContext);
-  const getParams = {
-    organization: currentApplication?.organization.name,
-    project: currentApplication?.project.name,
-    application: currentApplication?.name,
-  };
-  const { applicationList } = useApplicationList();
-  const { applicationTagList } = useApplicationTagList(getParams);
-  const { applicationVersionList } = useApplicationVersionList(getParams);
-  const { data: appVersion } = useFetchAppVersionQuery({ url });
+  const { url = '', setIsDeployed, setUrl } = useContext(AppContext);
+  const { application, tag, remotes, setData } = useContext(DataContext);
+  const { applicationList, applicationListRefetch } = useApplicationList();
+  const { applicationTagList } = useApplicationTagList(application?.application_uid);
+  const { applicationVersionList } = useApplicationVersionList(application?.application_uid);
+  const { data: appVersion, isLoading: isAppVersionLoading } =
+    useFetchAppVersionQuery({ url });
 
   // load app version details on change
   const onAppChange = useCallback(
-    (application: Application) => {
+    (newApplication: Application) => {
+      applicationListRefetch();
       if (!applicationList) return;
-      serCurrentApplication(application);
-      // const newApp = applications.find((app) => app.name === appName);
-
-      // if (newApp?.url) {
-      //   navigate(newApp.url);
-      // }
+      setData(newApplication, PublishDataKeys.APPLICATION);
+      setUrl(newApplication.remote_host);
+      navigate(newApplication.remote_host);
     },
-    [applicationList, serCurrentApplication],
+    [applicationList, applicationListRefetch, setData, setUrl],
   );
 
-  const onAppVersionChange = useCallback(
-    (_appVersion: ApplicationVersion) => {
-      if (!_appVersion || !applicationList) return;
-
-      const newApp = applicationList.find(
-        (app) => app.name === appVersion?.app,
-      );
-
-      console.log(`on app version change ${_appVersion}`);
-      if (!newApp) return;
-      // const _url = new URL(newApp.url);
-      // _url.hostname = `${_appVersion}.${_url.hostname
-      //   .split('.')
-      //   .slice(1)
-      //   .join('.')}`;
-
-      // navigate(_url.toString());
-    },
-    [appVersion?.app, applicationList],
-  );
+  const onAppVersionChange = useCallback((_appVersion: ApplicationVersion) => {
+    if (!_appVersion) return;
+    navigate(_appVersion.remote_host);
+  }, []);
 
   const onAppTagChange = useCallback((tag: ApplicationTag) => {
-    console.log('selected tag', tag);
-
+    navigate(tag.remote_host);
     return tag;
   }, []);
 
   const showRemotes = useMemo(() => {
-    const remotes = appVersion?.snapshot?.mfConfig?.remotes;
-    return !(!remotes || !Object.keys(remotes).length);
+    const remotes = appVersion?.remotes;
+    return Array.isArray(remotes) && !!remotes.length;
   }, [appVersion]);
 
-  const onRemoteChange = (
-    newVal: { app_uid: string; remote: ZeAppVersionItem } | undefined,
-  ) => {
+  const onRemoteChange = (newVal: ZeAppVersion | undefined) => {
     if (!newVal) return;
 
     function setSessionSetItem(key: string, value: string) {
@@ -103,17 +79,37 @@ export function ApplicationContainer() {
         .executeScript({
           target: { tabId: tabId },
           func: setSessionSetItem,
-          args: [newVal.app_uid, newVal.remote.url],
+          args: [newVal.application_uid, newVal.remote_host],
         })
         .then(() => console.log('injected a function'));
     })();
   };
 
+  // set remotes on the first load
   useEffect(() => {
-    if (appVersion) {
-      setIsDeployed(true);
-    }
-  }, [appVersion, setIsDeployed]);
+    if (Object.keys(remotes).length) return;
+    const initialRemotes = appVersion?.remotes?.reduce(
+      (acc, data) => {
+        if (!data) return acc;
+        return { ...acc, [data.application_uid]: data as ApplicationVersion };
+      },
+      {} as DataContextType['remotes'],
+    );
+    setData(initialRemotes || {}, PublishDataKeys.REMOTES);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appVersion, setData, showRemotes]);
+
+  useEffect(() => {
+    const isRemotesNotDirty =
+      appVersion && showRemotes
+        ? !!appVersion.remotes?.every(
+            (remote) =>
+              remote.version === remotes[remote.application_uid]?.version,
+          )
+        : true;
+    const isTagNotDirty = appVersion?.tag === tag?.name;
+    setIsDeployed(isRemotesNotDirty && isTagNotDirty);
+  }, [tag, remotes, appVersion, showRemotes, setIsDeployed]);
 
   return (
     <form name="appForm">
@@ -122,40 +118,42 @@ export function ApplicationContainer() {
         applications={applicationList ?? []}
         onChange={onAppChange}
       />
-      {currentApplication && (
+      {application.application_uid && (
         <>
           <ApplicationTagSelector
             title="Tags"
             tags={applicationTagList ?? []}
             onAppTagChange={onAppTagChange}
+            appVersion={appVersion}
+            isAppVersionLoading={isAppVersionLoading}
           />
           <ApplicationVersionSelector
             applicationVersionList={applicationVersionList ?? []}
             onAppVersionChange={onAppVersionChange}
+            appVersion={appVersion}
+            isAppVersionLoading={isAppVersionLoading}
           />
         </>
       )}
       {appVersion && showRemotes && (
         <>
           <h4>Remotes</h4>
-          {Object.keys(appVersion.snapshot.mfConfig.remotes).map(
-            (remoteKey) => {
-              const remote = appVersion.snapshot.mfConfig.remotes[remoteKey];
-              if (!remote) {
-                return null;
-              }
+          {appVersion.remotes?.map((remote) => {
+            if (!remote) {
+              return null;
+            }
 
-              return (
-                <RemotesSelector
-                  key={remoteKey}
-                  remoteKey={remoteKey}
-                  version={remote.currentVersion}
-                  remote={remote}
-                  onChange={onRemoteChange}
-                />
-              );
-            },
-          )}
+            return (
+              <RemotesSelector
+                key={remote.snapshot_id}
+                remoteKey={remote.application_uid}
+                version={remote.version}
+                remote={remote}
+                onChange={onRemoteChange}
+                isAppVersionLoading={isAppVersionLoading}
+              />
+            );
+          })}
         </>
       )}
     </form>

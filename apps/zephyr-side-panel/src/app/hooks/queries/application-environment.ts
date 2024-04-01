@@ -16,40 +16,30 @@ export interface ApplicationEnvironment {
 export const applicationEnvironmentQuery = createQueryKeys(
   'application-environment',
   {
-    getApplicationEnvironmentList: ({
-      organization,
-      project,
-      application,
-    }: GetApplicationEnvironmentListParams) => ({
-      queryKey: [':', organization, project, application],
+    getApplicationEnvironmentList: ({ application_uid }: { application_uid: string | undefined }) => ({
+      queryKey: [':', application_uid],
       queryFn: async () => {
-        if (!organization || !project || !application)
+        if (!application_uid) {
           return Promise.resolve(undefined);
+        }
+
+        const url = `/v2/side-panel/application-environment-list?application_uid=${application_uid}`;
         return axios
-          .get<{
-            entities: ApplicationEnvironment[];
-          }>(`${organization}/${project}/${application}/application-environment-list`)
+          .get<{ entities: ApplicationEnvironment[]; }>(url)
           .then((res) => res.data.entities);
-      },
-    }),
-  },
+      }
+    })
+  }
 );
 
-export function useApplicatioEnvironmentnList({
-  organization,
-  project,
-  application,
-}: GetApplicationEnvironmentListParams) {
+export function useApplicatioEnvironmentnList(application_uid: string | undefined) {
   const {
     isLoading,
     data: applicationEnvironmentList,
-    error,
+    error
   } = useQuery<ApplicationEnvironment[]>(
-    applicationEnvironmentQuery.getApplicationEnvironmentList({
-      organization,
-      project,
-      application,
-    }) as never,
+    applicationEnvironmentQuery
+      .getApplicationEnvironmentList({ application_uid }) as never
   );
 
   return { applicationEnvironmentList, isLoading, error };

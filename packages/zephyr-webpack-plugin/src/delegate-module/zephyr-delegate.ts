@@ -1,7 +1,5 @@
 import { createFullAppName } from 'zephyr-edge-contract';
-import { edge_endpoint } from '../config/endpoints';
-
-// todo: should get fully qualified url in config
+import { getToken } from '../token/token';
 
 interface DelegateConfig {
   org: string;
@@ -9,54 +7,87 @@ interface DelegateConfig {
   application: string | undefined;
 }
 
-const _toEdgeURL = (
-  prefix: string,
-  edge: { hostname: string; port: number },
-): string => {
-  return edge.port === 443
-    ? `https://${prefix}.${edge.hostname}`
-    : `http://${prefix}.${edge.hostname}:${edge.port}`;
-};
+// todo: in order to become federation impl agnostic, we should parse and provide
+// already processed federation config instead of mfConfig
 
-export function replace_remote_in_mf_config(
+export async function replace_remote_in_mf_config(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mfPlugin: any,
   config: DelegateConfig,
-): DelegateConfig {
+): Promise<DelegateConfig> {
   // replace remotes with delegate function
-  Object.keys(mfPlugin._options?.remotes).forEach((key) => {
-    // key could be 'app_name', 'app_name.project_name' or 'app_name.project_name.org_name'
-    const [app_name, project_name, org_name] = key.split('.');
-    const application_uid = createFullAppName({
-      org: org_name ?? config.org,
-      project: project_name ?? config.project,
-      name: app_name,
-    });
-    const defaultUrl = mfPlugin._options?.remotes[key];
-    // todo: make async call to resolve app_uid to edge_url - latest? latest tag or latest version if no latest tag
-    // todo: convert default url to version dependency?
-    const _config = Object.assign({}, config, {
-      application: application_uid,
-      application_uid: application_uid,
-      // todo: fix when proper dep resolution works
-      remote_entry_url: `${_toEdgeURL(application_uid, edge_endpoint)}/remoteEntry.js`,
-    });
-    mfPlugin._options.remotes[key] = replace_remote_with_delegate(
-      defaultUrl,
-      _config,
-    );
-  });
+  const depsResolutionTask = Object.keys(mfPlugin._options?.remotes).map(
+    async (key) => {
+      const [app_name, project_name, org_name] = key.split('.');
+      const application_uid = createFullAppName({
+        org: org_name ?? config.org,
+        project: project_name ?? config.project,
+        name: app_name,
+      });
+
+      // if default url is url - set as default, if not use app remote_host as default
+      // if default url is not url - send it as a semver to deps resolution
+      const resolvedDependency = await resolve_remote_dependency({
+        name: application_uid,
+        version: mfPlugin._options?.remotes[key],
+      });
+
+      async function resolve_remote_dependency({
+        name,
+        version,
+      }: {
+        name: string;
+        version: string;
+      }): Promise<ResolvedDependency | undefined> {
+        try {
+          // todo: @valorkin remove hardcode
+          const dashboardURL = `http://localhost:3333/v2/builder-packages-api/resolve?name=${name}&version=${version}`;
+          const token = await getToken();
+          const res = await fetch(dashboardURL, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token,
+              Accept: 'application/json',
+            },
+          });
+
+          if (!res.ok) {
+            throw new Error(res.statusText);
+          }
+          const response = (await res.json()) as { value: ResolvedDependency };
+          return response.value;
+        } catch (err) {
+          console.warn(`Error resolving '${name}' version '${version}'`);
+          console.error(err);
+        }
+
+        return {
+          default_url: version,
+          remote_entry_url: version,
+          application_uid: name,
+        };
+      }
+
+      if (resolvedDependency) {
+        mfPlugin._options.remotes[key] =
+          replace_remote_with_delegate(resolvedDependency);
+      }
+    },
+  );
+
+  await Promise.all(depsResolutionTask);
 
   return config;
 }
 
-export function replace_remote_with_delegate(
-  defaultUrl: string,
-  config: DelegateConfig & {
-    remote_entry_url: string;
-    application_uid: string;
-  },
-): string {
+interface ResolvedDependency {
+  default_url: string;
+  application_uid: string;
+  remote_entry_url: string;
+}
+
+export function replace_remote_with_delegate(deps: ResolvedDependency): string {
   // prepare delegate function string template
   const fnReplace = delegate_module_template.toString();
   const strStart = new RegExp(/^function[\W\S]+return new Promise/);
@@ -66,11 +97,11 @@ export function replace_remote_with_delegate(
     .replace(strStart, strNewStart)
     .replace(strEnd, '');
 
-  const { application_uid, remote_entry_url } = config;
+  const { application_uid, remote_entry_url, default_url } = deps;
   return promiseNewPromise
     .replace('__APPLICATION_UID__', application_uid)
     .replace('__REMOTE_ENTRY_URL__', remote_entry_url)
-    .replace('__DEFAULT_URL__', defaultUrl);
+    .replace('__DEFAULT_URL__', default_url);
 }
 
 function delegate_module_template(): unknown {

@@ -5,6 +5,7 @@ import { envValue } from './env-value';
 
 envValue.value = {
   production: false,
+  ZEPHYR_UI: 'http://localhost:3000',
   AUTH0_CLIENT_ID: 'ZsqL3PcPd5Tt2mNZimgvF5SRvvwvYqza',
   AUTH0_DOMAIN: 'zephyr-dev-eu.eu.auth0.com',
   ZEPHYR_API_ENDPOINT: 'http://localhost:3333',

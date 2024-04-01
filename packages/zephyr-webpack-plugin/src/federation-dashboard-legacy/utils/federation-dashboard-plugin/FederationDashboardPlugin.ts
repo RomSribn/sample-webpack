@@ -250,7 +250,7 @@ export class FederationDashboardPlugin {
 
     const rawData: ConvertToGraphParams = {
       name: this.FederationPluginOptions?.name,
-      remotes: this.FederationPluginOptions?.remotes,
+      remotes: Object.keys(this.FederationPluginOptions?.remotes || {}),
       metadata: this._options.metadata || {},
       topLevelPackage: vendorFederation || {},
       publicPath: stats.publicPath,
@@ -286,6 +286,7 @@ export class FederationDashboardPlugin {
       version: version,
       app: this._options.app,
       git: this._options.git,
+      remotes: rawData.remotes,
       context: {
         isCI: this._options.context.isCI,
       },

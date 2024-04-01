@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/zephyr-side-panel/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -86,9 +87,8 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/zephyr-side-panel/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["{projectRoot}/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
@@ -98,6 +98,5 @@
         "jestConfig": "apps/zephyr-side-panel/jest.config.ts"
       }
     }
-  },
-  "tags": []
+  }
 }
