@@ -36,7 +36,9 @@ const queryClient = new QueryClient({
     onError: (e) => {
       if (e.name === 'AxiosError') {
         const error = e as unknown as AxiosResponseError;
-        if (error?.response?.status === 403) {
+        const status = error?.response?.status;
+
+        if (status === 403 || status === 401) {
           logout();
         }
       }

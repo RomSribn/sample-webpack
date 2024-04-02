@@ -22,7 +22,7 @@ import {
 } from '../hooks/queries/application-tag';
 import {
   ApplicationVersion,
-  useApplicationVersionListInfinity,
+  useApplicationVersionList,
 } from '../hooks/queries/application-version';
 
 export function EnvironmentContainer() {
@@ -38,10 +38,10 @@ export function EnvironmentContainer() {
   const {
     applicationVersionList,
     fetchNextAppVersionListPage,
-    applicationVersionListCount,
     hasNextAppVersionListPage,
-  } = useApplicationVersionListInfinity({
+  } = useApplicationVersionList({
     application_uid: application?.application_uid,
+    initialPageParam: 1,
   });
   const { data: appVersion, isLoading: isAppVersionLoading } =
     useFetchAppVersionQuery({ url });
@@ -101,7 +101,6 @@ export function EnvironmentContainer() {
           <ApplicationVersionSelector
             applicationVersionList={applicationVersionList || []}
             fetchNextAppVersionListPage={fetchNextAppVersionListPage}
-            applicationVersionListCount={applicationVersionListCount}
             hasNextAppVersionListPage={hasNextAppVersionListPage}
             onAppVersionChange={onAppVersionChange}
             appVersion={appVersion}

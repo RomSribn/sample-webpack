@@ -1,11 +1,10 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef, useCallback, useMemo } from 'react';
 // @mui
 import { TextField, Autocomplete } from '@mui/material';
 // components
 import { SelectorSkeleton } from '../../components/selector-skeleton';
 import { CustomOption } from './custom-option';
 import { CustomPopper } from './custom-popper';
-import { CustomPaper } from './custom-paper';
 // context
 import { DataContext, PublishDataKeys } from '../../context/data-context';
 // icons
@@ -17,7 +16,6 @@ import { ApplicationVersion } from '../../hooks/queries/application-version';
 interface ApplicationVersionProps {
   applicationVersionList: ApplicationVersion[];
   fetchNextAppVersionListPage: () => void;
-  applicationVersionListCount: number;
   hasNextAppVersionListPage: boolean;
   onAppVersionChange: (applicationVersion: ApplicationVersion) => void;
   appVersion?: ZeAppVersionResponse;
@@ -25,7 +23,6 @@ interface ApplicationVersionProps {
 }
 export function ApplicationVersionSelector({
   applicationVersionList,
-  applicationVersionListCount,
   fetchNextAppVersionListPage,
   hasNextAppVersionListPage,
   onAppVersionChange,
@@ -33,6 +30,25 @@ export function ApplicationVersionSelector({
   isAppVersionLoading,
 }: Readonly<ApplicationVersionProps>) {
   const { application, version, setData } = useContext(DataContext);
+  const observer = useRef<IntersectionObserver>();
+
+  const lastOption = useMemo(
+    () => applicationVersionList[applicationVersionList.length - 1],
+    [applicationVersionList],
+  );
+
+  const lastOptionElementRef = useCallback(
+    (node: Element) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver(async (entries) => {
+        if (entries[0].isIntersecting && hasNextAppVersionListPage) {
+          fetchNextAppVersionListPage();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [fetchNextAppVersionListPage, hasNextAppVersionListPage],
+  );
 
   const _onAppVersionChange = (newVersion: ApplicationVersion) => {
     onAppVersionChange(newVersion);
@@ -48,6 +64,8 @@ export function ApplicationVersionSelector({
     setData(initialVersion, PublishDataKeys.VERSION);
   }, [applicationVersionList, version, appVersion, setData]);
 
+  useEffect(() => observer.current?.disconnect(), []);
+
   if (isAppVersionLoading) return <SelectorSkeleton />;
   if (!appVersion) return null;
 
@@ -58,15 +76,6 @@ export function ApplicationVersionSelector({
         className="custom-select"
         popupIcon={<ArrowDownIcon width={12} height={12} />}
         PopperComponent={CustomPopper}
-        PaperComponent={({ contentEditable, ...param}) => (
-          <CustomPaper
-            {...param}
-            applicationVersionList={applicationVersionList}
-            applicationVersionListCount={applicationVersionListCount}
-            fetchNextAppVersionListPage={fetchNextAppVersionListPage}
-            hasNextAppVersionListPage={hasNextAppVersionListPage}
-          />
-        )}
         disableClearable={true}
         options={applicationVersionList}
         getOptionLabel={(option) => option.name}
@@ -80,6 +89,11 @@ export function ApplicationVersionSelector({
               ownerState,
             ]}
             handleChange={_onAppVersionChange}
+            isLastElement={
+              lastOption.snapshot_id === option.snapshot_id &&
+              hasNextAppVersionListPage
+            }
+            optionRef={lastOptionElementRef}
           />
         )}
         renderInput={(params) => (
