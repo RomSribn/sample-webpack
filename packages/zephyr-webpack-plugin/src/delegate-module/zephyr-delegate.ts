@@ -107,12 +107,7 @@ function delegate_module_template(): unknown {
   return new Promise((resolve, reject) => {
     const remote_entry_url = '__REMOTE_ENTRY_URL__';
     const sessionEdgeURL = window.sessionStorage.getItem('__APPLICATION_UID__');
-
-    let edgeUrl = remote_entry_url;
-
-    if (sessionEdgeURL) {
-      edgeUrl = remote_entry_url;
-    }
+    const edgeUrl = sessionEdgeURL ?? remote_entry_url;
 
     const resolve_entry = [
       fetch(edgeUrl, { method: 'HEAD' })

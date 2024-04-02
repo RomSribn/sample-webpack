@@ -88,7 +88,7 @@ export function ApplicationContainer() {
         .executeScript({
           target: { tabId: tabId },
           func: setSessionSetItem,
-          args: [newVal.application_uid, newVal.remote_host],
+          args: [newVal.application_uid, newVal.remote_entry_url],
         })
         .then(() => console.log('injected a function'));
     })();

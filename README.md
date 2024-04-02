@@ -78,7 +78,11 @@ ZE_DEV=local npx nx run-many -t build --parallel=1 --skip-nx-cache -p team-blue 
 ZE_DEV=local npx nx run team-green:build --skip-nx-cache --watch
 ```
 
-open http://edge.lan:8787
+dev
+
+```bash
+ZE_DEV=dev npx nx run team-green:build --skip-nx-cache --watch
+```
 
 prod
 
