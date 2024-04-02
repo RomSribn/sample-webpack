@@ -42,7 +42,7 @@ export function RemotesSelector({
 }: Readonly<ApplicationSelectorProps>) {
   const { remotes, setData } = useContext(DataContext);
   const { applicationTagList } = useApplicationTagList(__remote.application_uid);
-  const { applicationVersionList } = useApplicationVersionList(__remote.application_uid);
+  const { applicationVersionList } = useApplicationVersionList({ application_uid: __remote.application_uid });
 
   // necessary to differentiate between tags and version
   const tagList = useMemo<SelectorOptionType[] | undefined>(

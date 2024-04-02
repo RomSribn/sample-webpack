@@ -5,6 +5,7 @@ import { TextField, Autocomplete } from '@mui/material';
 import { SelectorSkeleton } from '../../components/selector-skeleton';
 import { CustomOption } from './custom-option';
 import { CustomPopper } from './custom-popper';
+import { CustomPaper } from './custom-paper';
 // context
 import { DataContext, PublishDataKeys } from '../../context/data-context';
 // icons
@@ -15,12 +16,18 @@ import { ApplicationVersion } from '../../hooks/queries/application-version';
 
 interface ApplicationVersionProps {
   applicationVersionList: ApplicationVersion[];
+  fetchNextAppVersionListPage: () => void;
+  applicationVersionListCount: number;
+  hasNextAppVersionListPage: boolean;
   onAppVersionChange: (applicationVersion: ApplicationVersion) => void;
   appVersion?: ZeAppVersionResponse;
   isAppVersionLoading: boolean;
 }
 export function ApplicationVersionSelector({
   applicationVersionList,
+  applicationVersionListCount,
+  fetchNextAppVersionListPage,
+  hasNextAppVersionListPage,
   onAppVersionChange,
   appVersion,
   isAppVersionLoading,
@@ -51,6 +58,15 @@ export function ApplicationVersionSelector({
         className="custom-select"
         popupIcon={<ArrowDownIcon width={12} height={12} />}
         PopperComponent={CustomPopper}
+        PaperComponent={({ contentEditable, ...param}) => (
+          <CustomPaper
+            {...param}
+            applicationVersionList={applicationVersionList}
+            applicationVersionListCount={applicationVersionListCount}
+            fetchNextAppVersionListPage={fetchNextAppVersionListPage}
+            hasNextAppVersionListPage={hasNextAppVersionListPage}
+          />
+        )}
         disableClearable={true}
         options={applicationVersionList}
         getOptionLabel={(option) => option.name}

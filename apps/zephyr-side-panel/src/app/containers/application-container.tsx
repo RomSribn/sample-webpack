@@ -22,7 +22,7 @@ import {
 } from '../hooks/queries/application-tag';
 import {
   ApplicationVersion,
-  useApplicationVersionList,
+  useApplicationVersionListInfinity,
 } from '../hooks/queries/application-version';
 import { navigate } from '../utils/navigate';
 import { ZeAppVersion } from 'zephyr-edge-contract';
@@ -31,8 +31,17 @@ export function ApplicationContainer() {
   const { url = '', setIsDeployed, setUrl } = useContext(AppContext);
   const { application, tag, remotes, setData } = useContext(DataContext);
   const { applicationList, applicationListRefetch } = useApplicationList();
-  const { applicationTagList } = useApplicationTagList(application?.application_uid);
-  const { applicationVersionList } = useApplicationVersionList(application?.application_uid);
+  const { applicationTagList } = useApplicationTagList(
+    application?.application_uid,
+  );
+  const {
+    applicationVersionList,
+    fetchNextAppVersionListPage,
+    hasNextAppVersionListPage,
+    applicationVersionListCount,
+  } = useApplicationVersionListInfinity({
+    application_uid: application?.application_uid,
+  });
   const { data: appVersion, isLoading: isAppVersionLoading } =
     useFetchAppVersionQuery({ url });
 
@@ -129,6 +138,9 @@ export function ApplicationContainer() {
           />
           <ApplicationVersionSelector
             applicationVersionList={applicationVersionList ?? []}
+            fetchNextAppVersionListPage={fetchNextAppVersionListPage}
+            applicationVersionListCount={applicationVersionListCount}
+            hasNextAppVersionListPage={hasNextAppVersionListPage}
             onAppVersionChange={onAppVersionChange}
             appVersion={appVersion}
             isAppVersionLoading={isAppVersionLoading}
