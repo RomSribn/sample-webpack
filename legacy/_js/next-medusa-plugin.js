@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
-import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
+import { FederationDashboardPlugin } from '../../packages/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
 import * as fs from 'fs';
-import { mergeGraphs } from '../federation-dashboard-legacy/utils/merge-graphs/merge-graphs';
+import { mergeGraphs } from '../../packages/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/merge-graphs/merge-graphs';
 
 const PLUGIN_NAME = 'next-medusa-plugin';
 

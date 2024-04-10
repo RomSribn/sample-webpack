@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Zephyr control",
   "version": "0.5",
-  "description": "Made your federation easy",
+  "name": "Zephyr Mission Control",
+  "description": "Zephyr: We made application federation easy",
   "minimum_chrome_version": "116",
   "background": {
     "service_worker": "main.js",

@@ -7,8 +7,8 @@ import { CustomPopper } from './custom-popper';
 // context
 import {
   DataContext,
-  PublishDataKeys,
   defaultState,
+  PublishDataKeys,
 } from '../../context/data-context';
 // icons
 import { ArrowDownIcon } from '../../../assets/icons';
@@ -44,9 +44,16 @@ export function ApplicationSelector({
         PopperComponent={CustomPopper}
         disableClearable={true}
         value={application}
-        options={applications}
+        options={applications
+          // .sort((a,b) => a.project.name > b.project.name ? 1: -1)
+          .sort((a, b) =>
+            a.project.name + '/' + a.organization.name >
+            b.project.name + '/' + b.organization.name
+              ? 1
+              : -1,
+          )}
         groupBy={(option) =>
-          option.organization.name + '/' + option.project.name
+          option.project.name + '/' + option.organization.name
         }
         getOptionLabel={(option) => option.name}
         renderInput={CustomInput}

@@ -1,30 +1,49 @@
 import type { DurableObjectNamespace, DurableObjectState, Request } from '@cloudflare/workers-types';
+import { jwtVerify, importJWK } from 'jose';
 
 export interface Env {
 	ZE_BUILD_COUNTER: DurableObjectNamespace;
+	JWT_SECRET: string;
 }
-
 // Worker
 
 export default {
 	async fetch(request: Request, env: Env) {
-		let url = new URL(request.url);
-		// todo: git-author, git-repo,app_name
-		// todo: here we can check for user auth and limits
-		let name = url.searchParams.get('key');
-		if (!name) {
-			return new Response('Missing key', { status: 400 });
+		const token = request.headers.get('can_write_jwt');
+		if (!token) {
+			return new Response('Please login in Zephyr', { status: 403 });
 		}
 
-		let id = env.ZE_BUILD_COUNTER.idFromName(name);
+		const _public_token = await importJWK(JSON.parse(env.JWT_SECRET), 'RS256');
+		const { payload, protectedHeader } = await jwtVerify(token, _public_token);
 
+		const { user_uuid, can_write, username, application_uid } = payload as {
+			application_uid: string;
+			can_write: boolean;
+			user_uuid: string;
+			username: string;
+		};
+
+		if (!can_write) {
+			return new Response(
+				JSON.stringify({
+					message: `User ${username} is not allowed to update ${application_uid}`,
+					status: 403,
+				}),
+			);
+		}
+
+		let id = env.ZE_BUILD_COUNTER.idFromName(user_uuid);
 		let obj = env.ZE_BUILD_COUNTER.get(id);
 
 		// Send a request to the Durable Object, then await its response.
 		let resp = await obj.fetch(request.url);
 		let buildId = await resp.text();
 
-		return new Response(JSON.stringify({ [name]: buildId }), { headers: { 'content-type': 'application/json' }, status: 200 });
+		return new Response(JSON.stringify({ [user_uuid]: buildId }), {
+			headers: { 'content-type': 'application/json' },
+			status: 200,
+		});
 	},
 };
 

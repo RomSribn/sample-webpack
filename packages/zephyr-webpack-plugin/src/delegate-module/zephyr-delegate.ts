@@ -1,4 +1,9 @@
-import { createFullAppName, getToken } from 'zephyr-edge-contract';
+import {
+  createFullAppName,
+  ZEPHYR_API_ENDPOINT,
+  getToken,
+  v2_api_paths,
+} from 'zephyr-edge-contract';
 
 interface DelegateConfig {
   org: string;
@@ -14,6 +19,8 @@ export async function replace_remote_in_mf_config(
   mfPlugin: any,
   config: DelegateConfig,
 ): Promise<DelegateConfig> {
+  if (!mfPlugin._options?.remotes) return config;
+
   // replace remotes with delegate function
   const depsResolutionTask = Object.keys(mfPlugin._options?.remotes).map(
     async (key) => {
@@ -38,9 +45,13 @@ export async function replace_remote_in_mf_config(
         name: string;
         version: string;
       }): Promise<ResolvedDependency | undefined> {
+        const dashboardURL = new URL(
+          v2_api_paths.dashboard_path,
+          ZEPHYR_API_ENDPOINT,
+        );
+        dashboardURL.searchParams.append('name', name);
+        dashboardURL.searchParams.append('version', version);
         try {
-          // todo: @valorkin remove hardcode
-          const dashboardURL = `http://localhost:3333/v2/builder-packages-api/resolve?name=${name}&version=${version}`;
           const token = await getToken();
           const res = await fetch(dashboardURL, {
             method: 'GET',
@@ -57,8 +68,9 @@ export async function replace_remote_in_mf_config(
           const response = (await res.json()) as { value: ResolvedDependency };
           return response.value;
         } catch (err) {
-          console.warn(`Error resolving '${name}' version '${version}'`);
-          console.error(err);
+          console.warn(
+            `[zephyr] Could not resolve '${name}' with version '${version}'`,
+          );
         }
 
         return {
@@ -69,6 +81,14 @@ export async function replace_remote_in_mf_config(
       }
 
       if (resolvedDependency) {
+        const _version = mfPlugin._options.remotes[key];
+        if (_version?.indexOf('@') !== -1) {
+          const [v_app] = _version.split('@');
+          resolvedDependency.remote_entry_url = [
+            v_app,
+            resolvedDependency.remote_entry_url,
+          ].join('@');
+        }
         mfPlugin._options.remotes[key] =
           replace_remote_with_delegate(resolvedDependency);
       }
@@ -107,7 +127,11 @@ function delegate_module_template(): unknown {
   return new Promise((resolve, reject) => {
     const remote_entry_url = '__REMOTE_ENTRY_URL__';
     const sessionEdgeURL = window.sessionStorage.getItem('__APPLICATION_UID__');
-    const edgeUrl = sessionEdgeURL ?? remote_entry_url;
+    let edgeUrl = sessionEdgeURL ?? remote_entry_url;
+    let remote_name = '';
+    if (edgeUrl.indexOf('@') !== -1) {
+      [remote_name, edgeUrl] = edgeUrl.split('@') as [string, string];
+    }
 
     const resolve_entry = [
       fetch(edgeUrl, { method: 'HEAD' })
@@ -118,9 +142,15 @@ function delegate_module_template(): unknown {
     Promise.race(resolve_entry)
       .then((remoteUrl) => {
         if (typeof remoteUrl !== 'string') return;
-        // @ts-expect-error using temporary _import_ holder until babel replacement is fixed
-        __import__(remoteUrl)
-          .then((mod: unknown) => resolve(mod))
+        return new Function(`return import("${remoteUrl}")`)()
+          .then((mod: unknown) => {
+            const _win = window as unknown as Record<string, unknown>;
+            if (typeof _win[remote_name] !== 'undefined') {
+              return resolve(_win[remote_name]);
+            }
+
+            return resolve(mod);
+          })
           .catch((err: unknown) => reject(err));
       })
       .catch((err) => {

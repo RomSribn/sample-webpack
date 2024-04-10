@@ -13,4 +13,5 @@ export interface Env {
 	ze_envs: KVNamespace;
 	ze_snapshots: KVNamespace;
 	ze_files: KVNamespace;
+	JWT_SECRET: string;
 }

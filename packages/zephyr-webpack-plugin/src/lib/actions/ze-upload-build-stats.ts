@@ -1,14 +1,16 @@
-import { getToken } from 'zephyr-edge-contract';
-import { telemetry_api_endpoint } from '../../config/endpoints';
-
-const dashboardURL = telemetry_api_endpoint;
+import {
+  ZEPHYR_API_ENDPOINT,
+  getToken,
+  v2_api_paths,
+} from 'zephyr-edge-contract';
 
 export async function zeUploadBuildStats(
   dashData: unknown,
 ): Promise<void | unknown> {
-  if (!dashboardURL) {
-    return Promise.resolve();
-  }
+  const dashboardURL = new URL(
+    v2_api_paths.dashboard_path,
+    ZEPHYR_API_ENDPOINT,
+  );
   const client = fetch;
   try {
     const token = await getToken();
@@ -32,13 +34,4 @@ export async function zeUploadBuildStats(
     console.error(err);
   }
   return;
-}
-
-export interface ZeUploadBuildStats {
-  app_version: {
-    application_uid: string;
-    // snapshot id
-    snapshot_id: string;
-  };
-  urls: string[];
 }

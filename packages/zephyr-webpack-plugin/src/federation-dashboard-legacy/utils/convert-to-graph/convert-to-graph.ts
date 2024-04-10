@@ -56,7 +56,7 @@ export interface ConvertedGraph {
 
 export function convertToGraph(
   params: ConvertToGraphParams,
-  standalone?: boolean
+  standalone?: boolean,
 ): ConvertedGraph {
   const {
     name,
@@ -74,10 +74,10 @@ export function convertToGraph(
     buildHash,
   } = params;
 
-  validateParams(
-    { federationRemoteEntry, modules, topLevelPackage /*, metadata*/ },
-    standalone
-  );
+  // validateParams(
+  //   { federationRemoteEntry, modules, topLevelPackage /*, metadata*/ },
+  //   standalone
+  // );
 
   const { consumes, modulesObj, npmModules } = modulePartOne(modules);
 

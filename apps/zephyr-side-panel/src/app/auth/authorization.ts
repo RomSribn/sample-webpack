@@ -11,6 +11,8 @@ const {
   ZEPHYR_API_ENDPOINT: zephyrApiEndpoint,
 } = envValue.value;
 
+/** @deprecated */
+// just to use current isStillValidToken function from the zephyr-edge-contract
 export async function isTokenValid(token: string): Promise<void> {
   const config = {
     method: 'GET',
@@ -28,7 +30,9 @@ export async function isTokenValid(token: string): Promise<void> {
 export async function loginWithLink(redirectUrl: string): Promise<void> {
   const state = uuidv4().replace(/-/g, '');
   const authUrl = getAuthenticationURL(state);
-  await navigate(authUrl);
+  const authResponseUrl = await fetch(authUrl).then((res) => res.text());
+
+  await navigate(authResponseUrl);
   await subscribeToWsEvents(state, redirectUrl);
 }
 
@@ -44,8 +48,8 @@ export async function logout(): Promise<void> {
 }
 
 function getAuthenticationURL(state: string): string {
-  const auth0RedirectUrl = new URL('authorize', zephyrApiEndpoint);
-  const loginUrl = new URL('v2/auth/login', zephyrApiEndpoint);
+  const auth0RedirectUrl = new URL('v2/authorize', zephyrApiEndpoint);
+  const loginUrl = new URL('v2/authorize-link', zephyrApiEndpoint);
   loginUrl.searchParams.append('state', state);
   loginUrl.searchParams.append('redirect-url', auth0RedirectUrl.href);
   return loginUrl.href;

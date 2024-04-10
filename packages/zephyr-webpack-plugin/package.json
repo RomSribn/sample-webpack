@@ -2,20 +2,17 @@
   "name": "zephyr-webpack-plugin",
   "version": "0.0.1",
   "license": "Apache-2.0",
-  "publishConfig": {
-    "registry": "http://localhost:4873/"
-  },
   "dependencies": {
     "is-ci": "2.0.0",
-    "webpack": "5.89.0",
+    "webpack": "5.91.0",
     "tslib": "^2.3.0",
     "@babel/parser": "7.23.6",
     "@babel/types": "7.23.6",
     "@babel/traverse": "7.23.7",
     "@babel/generator": "7.23.6",
     "@module-federation/automatic-vendor-federation": "1.2.1",
-    "zephyr-edge-contract": "*",
-    "nx": "18.2.0"
+    "nx": "18.2.0",
+    "zephyr-edge-contract": "0.0.1"
   },
   "devDependencies": {
     "@types/is-ci": "3.0.4",

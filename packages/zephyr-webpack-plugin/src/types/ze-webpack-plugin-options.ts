@@ -5,9 +5,11 @@ export interface ZeWebpackPluginOptions {
   appName: string;
   username: string;
   zeConfig: {
+    edge_url: string;
     user: string;
     buildId: string | undefined;
   };
+  application_uid: string;
   app: {
     org: string;
     project: string;
@@ -23,8 +25,8 @@ export interface ZeWebpackPluginOptions {
   mfConfig?: {
     name: string;
     filename: string;
-    exposes?: Record<string, string>
+    exposes?: Record<string, string>;
     remotes?: Record<string, string>;
-    shared?: Record<string, unknown>
+    shared?: Record<string, unknown>;
   };
 }

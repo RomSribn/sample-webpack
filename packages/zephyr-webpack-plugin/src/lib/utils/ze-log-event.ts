@@ -1,39 +1,7 @@
 import { request } from './ze-http-request';
+import { getApplicationConfiguration } from 'zephyr-edge-contract';
 
-const isDev = true;
-
-// async function request(options, data, forceHttps) {
-//   const https =
-//     !forceHttps && isDev ? require('node:http') : require('node:https');
-//   return new Promise((resolve, reject) => {
-//     const req = https.request(options, (res) => {
-//       let response = [];
-//       res.on('data', (d) => response.push(d));
-
-//       res.on('end', () => {
-//         const _response = Buffer.concat(response)?.toString();
-//         try {
-//           resolve(JSON.parse(_response));
-//         } catch {
-//           resolve(_response);
-//         }
-//       });
-//     });
-
-//     req.on('error', (e) => reject(e));
-
-//     if (data) {
-//       req.write(data);
-//     }
-
-//     req.end();
-//   });
-// }
-
-// fix: hardcode
-const port = isDev ? 3000 : 3000;
-const hostname = isDev ? '127.0.0.1' : '127.0.0.1';
-const log = isDev ? (v: unknown) => console.log(v) : (_: unknown) => void _;
+const log = (v: unknown): void => console.log(v);
 
 interface LogEventOptions {
   level: string;
@@ -43,10 +11,8 @@ interface LogEventOptions {
 }
 
 export interface LoggerOptions {
-  appName: string;
-  username: string;
+  application_uid: string;
   zeConfig: {
-    user: string;
     buildId: string | undefined;
   };
   isCI: boolean;
@@ -56,53 +22,48 @@ export interface LoggerOptions {
 
 export function logger(options: LoggerOptions) {
   return function logEvent({ level, action, message, meta }: LogEventOptions) {
-    // todo: get from ze-config-provider
-    const appId = options.appName;
-    const zeUserId = options.zeConfig.user;
-    const zeBuildId = options.zeConfig.buildId;
-    const git = options.git;
-    const createdAt = Date.now();
+    const application_uid = options.application_uid;
+    getApplicationConfiguration({ application_uid }).then(
+      ({ username, user_uuid, LOGS_ENDPOINT }) => {
+        const zeBuildId = options.zeConfig.buildId;
+        const git = options.git;
+        const createdAt = Date.now();
 
-    // todo: if user not logged in - Ze does nothing
-    if (!zeBuildId || !zeUserId) {
-      return;
-    }
+        if (!level && !action) {
+          throw new Error('log level and action type must be provided');
+        }
 
-    if (!level && !action) {
-      throw new Error('log level and action type must be provided');
-    }
+        message = `[${options.application_uid}](${username})[${zeBuildId}]: ${message}`;
+        meta = Object.assign({}, meta, {
+          isCI: options.isCI,
+          app: options.app,
+          git: options.git,
+        });
 
-    message = `[${options.appName}](${options.username})[${zeBuildId}]: ${message}`;
-    meta = Object.assign({}, meta, {
-      isCI: options.isCI,
-      app: options.app,
-      git: options.git,
-    });
+        const data = JSON.stringify({
+          appId: application_uid,
+          zeUserId: user_uuid,
+          username,
+          zeBuildId,
+          logLevel: level,
+          actionType: action,
+          git,
+          message,
+          meta,
+          createdAt,
+        });
 
-    const data = JSON.stringify({
-      appId,
-      zeUserId,
-      zeBuildId,
-      logLevel: level,
-      actionType: action,
-      git,
-      message,
-      meta,
-      createdAt,
-    });
+        const reqOptions = {
+          path: `/logs`,
+          method: 'POST',
+          headers: {
+            'Content-Length': data.length,
+          },
+        };
 
-    const reqOptions = {
-      hostname,
-      port,
-      path: `/logs`,
-      method: 'POST',
-      headers: {
-        'Content-Length': data.length,
+        log(`[zephyr]: ${message}`);
+        request(LOGS_ENDPOINT, reqOptions, data).catch(() => void 0);
       },
-    };
-
-    request(reqOptions, data)
-      .then(log)
-      .catch(() => console.log(message));
+    );
   };
 }

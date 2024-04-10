@@ -1,8 +1,7 @@
 import { logger } from '../utils/ze-log-event';
-import { uploadEnvs } from './ze-upload-file';
-import { Snapshot, ZeEnvs } from 'zephyr-edge-contract';
+import { Snapshot, ZeUploadBuildStats } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
-import { ZeUploadBuildStats } from './ze-upload-build-stats';
+import { uploadEnvs } from '../upload/upload-envs';
 
 export async function zeEnableSnapshotOnEdge(
   pluginOptions: ZeWebpackPluginOptions,
@@ -10,6 +9,7 @@ export async function zeEnableSnapshotOnEdge(
   envs_jwt: ZeUploadBuildStats,
 ): Promise<void> {
   const logEvent = logger(pluginOptions);
+  const deployStart = Date.now();
 
   logEvent({
     level: 'info',
@@ -17,24 +17,18 @@ export async function zeEnableSnapshotOnEdge(
     message: `started deploying local build to edge`,
   });
 
-  const deployStart = Date.now();
-
-  // todo: upload context to API and get
-  // todo: get urls from ze API
-  const envs: ZeEnvs = {
-    snapshot_id: envs_jwt.app_version.snapshot_id,
-    urls: envs_jwt.urls,
-  };
-
   envs_jwt.urls.forEach((url) => {
     logEvent({
       level: 'trace',
       action: 'deploy:url',
-      message: `deployed to https://${url}`,
+      message: `deploying to ${url}`,
     });
   });
 
-  const latest = await uploadEnvs(envs);
+  const latest = await uploadEnvs({
+    body: envs_jwt,
+    application_uid: pluginOptions.application_uid,
+  });
 
   if (latest) {
     logEvent({

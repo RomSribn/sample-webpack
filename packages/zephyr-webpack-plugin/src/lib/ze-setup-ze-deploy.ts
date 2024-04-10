@@ -1,17 +1,17 @@
 import { Compiler } from 'webpack';
 import { logger } from './utils/ze-log-event';
-import { zeEnableSnapshotOnEdge } from './upload/ze-enable-snapshot-on-edge';
-import { zeUploadSnapshot } from './upload/ze-upload-snapshot';
-import { zeUploadAssets } from './upload/ze-upload-assets';
+import { zeEnableSnapshotOnEdge } from './actions/ze-enable-snapshot-on-edge';
+import { zeUploadSnapshot } from './actions/ze-upload-snapshot';
+import { zeUploadAssets } from './actions/ze-upload-assets';
 import { zeBuildAssetsMap } from './payload-builders/ze-build-assets-map';
 import { createSnapshot } from './payload-builders/ze-build-snapshot';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
+import { zeUploadBuildStats } from './actions/ze-upload-build-stats';
 import {
+  getApplicationConfiguration,
   ZeUploadBuildStats,
-  zeUploadBuildStats,
-} from './upload/ze-upload-build-stats';
-import { edge_endpoint } from '../config/endpoints';
+} from 'zephyr-edge-contract';
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
@@ -32,15 +32,24 @@ export function setupZeDeploy(
           return;
         }
 
+        const { EDGE_URL, username, email } = await getApplicationConfiguration(
+          { application_uid: pluginOptions.application_uid },
+        );
+
         const zeStart = Date.now();
         const assetsMap = zeBuildAssetsMap(pluginOptions, assets);
-        const snapshot = createSnapshot(pluginOptions, assetsMap);
+        const snapshot = createSnapshot({
+          options: pluginOptions,
+          assets: assetsMap,
+          username,
+          email,
+        });
         const missingAssets = await zeUploadSnapshot(
           pluginOptions,
           snapshot,
         ).catch((_) => void _);
         if (typeof missingAssets === 'undefined') return;
-        // todo: exit if upload failed
+
         const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
           missingAssets,
           assetsMap,
@@ -48,7 +57,6 @@ export function setupZeDeploy(
         });
         if (!assetsUploadSuccess) return;
 
-        // todo: upload app version and send JWT with env URLs to edge
         // eslint-disable-next-line
         const dashboardPlugin = (pluginOptions as any)
           .dashboard as FederationDashboardPlugin;
@@ -58,11 +66,8 @@ export function setupZeDeploy(
         dashboardPlugin.postDashboardData = async (dashData: any) => {
           dashData.app.buildId = pluginOptions.zeConfig.buildId;
           dashData.remote = pluginOptions.mfConfig?.filename;
-          // todo: shouldn't be this set for app inside of ze-api?
-          dashData.edge = {
-            hostname: edge_endpoint.hostname,
-            port: edge_endpoint.port,
-          };
+          // todo: @valorkin remove, this should be decided on API side
+          dashData.edge = { url: EDGE_URL };
           return await zeUploadBuildStats(dashData);
         };
 

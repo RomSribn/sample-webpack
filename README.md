@@ -9,6 +9,29 @@
 7. CloudFlare edge worker: ze-worker-to-generate-build-id - to generate build id
 8. CloudFlare edge worker: ze-worker-for-static-upload - to upload and serve files
 
+## How to work with different envs
+
+- locally `ZE_API=http://localhost:3333`
+- dev `ZE_API=https://api-dev.zephyr-cloud.io`
+
+## demo tasks on prod
+
+```bash
+npx nx run sample-webpack-application:build --watch --skip-nx-cache
+```
+
+```bash
+npx nx run sample-webpack-application:build --watch --skip-nx-cache
+```
+
+```bash
+npx nx run-many -t build --parallel=1 --skip-nx-cache --verbose -p team-blue team-green team-red
+```
+
+```bash
+npx nx run team-green:build --skip-nx-cache --watch
+```
+
 ## How to run locally
 
 - install dependencies
@@ -58,36 +81,6 @@ clean workers cache for demo
 
 ```bash
 rm -rf ./workers/.wrangler
-```
-
-```bash
-ZE_DEV=local npx dist/packages/cli login
-```
-
-run with local edge
-
-```bash
-ZE_DEV=local npx nx run sample-webpack-application:build --watch --skip-nx-cache
-```
-
-```bash
-ZE_DEV=local npx nx run-many -t build --parallel=1 --skip-nx-cache -p team-blue team-green team-red
-```
-
-```bash
-ZE_DEV=local npx nx run team-green:build --skip-nx-cache --watch
-```
-
-dev
-
-```bash
-ZE_DEV=dev npx nx run team-green:build --skip-nx-cache --watch
-```
-
-prod
-
-```bash
-npx nx run-many -t build --parallel=1 --skip-nx-cache -p team-blue team-red team-green
 ```
 
 working locally with verdaccio

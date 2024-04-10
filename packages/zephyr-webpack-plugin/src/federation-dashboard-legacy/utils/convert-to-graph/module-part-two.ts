@@ -132,7 +132,7 @@ export function modulePartTwo(
     }
     let version = '';
 
-    if (data && data[3].startsWith('=')) {
+    if (data && data[3] && data[3]?.startsWith('=')) {
       version = data[3].replace('=', '');
     } else {
       [

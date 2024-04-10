@@ -5,8 +5,8 @@ compatibility_date = "2023-10-02"
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+JWT_SECRET='{"kty":"RSA","n":"m8vGG3CptgdVkGa2AVpyaGXthIo6Qpaa0ey4V2Ui20Z6CyWzdSeLO0CL9NX611UKtpCRQM0X9LDj_-HQ4atsPCawW5hpdAzYq1hCeyUss_A3yfmLRlw5xa2rXN5X_c6VIf8i-ae8lEIIp9FruJ7psZl3lbEDCBv-edzhlVR4ZufyRuEOh0jQBU0Z5M3GiVikaWCQ2OSsFs5usZCf6FG0iVEEQosj03r9zE3qgtvf_hs7uj1j_o-Rbom4vVVIQm5vBKA2FNvDFEZRZZfwegFXN26rfIhe0IrRNbBhyMPMNu7caNVT-eeAY0VWZLzSC7QGIoTmf5uj7nrBkRqiBeYSWQ","e":"AQAB"}'
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/kv

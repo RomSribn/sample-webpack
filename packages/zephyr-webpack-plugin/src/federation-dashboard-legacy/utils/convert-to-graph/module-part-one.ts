@@ -18,6 +18,10 @@ interface ModulePartOneReturn {
   npmModules: NpmModules;
 }
 
+function isString(value: any): value is string {
+  return typeof value === 'string';
+}
+
 export function modulePartOne(
   modules: StatsModule[] | undefined,
 ): ModulePartOneReturn {
@@ -37,10 +41,10 @@ export function modulePartOne(
 
   modules?.forEach((mod) => {
     const { identifier, reasons, moduleType, nameForCondition, size } = mod;
-    const data = identifier?.split(' ');
+    const data = identifier?.split(' ') as (string | undefined)[] | undefined;
 
     if (moduleType === 'remote-module') {
-      if (data?.length === 4) {
+      if (data?.length === 4 && isString(data[3]) && isString(data[2])) {
         const name = data[3].replace('./', '');
 
         let applicationID: string | null = data[2].replace(
@@ -75,7 +79,12 @@ export function modulePartOne(
           consumesByName[userRequest].usedIn.add(module);
         });
       }
-    } else if (data && data[0] === 'container' && data[1] === 'entry') {
+    } else if (
+      data &&
+      data[0] === 'container' &&
+      data[1] === 'entry' &&
+      data[3]
+    ) {
       JSON.parse(data[3]).forEach(
         ([prefixedName, file]: [string, { import: string[] }]) => {
           const name = prefixedName.replace('./', '');
@@ -98,40 +107,52 @@ export function modulePartOne(
       const context = contextArray.join(sep);
 
       const packageJsonFile = join(context, 'package.json');
-      const packageJson = JSON.parse(
-        readFileSync(packageJsonFile, { encoding: 'utf-8' }),
-      ) as LocalPackageJson;
+      const packageJson = safe_read_package_json_sync(packageJsonFile);
 
-      const existingPackage = npmModules.get(packageJson.name);
-      if (existingPackage) {
-        const existingReference = existingPackage[packageJson.version];
-        const data = {
-          name: packageJson.name,
-          version: packageJson.version,
-          homepage: packageJson.homepage,
-          license: getLicenses(packageJson),
-          size: (Number(existingReference.size) || 0) + (size ?? 0),
-        };
-        if (existingReference) {
-          Object.assign(existingReference, data);
-        } else {
-          existingPackage[packageJson.version] = data;
-        }
-        npmModules.set(packageJson.name, existingPackage);
-      } else {
-        const newDep = {
-          [packageJson.version]: {
+      if (packageJson) {
+        const existingPackage = npmModules.get(packageJson.name);
+        if (existingPackage) {
+          const existingReference = existingPackage[packageJson.version];
+          const data = {
             name: packageJson.name,
             version: packageJson.version,
             homepage: packageJson.homepage,
             license: getLicenses(packageJson),
-            size,
-          },
-        };
-        npmModules.set(packageJson.name, newDep);
+            size: (Number(existingReference.size) || 0) + (size ?? 0),
+          };
+          if (existingReference) {
+            Object.assign(existingReference, data);
+          } else {
+            existingPackage[packageJson.version] = data;
+          }
+          npmModules.set(packageJson.name, existingPackage);
+        } else {
+          const newDep = {
+            [packageJson.version]: {
+              name: packageJson.name,
+              version: packageJson.version,
+              homepage: packageJson.homepage,
+              license: getLicenses(packageJson),
+              size,
+            },
+          };
+          npmModules.set(packageJson.name, newDep);
+        }
       }
     }
   });
 
   return { consumes, modulesObj, npmModules };
+}
+
+function safe_read_package_json_sync(
+  file_path: string,
+): LocalPackageJson | undefined {
+  try {
+    return JSON.parse(
+      readFileSync(file_path, { encoding: 'utf-8' }),
+    ) as LocalPackageJson;
+  } catch {
+    return;
+  }
 }

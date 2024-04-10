@@ -1,5 +1,5 @@
 import { logger } from '../utils/ze-log-event';
-import { uploadFile } from './ze-upload-file';
+import { uploadFile } from '../upload/upload-file';
 import { ZeUploadAssetsOptions } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 
@@ -36,7 +36,11 @@ export async function zeUploadAssets(
       const start = Date.now();
       const assetWithBuffer = assetsMap[asset.hash];
       const assetSize = assetWithBuffer?.buffer?.length / 1024;
-      return await uploadFile(asset.hash, assetWithBuffer)
+      return await uploadFile({
+        id: asset.hash,
+        asset: assetWithBuffer,
+        application_uid: pluginOptions.application_uid,
+      })
         .then(() => {
           const fileUploaded = Date.now() - start;
           totalTime += fileUploaded;

@@ -35,7 +35,7 @@ export function withZephyr(
 
     const { org, project } = gitInfo.app;
 
-    const fullAppName = createFullAppName({
+    const application_uid = createFullAppName({
       org,
       project,
       name: packageJson?.name,
@@ -58,7 +58,8 @@ export function withZephyr(
 
     const depsResolutionTasks = config.plugins
       ?.filter(
-        (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
+        (plugin) =>
+          plugin?.constructor.name.indexOf('ModuleFederationPlugin') === -1,
       )
       ?.map(async (mfConfig) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,7 +75,7 @@ export function withZephyr(
 
       config.plugins?.push(
         new ModuleFederationPlugin({
-          name: fullAppName,
+          name: application_uid,
           filename: 'remoteEntry.js',
           shared: packageJson?.dependencies,
           exposes: zephyrOption?.exposes,
@@ -91,6 +92,7 @@ export function withZephyr(
 
     config.plugins?.push(
       new ZeWebpackPlugin({
+        application_uid,
         app: {
           name: packageJson.name,
           version: packageJson.version,
