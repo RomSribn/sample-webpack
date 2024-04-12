@@ -1,5 +1,8 @@
 import { request } from './ze-http-request';
-import { getApplicationConfiguration } from 'zephyr-edge-contract';
+import {
+  getApplicationConfiguration,
+  ZEPHYR_API_ENDPOINT,
+} from 'zephyr-edge-contract';
 
 const log = (v: unknown): void => console.log(v);
 
@@ -24,7 +27,7 @@ export function logger(options: LoggerOptions) {
   return function logEvent({ level, action, message, meta }: LogEventOptions) {
     const application_uid = options.application_uid;
     getApplicationConfiguration({ application_uid }).then(
-      ({ username, user_uuid, LOGS_ENDPOINT }) => {
+      ({ username, user_uuid }) => {
         const zeBuildId = options.zeConfig.buildId;
         const git = options.git;
         const createdAt = Date.now();
@@ -62,8 +65,8 @@ export function logger(options: LoggerOptions) {
         };
 
         log(`[zephyr]: ${message}`);
-        request(LOGS_ENDPOINT, reqOptions, data).catch(() => void 0);
-      },
+        request(ZEPHYR_API_ENDPOINT, reqOptions, data).catch(() => void 0);
+      }
     );
   };
 }
