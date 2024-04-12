@@ -1,6 +1,6 @@
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import classnames from 'classnames';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 // material
 import { Popover, Box } from '@mui/material';
 // context
@@ -19,6 +19,7 @@ import {
 import { ID } from './index';
 import { logout } from '../../auth/authorization';
 import { RouteNames, routeTitles } from '../../router/route-names';
+import { envValue } from '../../../environments/env-value';
 
 interface NavigationPopoverProps {
   open: boolean;
@@ -34,7 +35,9 @@ const NavigationPopover = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { refreshToken } = useContext(AppContext);
+  const { refreshToken, url } = useContext(AppContext);
+
+  const isDocumentation = useMemo(() => url?.includes(envValue.value.ZEPHYR_DOCS_URL), [url]);
 
   const handleLogout = async () => {
     await logout();
@@ -97,15 +100,26 @@ const NavigationPopover = ({
         </li>
         <li
           className={classnames('navigation-list__item', {
-            disabled: true,
-            active: false,
+            active: isDocumentation,
           })}
         >
-          <Box display={'flex'} alignItems={'center'} marginRight={4}>
-            <DocumentIcon />
-            <span>{routeTitles[RouteNames.DOCUMENTATION]}</span>
-          </Box>
-          <NewTabIcon />
+          <Link
+            to={envValue.value.ZEPHYR_DOCS_URL}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Box display={'flex'} alignItems={'center'} marginRight={4}>
+              <DocumentIcon />
+              <span>{routeTitles[RouteNames.DOCUMENTATION]}</span>
+            </Box>
+            <NewTabIcon />
+          </Link>
         </li>
         <li
           className="navigation-list__item error"

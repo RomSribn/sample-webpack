@@ -4,6 +4,7 @@ export interface Environment {
   readonly AUTH0_CLIENT_ID: string;
   readonly AUTH0_DOMAIN: string;
   readonly ZEPHYR_API_ENDPOINT: string;
+  readonly ZEPHYR_DOCS_URL: string;
 }
 
 let _env: Environment;

@@ -9,4 +9,5 @@ envValue.value = {
   AUTH0_CLIENT_ID: 'ZsqL3PcPd5Tt2mNZimgvF5SRvvwvYqza',
   AUTH0_DOMAIN: 'zephyr-dev-eu.eu.auth0.com',
   ZEPHYR_API_ENDPOINT: 'http://localhost:3333',
+  ZEPHYR_DOCS_URL: 'https://docs.zephyr-cloud.io'
 };
