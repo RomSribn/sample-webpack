@@ -1,29 +1,67 @@
 import {
   createFullAppName,
-  ZEPHYR_API_ENDPOINT,
   getToken,
   v2_api_paths,
+  ZEPHYR_API_ENDPOINT,
 } from 'zephyr-edge-contract';
-
-interface DelegateConfig {
-  org: string;
-  project: string;
-  application: string | undefined;
-}
+import { DelegateConfig } from '../lib/dependency-resolution/replace-remotes-with-delegates';
 
 // todo: in order to become federation impl agnostic, we should parse and provide
 // already processed federation config instead of mfConfig
 
+async function resolve_remote_dependency({
+  name,
+  version,
+}: {
+  name: string;
+  version: string;
+}): Promise<ResolvedDependency | void> {
+  const resolveDependency = new URL(
+    v2_api_paths.resolve_dependency_path,
+    ZEPHYR_API_ENDPOINT
+  );
+  resolveDependency.searchParams.append('name', name);
+  resolveDependency.searchParams.append('version', version);
+  try {
+    const token = await getToken();
+    const res = await fetch(resolveDependency, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(res.statusText);
+    }
+    const response = (await res.json()) as
+      | { value: ResolvedDependency }
+      | undefined;
+    return response?.value;
+  } catch (err) {
+    console.error(
+      `[zephyr] Could not resolve '${name}' with version '${version}'`
+    );
+  }
+}
+
+export interface DependencyResolutionError {
+  error: boolean;
+  application_uid: string;
+}
+
 export async function replace_remote_in_mf_config(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mfPlugin: any,
-  config: DelegateConfig,
-): Promise<DelegateConfig> {
-  if (!mfPlugin._options?.remotes) return config;
+  config: DelegateConfig
+): Promise<(DependencyResolutionError | void)[] | void> {
+  if (!mfPlugin._options?.remotes) return;
 
   // replace remotes with delegate function
   const depsResolutionTask = Object.keys(mfPlugin._options?.remotes).map(
-    async (key) => {
+    async (key): Promise<void | DependencyResolutionError> => {
       const [app_name, project_name, org_name] = key.split('.');
       const application_uid = createFullAppName({
         org: org_name ?? config.org,
@@ -38,48 +76,6 @@ export async function replace_remote_in_mf_config(
         version: mfPlugin._options?.remotes[key],
       });
 
-      async function resolve_remote_dependency({
-        name,
-        version,
-      }: {
-        name: string;
-        version: string;
-      }): Promise<ResolvedDependency | undefined> {
-        const dashboardURL = new URL(
-          v2_api_paths.dashboard_path,
-          ZEPHYR_API_ENDPOINT,
-        );
-        dashboardURL.searchParams.append('name', name);
-        dashboardURL.searchParams.append('version', version);
-        try {
-          const token = await getToken();
-          const res = await fetch(dashboardURL, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + token,
-              Accept: 'application/json',
-            },
-          });
-
-          if (!res.ok) {
-            throw new Error(res.statusText);
-          }
-          const response = (await res.json()) as { value: ResolvedDependency };
-          return response.value;
-        } catch (err) {
-          console.warn(
-            `[zephyr] Could not resolve '${name}' with version '${version}'`,
-          );
-        }
-
-        return {
-          default_url: version,
-          remote_entry_url: version,
-          application_uid: name,
-        };
-      }
-
       if (resolvedDependency) {
         const _version = mfPlugin._options.remotes[key];
         if (_version?.indexOf('@') !== -1) {
@@ -91,13 +87,16 @@ export async function replace_remote_in_mf_config(
         }
         mfPlugin._options.remotes[key] =
           replace_remote_with_delegate(resolvedDependency);
+      } else {
+        return {
+          error: true,
+          application_uid,
+        };
       }
-    },
+    }
   );
 
-  await Promise.all(depsResolutionTask);
-
-  return config;
+  return Promise.all(depsResolutionTask);
 }
 
 interface ResolvedDependency {
@@ -156,7 +155,7 @@ function delegate_module_template(): unknown {
       .catch((err) => {
         console.error(
           `Zephyr: error loading remote entry ${remote_entry_url}`,
-          err,
+          err
         );
       });
   });

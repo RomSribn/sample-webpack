@@ -5,16 +5,15 @@ import {
 } from 'zephyr-edge-contract';
 
 export async function zeUploadBuildStats(
-  dashData: unknown,
+  dashData: unknown
 ): Promise<void | unknown> {
   const dashboardURL = new URL(
     v2_api_paths.dashboard_path,
-    ZEPHYR_API_ENDPOINT,
+    ZEPHYR_API_ENDPOINT
   );
-  const client = fetch;
   try {
     const token = await getToken();
-    const res = await client(dashboardURL, {
+    const res = await fetch(dashboardURL, {
       method: 'POST',
       body: JSON.stringify(dashData),
       headers: {
@@ -30,8 +29,9 @@ export async function zeUploadBuildStats(
 
     return await res.json();
   } catch (err) {
-    console.warn(`Error posting data to dashboard URL: ${dashboardURL}`);
-    console.error(err);
+    console.error(
+      `[zephyr]: Error uploading build stats, deployment is not completed`
+    );
   }
   return;
 }

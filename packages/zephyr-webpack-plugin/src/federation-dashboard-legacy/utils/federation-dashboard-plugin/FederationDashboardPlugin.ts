@@ -23,13 +23,12 @@ import {
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
-import { getToken } from 'zephyr-edge-contract';
+import { createFullAppName, createSnapshotId } from 'zephyr-edge-contract';
 import { findPackageJson } from './find-package-json';
 import { computeVersionStrategy, gitSha } from './compute-version-strategy';
 import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';
 import { AddRuntimeRequirementToPromiseExternal } from './add-runtime-requirement-to-promise-external';
 import { Exposes } from './federation-dashboard-types';
-import { createFullAppName, createSnapshotId } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
 // convert this require to imports
 
@@ -64,7 +63,7 @@ export class FederationDashboardPlugin {
         useAST: false,
         fetchClient: undefined,
       },
-      options,
+      options
     ) as FederationDashboardPluginOptions;
   }
 
@@ -78,7 +77,8 @@ export class FederationDashboardPlugin {
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
     const FederationPlugin = compiler.options.plugins.find(
-      (plugin) => plugin?.constructor.name === 'ModuleFederationPlugin',
+      (plugin) =>
+        plugin?.constructor.name.indexOf('ModuleFederationPlugin') !== -1
     ) as ModuleFederationPlugin & { _options: ModuleFederationPluginOptions };
 
     // todo: valorkin fixes
@@ -88,13 +88,13 @@ export class FederationDashboardPlugin {
       this.FederationPluginOptions = Object.assign(
         {},
         FederationPlugin._options,
-        this._options.standalone || {},
+        this._options.standalone || {}
       );
     } else if (this._options.standalone) {
       this.FederationPluginOptions = {};
     } else {
       throw new Error(
-        'Dashboard plugin is missing Module Federation or standalone option',
+        'Dashboard plugin is missing Module Federation or standalone option'
       );
     }
 
@@ -134,12 +134,12 @@ export class FederationDashboardPlugin {
           module: Module & {
             resource?: string;
             resourceResolveData?: { relativePath: string };
-          },
+          }
         ) => {
           // Loop through all the dependencies that has the named export that we are looking for
           const matchedNamedExports = module.dependencies.filter(
             (dep: Dependency & { name?: string }) =>
-              dep.name === 'federateComponent',
+              dep.name === 'federateComponent'
           );
 
           if (matchedNamedExports.length > 0 && module.resource) {
@@ -148,7 +148,7 @@ export class FederationDashboardPlugin {
               file: module.resourceResolveData?.relativePath,
             });
           }
-        },
+        }
       );
 
       filePaths.forEach(({ resource, file }) => {
@@ -170,7 +170,7 @@ export class FederationDashboardPlugin {
 
             if (callee?.loc?.identifierName === 'federateComponent') {
               const argsAreStrings = args.every(
-                (arg) => arg.type === 'StringLiteral',
+                (arg) => arg.type === 'StringLiteral'
               );
               if (!argsAreStrings) {
                 return;
@@ -222,7 +222,7 @@ export class FederationDashboardPlugin {
         ];
         return acc;
       },
-      {} as Record<string, [file: string, applicationID: string, name: string]>,
+      {} as Record<string, [file: string, applicationID: string, name: string]>
     );
     this.allArgumentsUsed = Object.values(uniqueArgs);
     if (callback) callback();
@@ -240,11 +240,11 @@ export class FederationDashboardPlugin {
     // get RemoteEntryChunk
     const RemoteEntryChunk = this.getRemoteEntryChunk(
       stats,
-      this.FederationPluginOptions,
+      this.FederationPluginOptions
     );
     const validChunkArray = this.buildValidChunkArray(
       liveStats,
-      this.FederationPluginOptions,
+      this.FederationPluginOptions
     );
     const chunkDependencies = this.getChunkDependencies(validChunkArray);
     const vendorFederation = this.buildVendorFederationMap(liveStats);
@@ -277,7 +277,7 @@ export class FederationDashboardPlugin {
 
     // todo: ze_webpack plugin
     const ze_webpack_plugin = curCompiler.options.plugins.find(
-      (plugin) => plugin?.constructor.name === 'ZeWebpackPlugin',
+      (plugin) => plugin?.constructor.name === 'ZeWebpackPlugin'
     ) as unknown as { _options: ZeWebpackPluginOptions };
     const version = createSnapshotId(ze_webpack_plugin._options);
 
@@ -398,12 +398,12 @@ export class FederationDashboardPlugin {
 
   getRemoteEntryChunk(
     stats: StatsCompilation,
-    FederationPluginOptions: typeof this.FederationPluginOptions,
+    FederationPluginOptions: typeof this.FederationPluginOptions
   ): StatsChunk | undefined {
     if (!stats.chunks) return;
 
     return stats.chunks.find((chunk) =>
-      chunk.names?.find((name) => name === FederationPluginOptions.name),
+      chunk.names?.find((name) => name === FederationPluginOptions.name)
     );
   }
 
@@ -420,7 +420,7 @@ export class FederationDashboardPlugin {
             {} as Record<
               keyof Omit<Chunk, '_groups'>,
               Chunk[keyof Omit<Chunk, '_groups'>]
-            >,
+            >
           );
 
           return this.mapToObjectRec(cleanSet);
@@ -430,7 +430,7 @@ export class FederationDashboardPlugin {
           [`${chunk.id}`]: stringifiableChunk,
         });
       },
-      {} as Record<string, never>,
+      {} as Record<string, never>
     );
   }
 
@@ -479,7 +479,7 @@ export class FederationDashboardPlugin {
     m:
       | Record<string, Chunk[keyof Chunk]>
       | Map<string, Chunk[keyof Chunk]>
-      | Chunk[keyof Chunk][],
+      | Chunk[keyof Chunk][]
   ): Record<string, unknown> {
     const lo: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(m)) {
@@ -496,12 +496,12 @@ export class FederationDashboardPlugin {
 
   buildValidChunkArray(
     liveStats: Stats,
-    FederationPluginOptions: typeof this.FederationPluginOptions,
+    FederationPluginOptions: typeof this.FederationPluginOptions
   ): Chunk[] {
     if (!FederationPluginOptions.name) return [];
 
     const namedChunkRefs = liveStats.compilation.namedChunks.get(
-      FederationPluginOptions.name,
+      FederationPluginOptions.name
     );
 
     if (!namedChunkRefs) return [];

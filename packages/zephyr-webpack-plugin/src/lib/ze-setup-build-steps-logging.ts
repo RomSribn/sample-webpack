@@ -4,7 +4,7 @@ import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
 export function logBuildSteps(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler,
+  compiler: Compiler
 ): { buildStartedAt: number } {
   const { pluginName, zeConfig, buildEnv } = pluginOptions;
   const logEvent = logger(pluginOptions);
@@ -13,11 +13,11 @@ export function logBuildSteps(
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
     if (!zeConfig.buildId) return cb();
     buildStartedAt = Date.now();
-    logEvent({
-      level: 'info',
-      action: 'build:started',
-      message: `${buildEnv} build started`,
-    });
+    // logEvent({
+    //   level: 'info',
+    //   action: 'build:started',
+    //   message: `${buildEnv} build started`,
+    // });
     cb();
   });
   compiler.hooks.done.tap(pluginName, () => {

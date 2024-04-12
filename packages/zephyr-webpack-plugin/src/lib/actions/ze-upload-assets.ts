@@ -5,7 +5,7 @@ import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 
 export async function zeUploadAssets(
   pluginOptions: ZeWebpackPluginOptions,
-  { missingAssets, assetsMap, count }: ZeUploadAssetsOptions,
+  { missingAssets, assetsMap, count }: ZeUploadAssetsOptions
 ): Promise<boolean> {
   const logEvent = logger(pluginOptions);
 
@@ -46,13 +46,13 @@ export async function zeUploadAssets(
           totalTime += fileUploaded;
           totalSize += assetSize;
 
-          logEvent({
-            level: 'info',
-            action: 'snapshot:assets:upload:file:done',
-            message: `file ${
-              asset.path
-            } uploaded in ${fileUploaded}ms (${assetSize.toFixed(2)}kb)`,
-          });
+          // logEvent({
+          //   level: 'info',
+          //   action: 'snapshot:assets:upload:file:done',
+          //   message: `file ${
+          //     asset.path
+          //   } uploaded in ${fileUploaded}ms (${assetSize.toFixed(2)}kb)`,
+          // });
         })
         .catch((err) => {
           logEvent({
@@ -64,7 +64,7 @@ export async function zeUploadAssets(
 
           throw err;
         });
-    }),
+    })
   )
     .then(() => {
       logEvent({

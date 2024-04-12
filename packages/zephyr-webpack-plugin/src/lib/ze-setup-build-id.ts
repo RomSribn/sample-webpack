@@ -8,9 +8,12 @@ import {
   getToken,
 } from 'zephyr-edge-contract';
 import { logger } from './utils/ze-log-event';
+import { replaceRemotesWithDelegates } from './dependency-resolution/replace-remotes-with-delegates';
+import { DependencyResolutionError } from '../delegate-module/zephyr-delegate';
+import { ConfigurationError } from './errors/configuration-error';
 
 export async function getBuildId(
-  application_uid: string,
+  application_uid: string
 ): Promise<string | undefined> {
   const { BUILD_ID_ENDPOINT, user_uuid, jwt } =
     await getApplicationConfiguration({
@@ -45,7 +48,7 @@ export async function getBuildId(
 
 export function setupZephyrConfig(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler,
+  compiler: Compiler
 ): void {
   const logEvent = logger(pluginOptions);
   const { pluginName, zeConfig, application_uid } = pluginOptions;
@@ -58,6 +61,31 @@ export function setupZephyrConfig(
     zeConfig.edge_url = EDGE_URL;
     zeConfig.buildId = void 0;
 
+    const resolvedDeps = await replaceRemotesWithDelegates(compiler.options, {
+      org: pluginOptions.app.org,
+      project: pluginOptions.app.project,
+    });
+    const errors = resolvedDeps
+      .flat()
+      .filter((res: unknown) => res && (res as DependencyResolutionError).error)
+      .map((result: unknown) => {
+        return (result as DependencyResolutionError).application_uid;
+      });
+    if (errors?.length) {
+      const [sample_app_name, sample_project_name, sample_org_name] =
+        errors[0].split('.');
+      throw new ConfigurationError(`Could not resolve remote entry points for urls: \n
+      ${errors.map((str) => `\t- ${str}`).join('\n')}\n\n
+        Please build them with Zephyr first or add as Unmanaged applications.\n
+        Note: you can read application uid as follows:
+        \t - ${sample_app_name} - project.json 'name' field of remote application
+        \t - ${sample_project_name} - git repository name
+        \t - ${sample_org_name} - git organization name
+
+        Or join and ask question in our discord: https://discord.gg/EqFbSSt8Hx
+      `);
+    }
+
     const buildId = await getBuildId(application_uid).catch((err) => {
       logEvent({
         level: 'error',
@@ -65,7 +93,6 @@ export function setupZephyrConfig(
         message: `error receiving build number for '${email}'`,
         meta: err.message,
       });
-      console.error(err);
     });
 
     if (buildId) {

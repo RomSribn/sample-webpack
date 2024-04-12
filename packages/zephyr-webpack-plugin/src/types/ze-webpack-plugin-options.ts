@@ -1,3 +1,5 @@
+import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
+
 export interface ZeWebpackPluginOptions {
   pluginName: string;
   isCI: boolean;
@@ -29,4 +31,5 @@ export interface ZeWebpackPluginOptions {
     remotes?: Record<string, string>;
     shared?: Record<string, unknown>;
   };
+  dashboard?: FederationDashboardPlugin;
 }

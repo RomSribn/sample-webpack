@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { ConfigurationError } from '../errors/configuration-error';
 
 export interface GitInfo {
   git: {
@@ -13,7 +14,7 @@ export interface GitInfo {
   };
 }
 
-export function getGitInfo(): GitInfo | undefined {
+export function getGitInfo(): GitInfo | void {
   try {
     const username = execSync('git config user.name').toString().trim();
     const email = execSync('git config user.email').toString().trim();
@@ -60,7 +61,9 @@ export function getGitInfo(): GitInfo | undefined {
       },
     };
   } catch (error) {
-    console.error('Error retrieving Git information:', error);
-    return;
+    throw new ConfigurationError(`git is not configured properly \n
+    - please set git user.name and user.email \n
+    - please set valid 'git remote origin' \n
+    `);
   }
 }

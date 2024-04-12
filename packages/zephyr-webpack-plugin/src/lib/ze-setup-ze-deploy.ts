@@ -15,7 +15,7 @@ import {
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler,
+  compiler: Compiler
 ): void {
   const { pluginName, zeConfig } = pluginOptions;
   const logEvent = logger(pluginOptions);
@@ -33,7 +33,7 @@ export function setupZeDeploy(
         }
 
         const { EDGE_URL, username, email } = await getApplicationConfiguration(
-          { application_uid: pluginOptions.application_uid },
+          { application_uid: pluginOptions.application_uid }
         );
 
         const zeStart = Date.now();
@@ -46,7 +46,7 @@ export function setupZeDeploy(
         });
         const missingAssets = await zeUploadSnapshot(
           pluginOptions,
-          snapshot,
+          snapshot
         ).catch((_) => void _);
         if (typeof missingAssets === 'undefined') return;
 
@@ -72,8 +72,9 @@ export function setupZeDeploy(
         };
 
         const envs = (await dashboardPlugin.processWebpackGraph(
-          compilation,
-        )) as { value: ZeUploadBuildStats };
+          compilation
+        )) as { value: ZeUploadBuildStats } | undefined;
+        if (!envs) return;
         // end of dashboard plugin hack around
 
         await zeEnableSnapshotOnEdge(pluginOptions, snapshot, envs.value);
@@ -83,7 +84,7 @@ export function setupZeDeploy(
           action: 'build:deploy:done',
           message: `build deployed in ${Date.now() - zeStart}ms`,
         });
-      },
+      }
     );
   });
 }

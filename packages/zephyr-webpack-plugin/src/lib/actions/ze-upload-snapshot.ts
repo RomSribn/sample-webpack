@@ -5,17 +5,17 @@ import { uploadSnapshot } from '../upload/upload-snapshot';
 
 export async function zeUploadSnapshot(
   pluginOptions: ZeWebpackPluginOptions,
-  snapshot: Snapshot,
+  snapshot: Snapshot
 ): Promise<SnapshotUploadRes | undefined> {
   const { buildEnv } = pluginOptions;
   const logEvent = logger(pluginOptions);
   const snapUploadMs = Date.now();
 
-  logEvent({
-    level: 'info',
-    action: 'snapshot:upload:started',
-    message: `started uploading of ${buildEnv} snapshot to zephyr`,
-  });
+  // logEvent({
+  //   level: 'info',
+  //   action: 'snapshot:upload:started',
+  //   message: `started uploading of ${buildEnv} snapshot to zephyr`,
+  // });
 
   let error;
   const edgeTodo = await uploadSnapshot({
