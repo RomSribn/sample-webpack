@@ -5,10 +5,7 @@
   "scripts": {
     "build": "nx run-many --all --target=build",
     "lint": "nx run-many --all --target=lint",
-    "test": "nx run-many --all --target=test",
-    "login": "npx dist/packages/cli login",
-    "registry": "npx nx run verdaccio:local-registry",
-    "prepare": "husky install"
+    "test": "nx run-many --all --target=test"
   },
   "workspaces": {
     "packages": [
@@ -44,7 +41,6 @@
     "@rspack/dev-server": "~0.5.9",
     "@rspack/plugin-minify": "~0.5.9",
     "@svgr/webpack": "^8.1.0",
-    "@swc-node/register": "1.8.0",
     "@swc/cli": "~0.1.63",
     "@swc/core": "~1.3.103",
     "@swc/jest": "0.2.29",

@@ -124,6 +124,17 @@ module.exports = composePlugins(
     // Update the webpack config as needed here.
     // e.g. `config.plugins.push(new MyPlugin())`
     return config;
-  },
+  }
 );
+```
+
+### npm publish
+
+bump versions -> do commit
+
+```bash
+npx nx run zephyr-edge-contract:build
+npx nx run zephyr-webpack-plugin:build
+npm publish dist/libs/zephyr-edge-contract
+npm publish dist/packages/zephyr-webpack-plugin
 ```
