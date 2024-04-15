@@ -12,7 +12,6 @@
   },
   "workspaces": {
     "packages": [
-      "api/*",
       "apps/*",
       "examples/*",
       "examples/react-18/**/*",

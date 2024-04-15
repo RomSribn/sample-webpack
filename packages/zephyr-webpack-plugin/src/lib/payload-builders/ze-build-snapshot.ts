@@ -24,7 +24,7 @@ export function createSnapshot({
     ? `${options.git.branch}.${options.zeConfig.buildId}`
     : `${options.zeConfig.user}.${options.zeConfig.buildId}`;
   return {
-    app_id: createFullAppName(options.app),
+    application_uid: createFullAppName(options.app),
     version: `${options.app.version}-${version_postfix}`,
     snapshot_id: createSnapshotId(options),
     domain: options.zeConfig.edge_url,

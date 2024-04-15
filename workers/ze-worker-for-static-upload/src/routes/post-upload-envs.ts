@@ -1,4 +1,4 @@
-import { Env, ZeAppListItem } from '../env';
+import { Env } from '../env';
 import { Snapshot, ZeEnvs } from 'zephyr-edge-contract';
 import { importJWK, jwtVerify } from 'jose';
 

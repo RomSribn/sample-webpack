@@ -1,39 +1,63 @@
-const wsServer = `ws://127.0.0.1:8080/ze/mf/reload`;
+// TYPES ONLY
+import type { Socket } from 'socket.io-client';
 
-const livereloadScript = `
+declare function io(uri: string): Socket;
+
+declare interface Location {
+  reload: () => void;
+}
+
+declare const location: Location;
+
+// TYPES ONLY
+
+// read from session_store
+
+// Miniflare Live Reload
+function livereload_template() {
+  const socket = io('${wsServer}');
+  (function connect() {
+    const room = socket.emit('joinZeMfLivereloadRoom',
+      { application_uid: '${application_uid}' });
+    room.on('reload', function(message) {
+      console.log(message);
+      setTimeout(() => location.reload(), 250);
+    });
+  })();
+}
+
+const livereloadScript = (application_uid: string, wsServer: string) => `
+<script src="${wsServer}/socket.io/socket.io.js"></script>
 <script defer type="application/javascript">
-(function () {
-  // Miniflare Live Reload
-  var url = new URL('${wsServer}');
-  function reload() { location.reload(); }
-  function connect(reconnected) {
-    var ws = new WebSocket(url);
-    if (reconnected) ws.onopen = reload;
-    ws.onmessage = function(message) {
-      try {
-        const payload = JSON.parse(message.data)
-        console[payload.entry.logLevel](payload.message)
-        if (payload.entry.actionType === "build:deploy:done") {
-          // todo: wait for KV populated
-          console.log(payload.entry)
-          setTimeout(() => reload(), 250);
-        }
-      } catch (err) {
-        console.log(message)
-        console.error(err)
-      }
-    };
-    ws.onclose = function(e) {
-      e.code === 1012 ? reload() : e.code === 1000 || e.code === 1001 || setTimeout(connect, 1000, true);
-    }
-  }
-  connect();
-})();
+  (function () {
+    ${livereload_template.toString()
+  .replace('function livereload_template() {\n', '')
+  .replace(new RegExp(/;[^)}]+}$/), '')
+  .replace('${wsServer}', wsServer)
+  .replace('${application_uid}', application_uid)
+}
+  })();
 </script>
 `;
 
+function ws_server_url(livereload: string) {
+  const wsServer = `https://api.zephyr-cloud.io`;
+  const devWsServer = `https://api-dev.zephyr-cloud.io`;
+  const localWsServer = 'http://127.0.0.1:3333'
+  switch (livereload) {
+    case 'local': return localWsServer;
+    case 'dev': return devWsServer;
+    default: return wsServer;
+  }
+}
+
 export class AppendLivereloadHandler {
-	element(element: any) {
-		element.append(livereloadScript, { html: true });
-	}
+  wsServer: string;
+  constructor(private readonly app_uid: string, livereload: string) {
+    this.wsServer = ws_server_url(livereload);
+  }
+
+  element(element: any) {
+    element.append(livereloadScript(this.app_uid, this.wsServer), { html: true });
+  }
 }
