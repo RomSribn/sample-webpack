@@ -13,6 +13,10 @@ const darkTheme = createTheme({
   },
 });
 
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
 const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <StrictMode>
@@ -20,5 +24,5 @@ root.render(
       <CssBaseline enableColorScheme />
       <App />
     </ThemeProvider>
-  </StrictMode>,
+  </StrictMode>
 );

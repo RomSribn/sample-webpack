@@ -11,6 +11,9 @@
   "side_panel": {
     "default_path": "index.html"
   },
+  "action": {
+    "default_title": "Click to open panel"
+  },
   "permissions": ["sidePanel", "scripting", "tabs", "storage", "webNavigation"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "icons": {

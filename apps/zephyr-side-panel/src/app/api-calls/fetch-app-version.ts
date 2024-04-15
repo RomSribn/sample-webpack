@@ -16,7 +16,9 @@ export async function fetchAppVersion({
     .get<{
       value: ZeAppVersionResponse;
     }>(
-      `/v2/side-panel/application-remote-versions?host_url=${encodeURIComponent(activeURL)}`,
+      `/v2/side-panel/application-remote-versions?host_url=${encodeURIComponent(activeURL)}`
     )
-    .then((res) => res.data?.value);
+    .then((res) => {
+      return res.data?.value;
+    });
 }
