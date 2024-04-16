@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "start": "nx run zephyr-side-panel:serve",
-    "build": "nx run zephyr-side-panel:build"
+    "build": "nx run zephyr-side-panel:build",
+    "build-dev": "nx run zephyr-side-panel:build:development"
   },
   "private": true,
   "devDependencies": {

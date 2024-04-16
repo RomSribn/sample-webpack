@@ -6,7 +6,7 @@ import {
   ZeBuildAssetsMap,
 } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
-import { isCI } from 'nx/src/utils/is-ci';
+import * as isCI from 'is-ci';
 
 export function createSnapshot({
   options,
@@ -48,7 +48,7 @@ export function createSnapshot({
         memo[asset.path] = { path, extname, hash: asset.hash, size };
         return memo;
       },
-      {} as Record<string, SnapshotAsset>,
+      {} as Record<string, SnapshotAsset>
     ),
   };
 }

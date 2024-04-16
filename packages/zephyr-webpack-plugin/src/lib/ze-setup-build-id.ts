@@ -62,8 +62,8 @@ export function setupZephyrConfig(
       logEvent({
         level: 'error',
         action: 'build:get-build-id:error',
-        message: `error receiving build number for '${email}'`,
-        meta: err.message,
+        message: `error receiving build number for '${email}'\n
+        ${err.message}\n`,
       });
     });
 

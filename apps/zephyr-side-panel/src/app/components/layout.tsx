@@ -32,12 +32,12 @@ export function Layout({ children, auth }: Readonly<AppControlContainerProps>) {
 
   const deployStatus = useMemo(
     () => (isDeployed ? 'success' : 'warning'),
-    [isDeployed],
+    [isDeployed]
   );
 
   useEffect(() => {
     if (
-      appVersion &&
+      appVersion?.application_uid &&
       applicationList &&
       application.application_uid !== appVersion.application_uid
     ) {
@@ -50,7 +50,7 @@ export function Layout({ children, auth }: Readonly<AppControlContainerProps>) {
           project: { name: project },
           organization: { name: org },
         },
-        PublishDataKeys.APPLICATION,
+        PublishDataKeys.APPLICATION
       );
     }
   }, [appVersion, application.application_uid, applicationList, setData]);
@@ -59,7 +59,7 @@ export function Layout({ children, auth }: Readonly<AppControlContainerProps>) {
     if (!appVersion) {
       setData(
         defaultState[PublishDataKeys.APPLICATION],
-        PublishDataKeys.APPLICATION,
+        PublishDataKeys.APPLICATION
       );
     }
   }, [appVersion, setData]);
