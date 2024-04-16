@@ -19,8 +19,7 @@ export function createSnapshot({
   username: string;
   email: string;
 }): Snapshot {
-  // todo: api request for version?
-  const version_postfix = isCI()
+  const version_postfix = isCI
     ? `${options.git.branch}.${options.zeConfig.buildId}`
     : `${options.zeConfig.user}.${options.zeConfig.buildId}`;
   return {
