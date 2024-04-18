@@ -9,7 +9,7 @@ export type FetchAppVersionOptions = {
 export async function fetchAppVersion({
   url,
 }: FetchAppVersionOptions): Promise<ZeAppVersionResponse> {
-  const activeURL = await getActiveTabUrl(url);
+  const activeURL = await getActiveTabUrl(url) ?? '';
 
   // request current version of the app
   return axios

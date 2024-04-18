@@ -10,7 +10,7 @@ export async function zeUploadBuildStats(
 ): Promise<{ value: ZeUploadBuildStats } | undefined> {
   const dashboardURL = new URL(
     v2_api_paths.dashboard_path,
-    ZEPHYR_API_ENDPOINT
+    ZEPHYR_API_ENDPOINT,
   );
   try {
     const token = await getToken();
@@ -30,6 +30,13 @@ export async function zeUploadBuildStats(
 
     return await res.json();
   } catch (err) {
+    const errMessage = (err as Error).message;
+    if (errMessage === 'Forbidden') {
+      console.error(`[zephyr]:`, errMessage);
+      console.error(
+        `[zephyr]: If you believe this is a mistake please make sure you have access to the organization for this application in Zephyr.`
+      );
+    }
     console.error(
       `[zephyr]: Error uploading build stats, deployment is not completed`
     );
