@@ -6,6 +6,10 @@ import {
 } from 'zephyr-edge-contract';
 import { DelegateConfig } from '../lib/dependency-resolution/replace-remotes-with-delegates';
 
+declare const __webpack_require__: {
+  l: (url: string, fn: () => void, name: string, name2: string) => void;
+};
+
 // todo: in order to become federation impl agnostic, we should parse and provide
 // already processed federation config instead of mfConfig
 
@@ -141,9 +145,25 @@ function delegate_module_template(): unknown {
     Promise.race(resolve_entry)
       .then((remoteUrl) => {
         if (typeof remoteUrl !== 'string') return;
+        const _win = window as unknown as Record<string, unknown>;
+
+        if (
+          typeof __webpack_require__ !== 'undefined' &&
+          typeof __webpack_require__.l === 'function'
+        ) {
+          __webpack_require__.l(
+            remoteUrl,
+            () => {
+              resolve(_win[remote_name]);
+            },
+            remote_name,
+            remote_name
+          );
+          return;
+        }
+
         return new Function(`return import("${remoteUrl}")`)()
           .then((mod: unknown) => {
-            const _win = window as unknown as Record<string, unknown>;
             if (typeof _win[remote_name] !== 'undefined') {
               return resolve(_win[remote_name]);
             }

@@ -8,11 +8,8 @@ import { zeEnableSnapshotOnEdge } from '../actions/ze-enable-snapshot-on-edge';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 import { logger } from '../utils/ze-log-event';
 import { Stats, StatsCompilation } from 'webpack';
-import * as process from 'node:process';
 import { emitDeploymentDone } from './lifecycle-events';
 import { getDashboardData } from '../../federation-dashboard-legacy/get-dashboard-data';
-
-process.on('message', zephyr_agent);
 
 export interface ZephyrAgentProps {
   stats: Stats;

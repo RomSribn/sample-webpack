@@ -1,18 +1,9 @@
-import { readFileSync } from 'node:fs';
 import { sep } from 'node:path';
-
-import { parse } from '@babel/parser';
-import { isNode } from '@babel/types';
-import traverse from '@babel/traverse';
-import generate from '@babel/generator';
 
 import {
   Chunk,
-  Compilation,
   Compiler,
   container,
-  Dependency,
-  Module,
   Stats,
   StatsChunk,
   StatsCompilation,
@@ -23,11 +14,7 @@ import {
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
-import {
-  createFullAppName,
-  createSnapshotId,
-  ZeUploadBuildStats,
-} from 'zephyr-edge-contract';
+import { ZeUploadBuildStats } from 'zephyr-edge-contract';
 import { findPackageJson } from './find-package-json';
 import { computeVersionStrategy, gitSha } from './compute-version-strategy';
 import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';
@@ -130,7 +117,7 @@ export class FederationDashboardPlugin {
     // }
   }
 
-  parseModuleAst(compilation: Compilation, callback?: () => void): void {
+  /*parseModuleAst(compilation: Compilation, callback?: () => void): void {
     const filePaths: { resource: string; file?: string }[] = [];
     const allArgumentsUsed: string[][] = [];
     // Explore each chunk (build output):
@@ -167,10 +154,10 @@ export class FederationDashboardPlugin {
 
         // traverse the abstract syntax tree
         traverse(ast, {
-          /**
+          /!**
            * We want to run a function depending on a found nodeType
            * More node types are documented here: https://babeljs.io/docs/en/babel-types#api
-           */
+           *!/
           CallExpression: (path) => {
             const { node } = path;
             const { callee, arguments: args } = node;
@@ -233,7 +220,7 @@ export class FederationDashboardPlugin {
     );
     this.allArgumentsUsed = Object.values(uniqueArgs);
     if (callback) callback();
-  }
+  }*/
 
   processWebpackGraph({
     stats,

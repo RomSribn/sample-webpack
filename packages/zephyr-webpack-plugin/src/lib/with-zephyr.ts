@@ -7,6 +7,7 @@ import { isModuleFederationPlugin } from './utils/is-mf-plugin';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
 import { resolve_remote_dependencies } from './dependency-resolution/resolve-remote-dependencies';
 import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
+import { ze_log } from '../utils/debug';
 
 function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
   return config.plugins
@@ -24,20 +25,29 @@ export function withZephyr(_zephyrOptions?: ZephyrPluginOptions) {
   return async function configure(
     config: Configuration
   ): Promise<Configuration> {
+    ze_log('Configuring with Zephyr');
+
     const packageJson = getPackageJson(config.context);
+    ze_log('Loaded Package JSON', packageJson);
     if (!packageJson) return config;
 
     const gitInfo = getGitInfo();
+    ze_log('Loaded Git Info', gitInfo);
 
     if (!gitInfo?.app.org || !gitInfo?.app.project || !packageJson?.name)
       return config;
 
+    ze_log('Resolving remote dependencies');
     await resolve_remote_dependencies(config, {
       org: gitInfo.app.org,
       project: gitInfo.app.project,
     });
+    ze_log('Remote dependencies resolved');
 
+    ze_log('doing zephyr copy of mf options');
     const mfConfigs = getCopyOfMFOptions(config);
+
+    ze_log('Adding Zephyr Webpack Plugin');
     config.plugins?.push(
       new ZeWebpackPlugin({
         application_uid: createFullAppName({
