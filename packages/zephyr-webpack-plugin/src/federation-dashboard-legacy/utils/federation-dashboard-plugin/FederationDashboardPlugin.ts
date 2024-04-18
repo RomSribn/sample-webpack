@@ -34,6 +34,7 @@ import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-
 import { AddRuntimeRequirementToPromiseExternal } from './add-runtime-requirement-to-promise-external';
 import { Exposes } from './federation-dashboard-types';
 import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
+import { isModuleFederationPlugin } from '../../../lib/utils/is-mf-plugin';
 // convert this require to imports
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -84,8 +85,7 @@ export class FederationDashboardPlugin {
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
     const FederationPlugin = compiler.options.plugins.find(
-      (plugin) =>
-        plugin?.constructor.name.indexOf('ModuleFederationPlugin') !== -1
+      isModuleFederationPlugin
     ) as ModuleFederationPlugin & { _options: ModuleFederationPluginOptions };
 
     // todo: valorkin fixes

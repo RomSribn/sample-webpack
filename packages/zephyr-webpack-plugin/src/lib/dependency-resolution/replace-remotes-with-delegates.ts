@@ -3,6 +3,7 @@ import {
   replace_remote_in_mf_config,
 } from '../../delegate-module/zephyr-delegate';
 import { Configuration } from 'webpack';
+import { isModuleFederationPlugin } from '../utils/is-mf-plugin';
 
 export interface DelegateConfig {
   org: string;
@@ -17,10 +18,7 @@ export async function replaceRemotesWithDelegates(
   // this is WebpackOptionsNormalized type but this type is not exported
   const config = _config as Configuration;
   const depsResolutionTasks = config.plugins
-    ?.filter(
-      (plugin) =>
-        plugin?.constructor.name.indexOf('ModuleFederationPlugin') !== -1
-    )
+    ?.filter(isModuleFederationPlugin)
     ?.map(async (mfConfig) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return await replace_remote_in_mf_config(mfConfig, { org, project });
