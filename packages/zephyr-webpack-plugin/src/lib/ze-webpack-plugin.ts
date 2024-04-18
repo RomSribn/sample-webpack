@@ -28,22 +28,6 @@ export class ZeWebpackPlugin {
   apply(compiler: Compiler): void {
     setupZephyrConfig(this._options, compiler);
     logBuildSteps(this._options, compiler);
-    setupDashboardPlugin(this._options, compiler);
     setupZeDeploy(this._options, compiler);
   }
-}
-
-function setupDashboardPlugin(
-  pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler
-): void {
-  pluginOptions.dashboard = new FederationDashboardPlugin({
-    zeOptions: pluginOptions,
-    app: pluginOptions.app,
-    git: pluginOptions.git,
-    context: {
-      isCI,
-    },
-  });
-  pluginOptions.dashboard.apply(compiler);
 }

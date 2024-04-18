@@ -135,6 +135,14 @@ bump versions -> do commit
 ```bash
 npx nx run zephyr-edge-contract:build
 npx nx run zephyr-webpack-plugin:build
+```
+
+```bash
 npm publish dist/libs/zephyr-edge-contract
 npm publish dist/packages/zephyr-webpack-plugin
+```
+
+```bash
+npm pack dist/libs/zephyr-edge-contract
+npm pack dist/packages/zephyr-webpack-plugin
 ```

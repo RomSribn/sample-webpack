@@ -23,7 +23,11 @@ import {
   ConvertToGraphParams,
 } from '../convert-to-graph/convert-to-graph';
 import { TopLevelPackage } from '../convert-to-graph/validate-params';
-import { createFullAppName, createSnapshotId } from 'zephyr-edge-contract';
+import {
+  createFullAppName,
+  createSnapshotId,
+  ZeUploadBuildStats,
+} from 'zephyr-edge-contract';
 import { findPackageJson } from './find-package-json';
 import { computeVersionStrategy, gitSha } from './compute-version-strategy';
 import { FederationDashboardPluginOptions } from './federation-dashboard-plugin-options';
@@ -35,12 +39,15 @@ import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AutomaticVendorFederation = require('@module-federation/automatic-vendor-federation');
 
-// const PLUGIN_NAME = 'FederationDashboardPlugin';
-
-// const { RawSource } = sources;
 type ModuleFederationPlugin = typeof container.ModuleFederationPlugin;
 type ModuleFederationPluginOptions =
   ConstructorParameters<ModuleFederationPlugin>[0];
+
+interface ProcessWebpackGraphParams {
+  stats: Stats;
+  stats_json: StatsCompilation;
+  pluginOptions: ZeWebpackPluginOptions;
+}
 
 export class FederationDashboardPlugin {
   _options: FederationDashboardPluginOptions;
@@ -228,41 +235,49 @@ export class FederationDashboardPlugin {
     if (callback) callback();
   }
 
-  async processWebpackGraph(curCompiler: Compilation): Promise<unknown> {
-    const liveStats = curCompiler.getStats();
-    const stats = liveStats.toJson();
-    if (this._options.useAST) {
-      this.parseModuleAst(curCompiler);
-    }
+  processWebpackGraph({
+    stats,
+    stats_json,
+    pluginOptions,
+  }: ProcessWebpackGraphParams): ConvertedGraph | undefined {
+    // async processWebpackGraph(/*curCompiler: Compilation*/): Promise<unknown> {
+    //   const stats = curCompiler.getStats();
+    //   const stats_json = stats.toJson();
+    //   if (this._options.useAST) {
+    //     this.parseModuleAst(curCompiler);
+    //   }
 
     // fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2))
 
     // get RemoteEntryChunk
     const RemoteEntryChunk = this.getRemoteEntryChunk(
-      stats,
+      stats_json,
       this.FederationPluginOptions
     );
     const validChunkArray = this.buildValidChunkArray(
-      liveStats,
+      stats,
       this.FederationPluginOptions
     );
     const chunkDependencies = this.getChunkDependencies(validChunkArray);
-    const vendorFederation = this.buildVendorFederationMap(liveStats);
+    const vendorFederation = this.buildVendorFederationMap(stats);
 
     const rawData: ConvertToGraphParams = {
       name: this.FederationPluginOptions?.name,
       remotes: Object.keys(this.FederationPluginOptions?.remotes || {}),
       metadata: this._options.metadata || {},
       topLevelPackage: vendorFederation || {},
-      publicPath: stats.publicPath,
+      publicPath: stats_json.publicPath,
       federationRemoteEntry: RemoteEntryChunk,
-      buildHash: stats.hash,
+      buildHash: stats_json.hash,
       environment: this._options.environment, // 'development' if not specified
-      version: computeVersionStrategy(stats, this._options.versionStrategy),
+      version: computeVersionStrategy(
+        stats_json,
+        this._options.versionStrategy
+      ),
       posted: this._options.posted, // Date.now() if not specified
       group: this._options.group, // 'default' if not specified
       sha: gitSha,
-      modules: stats.modules,
+      modules: stats_json.modules,
       chunkDependencies,
       functionRemotes: this.allArgumentsUsed,
     };
@@ -275,37 +290,12 @@ export class FederationDashboardPlugin {
       console.warn(err);
     }
 
-    // todo: ze_webpack plugin
-    const ze_webpack_plugin = curCompiler.options.plugins.find(
-      (plugin) => plugin?.constructor.name === 'ZeWebpackPlugin'
-    ) as unknown as { _options: ZeWebpackPluginOptions };
-    const version = createSnapshotId(ze_webpack_plugin._options);
-
-    // todo: override data from convert graph
-    const data_overrides = {
-      id: createFullAppName(this._options.app!),
-      version: version,
-      app: this._options.app,
-      git: this._options.git,
-      remotes: rawData.remotes,
-      context: {
-        isCI: this._options.context.isCI,
-      },
-    };
-
-    // todo: extend data
-    Object.assign(graphData!, data_overrides);
-
     if (!graphData) {
       return;
     }
+    return graphData;
     // const dashData = (this._dashData = JSON.stringify(graphData));
-    return this.postDashboardData(graphData).catch((err) => {
-      if (err) {
-        curCompiler.errors.push(err);
-        throw err;
-      }
-    });
+    // return this.postDashboardData(graphData);
     // todo: this was generating dashboard plugin, not sure we need it anymore
     /*return Promise.resolve().then(() => {
       const statsBuf = Buffer.from(dashData || '{}', 'utf-8');
@@ -540,7 +530,9 @@ export class FederationDashboardPlugin {
     return Array.from(directReasons);
   }*/
 
-  async postDashboardData(dashData: unknown): Promise<void | unknown> {
+  async postDashboardData(
+    dashData: any
+  ): Promise<{ value: ZeUploadBuildStats } | undefined> {
     console.log(dashData);
     throw new Error('not implemented, override it');
   }

@@ -9,4 +9,7 @@ export interface ZephyrPluginOptions {
   exposes?: string[];
   // by default - empty
   remotes?: string[];
+
+  // hacks, especially for angular
+  wait_for_index_html?: boolean;
 }

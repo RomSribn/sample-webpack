@@ -4,9 +4,8 @@ import { createFullAppName } from 'zephyr-edge-contract';
 import { getPackageJson } from './utils/ze-util-read-package-json';
 import { getGitInfo } from './utils/ze-util-get-git-info';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
-import { replaceRemotesWithDelegates } from './dependency-resolution/replace-remotes-with-delegates';
-import { DependencyResolutionError } from '../delegate-module/zephyr-delegate';
-import { ConfigurationError } from './errors/configuration-error';
+import { resolve_remote_dependencies } from './dependency-resolution/resolve-remote-dependencies';
+import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
 
 function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
   return config.plugins
@@ -23,8 +22,7 @@ function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
     .filter(Boolean);
 }
 
-export function withZephyr() {
-  // _zephyrOptions?: ZephyrPluginOptions | ZephyrPluginOptions[],
+export function withZephyr(_zephyrOptions?: ZephyrPluginOptions) {
   return async function configure(
     config: Configuration
   ): Promise<Configuration> {
@@ -57,44 +55,12 @@ export function withZephyr() {
         },
         git: gitInfo?.git,
         mfConfig: Array.isArray(mfConfigs) ? mfConfigs[0] : void 0,
+        wait_for_index_html: _zephyrOptions?.wait_for_index_html,
       })
     );
 
     return config;
   };
-}
-
-async function resolve_remote_dependencies(
-  config: Configuration,
-  app: {
-    org: string;
-    project: string;
-  }
-): Promise<void> {
-  const resolvedDeps = await replaceRemotesWithDelegates(config, {
-    org: app.org,
-    project: app.project,
-  });
-  const errors = resolvedDeps
-    .flat()
-    .filter((res: unknown) => res && (res as DependencyResolutionError).error)
-    .map((result: unknown) => {
-      return (result as DependencyResolutionError).application_uid;
-    });
-  if (errors?.length) {
-    const [sample_app_name, sample_project_name, sample_org_name] =
-      errors[0].split('.');
-    throw new ConfigurationError(`Could not resolve remote entry points for urls: \n
-      ${errors.map((str) => `\t- ${str}`).join('\n')}\n\n
-        Please build them with Zephyr first or add as Unmanaged applications.\n
-        Note: you can read application uid as follows:
-        \t - ${sample_app_name} - project.json 'name' field of remote application
-        \t - ${sample_project_name} - git repository name
-        \t - ${sample_org_name} - git organization name
-
-        Or join and ask question in our discord: https://discord.gg/EqFbSSt8Hx
-      `);
-  }
 }
 
 // todo: make sample wich use direct mf config via ze options

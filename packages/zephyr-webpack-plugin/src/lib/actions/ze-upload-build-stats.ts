@@ -2,11 +2,12 @@ import {
   ZEPHYR_API_ENDPOINT,
   getToken,
   v2_api_paths,
+  ZeUploadBuildStats,
 } from 'zephyr-edge-contract';
 
 export async function zeUploadBuildStats(
   dashData: unknown
-): Promise<void | unknown> {
+): Promise<{ value: ZeUploadBuildStats } | undefined> {
   const dashboardURL = new URL(
     v2_api_paths.dashboard_path,
     ZEPHYR_API_ENDPOINT

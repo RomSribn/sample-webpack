@@ -1,7 +1,6 @@
 import { ZeWebpackPluginOptions } from '../../../types/ze-webpack-plugin-options';
 
 export interface FederationDashboardPluginOptions {
-  zeOptions: ZeWebpackPluginOptions;
   app?: {
     // git org
     org: string;
@@ -29,7 +28,7 @@ export interface FederationDashboardPluginOptions {
   useAST: boolean;
   fetchClient?: (
     input: RequestInfo | URL,
-    init?: RequestInit,
+    init?: RequestInit
   ) => Promise<Response>;
   standalone?: boolean;
   dashboardURL?: string;

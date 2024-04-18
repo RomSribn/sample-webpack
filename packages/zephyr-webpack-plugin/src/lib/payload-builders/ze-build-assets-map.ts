@@ -1,7 +1,8 @@
-import { extname } from 'node:path';
-import { createHash } from 'node:crypto';
-import { logger, LoggerOptions } from '../utils/ze-log-event';
-import { Source, ZeBuildAssetsMap } from 'zephyr-edge-contract';
+import { logger } from '../utils/ze-log-event';
+import { Source, ZeBuildAsset, ZeBuildAssetsMap } from 'zephyr-edge-contract';
+import { getZeBuildAsset } from '../../utils/get-ze-build-asset';
+import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
+import { onIndexHtmlResolved } from '../../hacks/resolve-index-html';
 
 function getAssetType(asset: Source): string {
   return asset.constructor.name;
@@ -22,13 +23,13 @@ function extractBuffer(asset: Source): Buffer | string | undefined {
   }
 }
 
-export function zeBuildAssetsMap(
-  pluginOptions: LoggerOptions,
-  assets: Record<string, Source>,
-): ZeBuildAssetsMap {
+export async function zeBuildAssetsMap(
+  pluginOptions: ZeWebpackPluginOptions,
+  assets: Record<string, Source>
+): Promise<ZeBuildAssetsMap> {
   const logEvent = logger(pluginOptions);
 
-  return Object.keys(assets).reduce((memo, filepath) => {
+  const buildAssetMap = Object.keys(assets).reduce((memo, filepath) => {
     const asset = assets[filepath];
     const buffer = extractBuffer(asset);
 
@@ -41,19 +42,20 @@ export function zeBuildAssetsMap(
       return memo;
     }
 
-    const hash = createHash('sha256')
-      .update(buffer.length ? buffer : Buffer.from(filepath, 'utf8'))
-      .update(Buffer.from(filepath, 'utf8'))
-      .digest('hex');
+    const assetMap = getZeBuildAsset({ filepath, content: buffer });
+    memo[assetMap.hash] = assetMap;
 
-    // todo: update worker
-    memo[hash] = {
-      path: filepath,
-      extname: extname(filepath),
-      hash,
-      size: buffer.length,
-      buffer: buffer,
-    };
     return memo;
   }, {} as ZeBuildAssetsMap);
+
+  if (pluginOptions.wait_for_index_html) {
+    const index_html_content = await onIndexHtmlResolved();
+    const index_html_asset = getZeBuildAsset({
+      filepath: 'index.html',
+      content: index_html_content,
+    });
+    buildAssetMap[index_html_asset.hash] = index_html_asset;
+  }
+
+  return buildAssetMap;
 }

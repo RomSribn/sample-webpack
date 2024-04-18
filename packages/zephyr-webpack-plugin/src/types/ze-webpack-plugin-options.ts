@@ -31,5 +31,6 @@ export interface ZeWebpackPluginOptions {
     remotes?: Record<string, string>;
     shared?: Record<string, unknown>;
   };
-  dashboard?: FederationDashboardPlugin;
+  // hacks
+  wait_for_index_html?: boolean;
 }
