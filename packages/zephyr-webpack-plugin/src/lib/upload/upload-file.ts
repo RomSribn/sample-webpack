@@ -1,14 +1,11 @@
-import { request, RequestOptions } from '../utils/ze-http-request';
-import {
-  getApplicationConfiguration,
-  UploadableAsset,
-} from 'zephyr-edge-contract';
+import {ClientRequestArgs} from 'node:http';
+import { getApplicationConfiguration, request, UploadableAsset } from 'zephyr-edge-contract';
 
 export async function uploadFile({
-  id,
-  asset,
-  application_uid,
-}: {
+                                   id,
+                                   asset,
+                                   application_uid,
+                                 }: {
   id: string;
   asset: UploadableAsset;
   application_uid: string;
@@ -26,17 +23,18 @@ export async function uploadFile({
     application_uid,
   });
 
-  const options: RequestOptions & { headers: Record<string, string> } = {
-    path: `/upload?type=${type}&id=${id}`,
+  const options: ClientRequestArgs = {
     method: 'POST',
     headers: {
+      'x-file-size': asset.size.toString(),
+      'x-file-path': asset.path,
+      'x-file-meta': JSON.stringify(meta),
       can_write_jwt: jwt,
     },
   };
 
-  // options.headers['Content-Type'] = 'application/octet';
-  options.headers['x-file-path'] = asset.path;
-  options.headers['x-file-meta'] = JSON.stringify(meta);
-
-  return request(EDGE_URL, options, asset.buffer);
+  const url = new URL('/upload', EDGE_URL);
+  url.searchParams.append('type', type);
+  url.searchParams.append('id', id);
+  return request(url, options, asset.buffer);
 }

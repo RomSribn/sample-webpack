@@ -26,10 +26,6 @@ export interface FederationDashboardPluginOptions {
   debug: boolean;
   filename: string;
   useAST: boolean;
-  fetchClient?: (
-    input: RequestInfo | URL,
-    init?: RequestInit
-  ) => Promise<Response>;
   standalone?: boolean;
   dashboardURL?: string;
   metadata?: Record<string, string | { url: string }>;

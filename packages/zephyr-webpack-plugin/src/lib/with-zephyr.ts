@@ -1,5 +1,5 @@
 import { Configuration } from 'webpack';
-import { createFullAppName } from 'zephyr-edge-contract';
+import { createFullAppName, ze_log } from 'zephyr-edge-contract';
 
 import { getPackageJson } from './utils/ze-util-read-package-json';
 import { getGitInfo } from './utils/ze-util-get-git-info';
@@ -7,7 +7,6 @@ import { isModuleFederationPlugin } from './utils/is-mf-plugin';
 import { ZeWebpackPlugin } from './ze-webpack-plugin';
 import { resolve_remote_dependencies } from './dependency-resolution/resolve-remote-dependencies';
 import { ZephyrPluginOptions } from '../types/zephyr-plugin-options';
-import { ze_log } from '../utils/debug';
 
 function getCopyOfMFOptions(config: Configuration): unknown | Array<unknown> {
   return config.plugins

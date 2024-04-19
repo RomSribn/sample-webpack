@@ -1,16 +1,10 @@
 import { Compiler } from 'webpack';
-import { request } from './utils/ze-http-request';
+import { checkAuth, getApplicationConfiguration, getToken, request, ze_error, ze_log } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
-
-import {
-  checkAuth,
-  getApplicationConfiguration,
-  getToken,
-} from 'zephyr-edge-contract';
 import { logger } from './utils/ze-log-event';
 
 export async function getBuildId(
-  application_uid: string
+  application_uid: string,
 ): Promise<string | undefined> {
   const { BUILD_ID_ENDPOINT, user_uuid, jwt } =
     await getApplicationConfiguration({
@@ -19,8 +13,6 @@ export async function getBuildId(
   const token = await getToken();
 
   const options = {
-    path: `/`,
-    method: 'GET',
     headers: {
       can_write_jwt: jwt,
       Authorization: 'Bearer ' + token,
@@ -45,19 +37,26 @@ export async function getBuildId(
 
 export function setupZephyrConfig(
   pluginOptions: ZeWebpackPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ): void {
+  ze_log('Setting Get Zephyr Config hook');
   const logEvent = logger(pluginOptions);
   const { pluginName, zeConfig, application_uid } = pluginOptions;
+
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
+    ze_log('Going to check auth token or get it');
     await checkAuth();
+
+    ze_log('Got auth token, going to get application configuration');
     const { username, email, EDGE_URL } = await getApplicationConfiguration({
       application_uid,
     });
+    ze_log('Got application configuration', { username, email, EDGE_URL });
     zeConfig.user = username;
     zeConfig.edge_url = EDGE_URL;
     zeConfig.buildId = void 0;
 
+    ze_log('Going to get build id');
     const buildId = await getBuildId(application_uid).catch((err) => {
       logEvent({
         level: 'error',
@@ -67,14 +66,17 @@ export function setupZephyrConfig(
       });
     });
 
-    if (buildId) {
-      zeConfig.buildId = buildId;
-      logEvent({
-        level: 'info',
-        action: 'build:get-build-id:done',
-        message: `received build number '${buildId}' for '${zeConfig.user}'`,
-      });
+    if (!buildId) {
+      ze_error('Could not get build id');
+      return cb(new Error('Could not get build id'));
     }
+
+    zeConfig.buildId = buildId;
+    logEvent({
+      level: 'info',
+      action: 'build:get-build-id:done',
+      message: `received build number '${buildId}' for '${zeConfig.user}'`,
+    });
 
     return cb();
   });

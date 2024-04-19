@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { ze_log } from '../utils/debug';
+import { ze_log } from 'zephyr-edge-contract';
 
 const _index_html_emitted = new EventEmitter();
 

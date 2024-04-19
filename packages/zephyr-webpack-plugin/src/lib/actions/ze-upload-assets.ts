@@ -1,12 +1,13 @@
 import { logger } from '../utils/ze-log-event';
 import { uploadFile } from '../upload/upload-file';
-import { ZeUploadAssetsOptions } from 'zephyr-edge-contract';
+import { ze_log, ZeUploadAssetsOptions } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 
 export async function zeUploadAssets(
   pluginOptions: ZeWebpackPluginOptions,
   { missingAssets, assetsMap, count }: ZeUploadAssetsOptions
 ): Promise<boolean> {
+  ze_log('Uploading assets.');
   const logEvent = logger(pluginOptions);
 
   if (
@@ -45,21 +46,13 @@ export async function zeUploadAssets(
           const fileUploaded = Date.now() - start;
           totalTime += fileUploaded;
           totalSize += assetSize;
-
-          // logEvent({
-          //   level: 'info',
-          //   action: 'snapshot:assets:upload:file:done',
-          //   message: `file ${
-          //     asset.path
-          //   } uploaded in ${fileUploaded}ms (${assetSize.toFixed(2)}kb)`,
-          // });
+          ze_log(`file ${asset.path} uploaded in ${fileUploaded}ms (${assetSize.toFixed(2)}kb)`);
         })
         .catch((err) => {
           logEvent({
             level: 'error',
             action: 'snapshot:assets:upload:file:failed',
-            message: `failed uploading file ${asset.path}`,
-            meta: { error: err.toString() },
+            message: `failed to upload file ${asset.path} \n ${err.message.toString()}`
           });
 
           throw err;
@@ -80,8 +73,7 @@ export async function zeUploadAssets(
       logEvent({
         level: 'error',
         action: 'snapshot:assets:upload:failed',
-        message: `failed uploading missing assets to zephyr`,
-        meta: { error: err.toString() },
+        message: `failed uploading missing assets to zephyr \n ${err.message.toString()}`
       });
       return false;
     });

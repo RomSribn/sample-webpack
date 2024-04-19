@@ -1,10 +1,9 @@
-import { fork } from 'node:child_process';
-import { join, sep, relative } from 'node:path';
 import { Compiler } from 'webpack';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 import { zephyr_agent, ZephyrAgentProps } from './ze-agent';
 import * as process from 'node:process';
 import { onDeploymentDone } from './ze-agent/lifecycle-events';
+import { ze_error, ze_log } from 'zephyr-edge-contract';
 
 export function setupZeDeploy(
   pluginOptions: ZeWebpackPluginOptions,
@@ -20,13 +19,15 @@ export function setupZeDeploy(
       async (assets) => {
         if (!zeConfig.buildId) {
           // no id - no cloud builds ;)
+          ze_error('No build id found. Skipping deployment.');
           return;
         }
 
-        // get converted graph here and send it to the agent
 
+        ze_log('Compilation done.');
         const stats = compilation.getStats();
         const stats_json = compilation.getStats().toJson();
+        ze_log('Converted stats to json. Starting deployment.');
 
         process.nextTick((props: ZephyrAgentProps) => zephyr_agent(props), {
           stats,
@@ -34,6 +35,7 @@ export function setupZeDeploy(
           assets,
           pluginOptions,
         });
+
         if (!pluginOptions.wait_for_index_html) {
           await onDeploymentDone();
         }

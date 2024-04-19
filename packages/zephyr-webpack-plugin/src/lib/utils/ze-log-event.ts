@@ -1,7 +1,13 @@
-import { request } from './ze-http-request';
-import { getApplicationConfiguration, getToken, ZEPHYR_API_ENDPOINT } from 'zephyr-edge-contract';
+import { request } from 'zephyr-edge-contract';
+import { getApplicationConfiguration, getToken, ze_error, ze_log, ZEPHYR_API_ENDPOINT } from 'zephyr-edge-contract';
+import { enabled } from 'debug';
 
-const log = (v: unknown): void => console.log(v);
+const log = (level: string, msg: unknown): void => {
+  if (level === 'error') {
+    return enabled('zephyr:*') ? ze_error(msg) : console.error(msg);
+  }
+  return enabled('zephyr:*') ? ze_log(msg) : console.log(msg);
+};
 
 interface LogEventOptions {
   level: string;
@@ -42,7 +48,7 @@ export function logger(options: LoggerOptions) {
           meta = Object.assign({}, meta, {
             isCI: options.isCI,
             app: options.app,
-            git: options.git
+            git: options.git,
           });
 
           const data = JSON.stringify({
@@ -55,22 +61,22 @@ export function logger(options: LoggerOptions) {
             git,
             message,
             meta,
-            createdAt
+            createdAt,
           });
 
           const reqOptions = {
-            path: `/v2/application/logs`,
             method: 'POST',
             headers: {
               Authorization: 'Bearer ' + token,
               'Content-Type': 'application/json',
-              'Content-Length': data.length
-            }
+              'Content-Length': data.length,
+            },
           };
 
-          log(`[zephyr]: ${message}`);
-          request(ZEPHYR_API_ENDPOINT, reqOptions, data).catch(() => void 0);
-        }
+          log(level, `[zephyr]: ${message}`);
+          const url = new URL(`/v2/application/logs`, ZEPHYR_API_ENDPOINT);
+          request(url, reqOptions, data).catch(() => void 0);
+        },
       );
   };
 }

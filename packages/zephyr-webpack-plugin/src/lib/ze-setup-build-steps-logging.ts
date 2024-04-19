@@ -1,6 +1,7 @@
 import { Compiler } from 'webpack';
 import { logger } from './utils/ze-log-event';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
+import { ze_error, ze_log } from 'zephyr-edge-contract';
 
 export function logBuildSteps(
   pluginOptions: ZeWebpackPluginOptions,
@@ -13,13 +14,10 @@ export function logBuildSteps(
   compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, cb) => {
     if (!zeConfig.buildId) return cb();
     buildStartedAt = Date.now();
-    // logEvent({
-    //   level: 'info',
-    //   action: 'build:started',
-    //   message: `${buildEnv} build started`,
-    // });
+    ze_log('build started at', buildStartedAt);
     cb();
   });
+
   compiler.hooks.done.tap(pluginName, () => {
     if (!zeConfig.buildId) return;
     logEvent({
@@ -28,13 +26,14 @@ export function logBuildSteps(
       message: `${buildEnv} build finished in ${Date.now() - buildStartedAt}ms`,
     });
   });
+
   compiler.hooks.failed.tap(pluginName, (err) => {
     if (!zeConfig.buildId) return;
+    ze_error('build failed', err);
     logEvent({
       level: 'error',
       action: 'build:failed',
-      message: `${buildEnv} build failed in ${Date.now() - buildStartedAt}ms`,
-      meta: { error: err.toString() },
+      message: `${buildEnv} build failed in ${Date.now() - buildStartedAt}ms \n ${err.message} \n ${err.stack}`
     });
   });
 

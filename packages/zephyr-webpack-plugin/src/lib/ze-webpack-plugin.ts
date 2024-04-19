@@ -4,7 +4,6 @@ import * as isCI from 'is-ci';
 import { setupZephyrConfig } from './ze-setup-build-id';
 import { logBuildSteps } from './ze-setup-build-steps-logging';
 import { setupZeDeploy } from './ze-setup-ze-deploy';
-import { FederationDashboardPlugin } from '../federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
 import { ZeWebpackPluginOptions } from '../types/ze-webpack-plugin-options';
 
 const pluginName = 'ZeWebpackPlugin';

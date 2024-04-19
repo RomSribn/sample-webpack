@@ -1,16 +1,14 @@
-import {
-  getApplicationConfiguration,
-  ZeUploadBuildStats,
-} from 'zephyr-edge-contract';
-import { request, RequestOptions } from '../utils/ze-http-request';
+import type { ClientRequestArgs } from 'node:http';
+import { getApplicationConfiguration, request, ze_log, ZeUploadBuildStats } from 'zephyr-edge-contract';
 
 export async function uploadEnvs({
-  body,
-  application_uid,
-}: {
+                                   body,
+                                   application_uid,
+                                 }: {
   body: ZeUploadBuildStats;
   application_uid: string;
 }): Promise<unknown> {
+  ze_log(`Uploading envs to Zephyr, for ${application_uid}`);
   const type = 'envs';
   const data = JSON.stringify(body);
 
@@ -18,16 +16,16 @@ export async function uploadEnvs({
     application_uid,
   });
 
-  const options: RequestOptions & { headers: Record<string, string> } = {
-    path: `/upload?type=${type}`,
+  const url = new URL('/upload', EDGE_URL);
+  url.searchParams.append('type', type);
+  const options: ClientRequestArgs = {
     method: 'POST',
     headers: {
       can_write_jwt: jwt,
+      'Content-Type': 'application/json',
       'Content-Length': data.length.toString(),
     },
   };
-
-  options.headers['Content-Type'] = 'application/json';
 
   return request(EDGE_URL, options, data);
 }

@@ -1,27 +1,25 @@
 import { logger } from '../utils/ze-log-event';
-import { Snapshot, SnapshotUploadRes } from 'zephyr-edge-contract';
+import { Snapshot, SnapshotUploadRes, ze_error, ze_log } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 import { uploadSnapshot } from '../upload/upload-snapshot';
 
 export async function zeUploadSnapshot(
   pluginOptions: ZeWebpackPluginOptions,
-  snapshot: Snapshot
+  snapshot: Snapshot,
 ): Promise<SnapshotUploadRes | undefined> {
+  ze_log('Uploading snapshot.');
   const { buildEnv } = pluginOptions;
   const logEvent = logger(pluginOptions);
   const snapUploadMs = Date.now();
-
-  // logEvent({
-  //   level: 'info',
-  //   action: 'snapshot:upload:started',
-  //   message: `started uploading of ${buildEnv} snapshot to zephyr`,
-  // });
 
   let error;
   const edgeTodo = await uploadSnapshot({
     body: snapshot,
     application_uid: pluginOptions.application_uid,
-  }).catch((err) => (error = err));
+  }).catch((err) => {
+    error = err;
+    ze_error('Failed to upload snapshot', err);
+  });
 
   if (!edgeTodo || error) {
     logEvent({
@@ -29,16 +27,17 @@ export async function zeUploadSnapshot(
       action: 'snapshot:upload:failed',
       message: `failed uploading of ${buildEnv} snapshot to zephyr`,
     });
+    ze_error('Failed to upload snapshot', error);
     return;
-  } else {
-    logEvent({
-      level: 'info',
-      action: 'snapshot:upload:done',
-      message: `uploaded ${buildEnv} snapshot in ${
-        Date.now() - snapUploadMs
-      }ms`,
-    });
   }
+
+  logEvent({
+    level: 'info',
+    action: 'snapshot:upload:done',
+    message: `uploaded ${buildEnv} snapshot in ${
+      Date.now() - snapUploadMs
+    }ms`,
+  });
 
   return edgeTodo;
 }

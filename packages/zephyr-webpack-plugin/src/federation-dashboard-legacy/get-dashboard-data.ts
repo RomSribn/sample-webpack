@@ -1,7 +1,7 @@
 import { ConvertedGraph } from './utils/convert-to-graph/convert-to-graph';
 import { FederationDashboardPlugin } from './utils/federation-dashboard-plugin/FederationDashboardPlugin';
 import * as isCI from 'is-ci';
-import { createSnapshotId } from 'zephyr-edge-contract';
+import { createSnapshotId, ze_error, ze_log } from 'zephyr-edge-contract';
 import { ZephyrAgentProps } from '../lib/ze-agent';
 
 export function getDashboardData({
@@ -11,7 +11,8 @@ export function getDashboardData({
   EDGE_URL,
 }: ZephyrAgentProps & {
   EDGE_URL: string;
-}): ConvertedGraph | undefined {
+}): ConvertedGraph | void {
+  ze_log('getDashboardData started. create federation dashboard plugin');
   const dashboardPlugin = new FederationDashboardPlugin({
     app: pluginOptions.app,
     git: pluginOptions.git,
@@ -20,12 +21,13 @@ export function getDashboardData({
     },
   });
 
+  ze_log('process webpack graph');
   const convertedGraph = dashboardPlugin.processWebpackGraph({
     stats,
     stats_json,
     pluginOptions,
   });
-  if (!convertedGraph) return;
+  if (!convertedGraph) return ze_error('Failed to convert graph to dashboard data');
 
   /** todo: what we need here:
    // - dependencies, devDependencies, peerDependencies
@@ -108,5 +110,7 @@ export function getDashboardData({
   };
 
   // todo: extend data
-  return Object.assign({}, convertedGraph, data_overrides);
+  const res =  Object.assign({}, convertedGraph, data_overrides);
+  ze_log('getDashboardData done.', res);
+  return res;
 }

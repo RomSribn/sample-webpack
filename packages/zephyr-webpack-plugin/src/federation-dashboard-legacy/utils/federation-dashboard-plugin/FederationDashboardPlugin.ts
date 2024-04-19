@@ -54,9 +54,7 @@ export class FederationDashboardPlugin {
     this._options = Object.assign(
       {
         debug: false,
-        // filename: 'dashboard.json',
-        useAST: false,
-        fetchClient: undefined,
+        useAST: false
       },
       options
     ) as FederationDashboardPluginOptions;

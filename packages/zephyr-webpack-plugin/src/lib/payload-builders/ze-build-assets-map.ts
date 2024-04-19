@@ -1,5 +1,5 @@
 import { logger } from '../utils/ze-log-event';
-import { Source, ZeBuildAsset, ZeBuildAssetsMap } from 'zephyr-edge-contract';
+import { Source, ze_log, ZeBuildAsset, ZeBuildAssetsMap } from 'zephyr-edge-contract';
 import { getZeBuildAsset } from '../../utils/get-ze-build-asset';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
 import { onIndexHtmlResolved } from '../../hacks/resolve-index-html';
@@ -27,8 +27,9 @@ export async function zeBuildAssetsMap(
   pluginOptions: ZeWebpackPluginOptions,
   assets: Record<string, Source>
 ): Promise<ZeBuildAssetsMap> {
-  const logEvent = logger(pluginOptions);
+  ze_log('Building assets map from webpack assets.');
 
+  const logEvent = logger(pluginOptions);
   const buildAssetMap = Object.keys(assets).reduce((memo, filepath) => {
     const asset = assets[filepath];
     const buffer = extractBuffer(asset);
@@ -48,6 +49,7 @@ export async function zeBuildAssetsMap(
     return memo;
   }, {} as ZeBuildAssetsMap);
 
+  ze_log('Assets map built. Checking for index.html waiter.');
   if (pluginOptions.wait_for_index_html) {
     const index_html_content = await onIndexHtmlResolved();
     const index_html_asset = getZeBuildAsset({
@@ -55,6 +57,7 @@ export async function zeBuildAssetsMap(
       content: index_html_content,
     });
     buildAssetMap[index_html_asset.hash] = index_html_asset;
+    ze_log('Index.html added to assets map.');
   }
 
   return buildAssetMap;

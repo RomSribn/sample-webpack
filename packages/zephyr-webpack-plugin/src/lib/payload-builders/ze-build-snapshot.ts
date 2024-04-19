@@ -2,7 +2,7 @@ import {
   createFullAppName,
   createSnapshotId,
   Snapshot,
-  SnapshotAsset,
+  SnapshotAsset, ze_log,
   ZeBuildAssetsMap,
 } from 'zephyr-edge-contract';
 import { ZeWebpackPluginOptions } from '../../types/ze-webpack-plugin-options';
@@ -19,6 +19,7 @@ export function createSnapshot({
   username: string;
   email: string;
 }): Snapshot {
+  ze_log('Creating snapshot object.');
   const version_postfix = isCI
     ? `${options.git.branch}.${options.zeConfig.buildId}`
     : `${options.zeConfig.user}.${options.zeConfig.buildId}`;

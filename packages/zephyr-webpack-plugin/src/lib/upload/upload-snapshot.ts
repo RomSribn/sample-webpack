@@ -1,39 +1,45 @@
+import { ClientRequestArgs } from 'node:http';
 import {
   getApplicationConfiguration,
-  getToken,
+  request,
   Snapshot,
   SnapshotUploadRes,
+  ze_error,
+  ze_log,
 } from 'zephyr-edge-contract';
-import { request, RequestOptions } from '../utils/ze-http-request';
+
 
 export async function uploadSnapshot({
-  body,
-  application_uid,
-}: {
+                                       body,
+                                       application_uid,
+                                     }: {
   body: Snapshot;
   application_uid: string;
 }): Promise<SnapshotUploadRes | undefined> {
+  ze_log('Starting upload of snapshot');
   const { EDGE_URL, jwt } = await getApplicationConfiguration({
     application_uid,
   });
 
   const type = 'snapshot';
   const data = JSON.stringify(body);
-  const options: RequestOptions & { headers: Record<string, string> } = {
-    path: `/upload?type=${type}`,
+  const url = new URL('/upload', EDGE_URL);
+  url.searchParams.append('type', type);
+  const options: ClientRequestArgs = {
     method: 'POST',
     headers: {
       'Content-Length': data.length.toString(),
+      'Content-Type': 'application/json',
       can_write_jwt: jwt,
     },
   };
 
-  options.headers['Content-Type'] = 'application/json';
-
-  const res = await request<SnapshotUploadRes>(EDGE_URL, options, data);
+  const res = await request<SnapshotUploadRes>(url, options, data)
+    .catch((err) => ze_error('Failed to upload snapshot', err));
+  ze_log('Snapshot uploaded');
 
   if (!res || typeof res === 'string') {
-    console.error(res);
+    ze_error('Failed to upload snapshot', res);
     return;
   }
 

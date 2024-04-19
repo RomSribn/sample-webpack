@@ -1,4 +1,4 @@
-import { getApplicationConfiguration, Source } from 'zephyr-edge-contract';
+import { getApplicationConfiguration, Source, ze_error, ze_log } from 'zephyr-edge-contract';
 import { zeBuildAssetsMap } from '../payload-builders/ze-build-assets-map';
 import { createSnapshot } from '../payload-builders/ze-build-snapshot';
 import { zeUploadSnapshot } from '../actions/ze-upload-snapshot';
@@ -24,6 +24,7 @@ export async function zephyr_agent({
   assets,
   pluginOptions,
 }: ZephyrAgentProps): Promise<void> {
+  ze_log('zephyr agent started.');
   const logEvent = logger(pluginOptions);
   const { EDGE_URL, username, email } = await getApplicationConfiguration({
     application_uid: pluginOptions.application_uid,
@@ -37,19 +38,21 @@ export async function zephyr_agent({
     username,
     email,
   });
-  const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot).catch(
-    (_) => void _
-  );
-  if (typeof missingAssets === 'undefined') return;
+
+  const missingAssets = await zeUploadSnapshot(pluginOptions, snapshot)
+    .catch((err) => ze_error('Failed to upload snapshot.', err));
+
+
+  if (typeof missingAssets === 'undefined') return ze_error('Snapshot upload gave no result, exiting');
 
   const assetsUploadSuccess = await zeUploadAssets(pluginOptions, {
     missingAssets,
     assetsMap,
     count: Object.keys(assets).length,
   });
-  if (!assetsUploadSuccess) return;
 
-  // eslint-disable-next-line
+  if (!assetsUploadSuccess) return ze_error('Failed to upload assets.', assetsUploadSuccess);
+
   const dashData = getDashboardData({
     stats,
     stats_json,
@@ -57,9 +60,9 @@ export async function zephyr_agent({
     pluginOptions,
     EDGE_URL,
   });
-  const envs = await zeUploadBuildStats(dashData);
 
-  if (!envs) return;
+  const envs = await zeUploadBuildStats(dashData);
+  if (!envs) return ze_error('Did not receive envs from build stats upload. Exiting.');
 
   await zeEnableSnapshotOnEdge(pluginOptions, snapshot, envs.value);
 
