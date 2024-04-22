@@ -1,12 +1,16 @@
+import { is_debug_enabled } from 'zephyr-edge-contract';
 import { request } from 'zephyr-edge-contract';
 import { getApplicationConfiguration, getToken, ze_error, ze_log, ZEPHYR_API_ENDPOINT } from 'zephyr-edge-contract';
-import { enabled } from 'debug';
+
 
 const log = (level: string, msg: unknown): void => {
-  if (level === 'error') {
-    return enabled('zephyr:*') ? ze_error(msg) : console.error(msg);
+  if (level === 'warn') {
+    return is_debug_enabled ? ze_log(msg) : console.warn(msg);
   }
-  return enabled('zephyr:*') ? ze_log(msg) : console.log(msg);
+  if (level === 'error') {
+    return is_debug_enabled ? ze_error(msg) : console.error(msg);
+  }
+  return is_debug_enabled ? ze_log(msg) : console.log(msg);
 };
 
 interface LogEventOptions {
