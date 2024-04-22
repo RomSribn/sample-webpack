@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "0.5",
+  "version": "0.0.9",
   "name": "Zephyr Mission Control",
   "description": "Zephyr: We made application federation easy",
   "minimum_chrome_version": "116",
@@ -14,7 +14,7 @@
   "action": {
     "default_title": "Click to open panel"
   },
-  "permissions": ["sidePanel", "scripting", "tabs", "storage", "webNavigation"],
+  "permissions": ["sidePanel", "scripting", "tabs", "storage"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "icons": {
     "16": "assets/icons/icon-16.png",
