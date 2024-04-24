@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
-import { FederationDashboardPlugin } from '../../packages/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
+import { FederationDashboardPlugin } from '../../libs/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/federation-dashboard-plugin/FederationDashboardPlugin';
 import * as fs from 'fs';
-import { mergeGraphs } from '../../packages/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/merge-graphs/merge-graphs';
+import { mergeGraphs } from '../../libs/zephyr-webpack-plugin/src/federation-dashboard-legacy/utils/merge-graphs/merge-graphs';
 
 const PLUGIN_NAME = 'next-medusa-plugin';
 
@@ -17,7 +17,7 @@ class NextMedusaPlugin {
       : join(compiler.options.output.path, `sidecar-${this._options.filename}`);
     const hostData = join(
       compiler.options.output.path,
-      this._options.filename.replace('sidecar-', ''),
+      this._options.filename.replace('sidecar-', '')
     );
 
     const MedusaPlugin = new FederationDashboardPlugin({
@@ -29,16 +29,16 @@ class NextMedusaPlugin {
     compiler.hooks.afterEmit.tap(PLUGIN_NAME, () => {
       const sidecarData = join(
         compiler.options.output.path,
-        `sidecar-${this._options.filename}`,
+        `sidecar-${this._options.filename}`
       );
       const hostData = join(
         compiler.options.output.path,
-        this._options.filename.replace('sidecar-', ''),
+        this._options.filename.replace('sidecar-', '')
       );
       if (existsSync(sidecarData) && existsSync(hostData)) {
         fs.writeFileSync(
           hostData,
-          JSON.stringify(mergeGraphs(require(sidecarData), require(hostData))),
+          JSON.stringify(mergeGraphs(require(sidecarData), require(hostData)))
         );
       }
     });
@@ -67,14 +67,14 @@ const withMedusa =
         ) {
           if (!name) {
             throw new Error(
-              'Medusa needs a name for the app, please ensure plugin options has {name: <appname>}',
+              'Medusa needs a name for the app, please ensure plugin options has {name: <appname>}'
             );
           }
           config.plugins.push(
             new NextMedusaPlugin({
               standalone: { name },
               ...medusaConfig,
-            }),
+            })
           );
         }
 

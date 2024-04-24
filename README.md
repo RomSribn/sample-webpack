@@ -92,7 +92,7 @@ npm run registry
 #termianl 2
 npx nx run zephyr-webpack-plugin:build
 npm publish dist/libs/zephyr-edge-contract
-npm publish dist/packages/zephyr-webpack-plugin
+npm publish dist/libs/zephyr-webpack-plugin
 ```
 
 set `ZE_DEV=local` for terminal
@@ -133,16 +133,30 @@ module.exports = composePlugins(
 bump versions -> do commit
 
 ```bash
-npx nx run zephyr-edge-contract:build
-npx nx run zephyr-webpack-plugin:build
+npm run build-libs
 ```
 
 ```bash
 npm publish dist/libs/zephyr-edge-contract
-npm publish dist/packages/zephyr-webpack-plugin
+npm publish dist/libs/zephyr-webpack-plugin
+npm publish dist/libs/zephyr-agent
+npm publish dist/libs/rollup-plugin-zephyr
 ```
 
 ```bash
 npm pack dist/libs/zephyr-edge-contract
-npm pack dist/packages/zephyr-webpack-plugin
+npm pack dist/libs/zephyr-webpack-plugin
+npm pack dist/libs/rollup-plugin-zephyr
+npm pack dist/libs/zephyr-agent
+```
+
+## rebuild for vite
+
+```bash
+npm run build-libs
+npm pack dist/libs/rollup-plugin-zephyr
+npm pack dist/libs/zephyr-agent
+cd dist/libs/zephyr-agent
+npm pack ../zephyr-edge-contract
+npm i ./zephyr-edge-contract-0.0.10.tgz
 ```

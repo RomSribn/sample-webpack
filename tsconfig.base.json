@@ -15,9 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "zephyr-cli": ["packages/cli/src/index.ts"],
+      "rollup-plugin-zephyr": ["libs/rollup-plugin-zephyr/src/index.ts"],
+      "zephyr-agent": ["libs/zephyr-agent/src/index.ts"],
       "zephyr-edge-contract": ["libs/zephyr-edge-contract/src/index.ts"],
-      "zephyr-webpack-plugin": ["packages/zephyr-webpack-plugin/src/index.ts"]
+      "zephyr-webpack-plugin": ["libs/zephyr-webpack-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
