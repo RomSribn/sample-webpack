@@ -14,27 +14,32 @@ declare const location: Location;
 // read from session_store
 
 // Miniflare Live Reload
-function livereload_template() {
+function livereload_template(application_uids: string[], wsServer: string) {
+  const roomList = application_uids.map(
+    (application_uid, index) => `
+  const room${index} = socket.emit('joinZeMfLivereloadRoom',
+    { application_uid: '${application_uid}' });
+    room${index}.on('reload', function(message) {
+    console.log(message);
+    setTimeout(() => location.reload(), 250);
+  });
+  `
+  );
+  const roomListString = roomList.join('\n');
+  return `
   const socket = io('${wsServer}');
-  (function connect() {
-    const room = socket.emit('joinZeMfLivereloadRoom',
-      { application_uid: '${application_uid}' });
-    room.on('reload', function(message) {
-      console.log(message);
-      setTimeout(() => location.reload(), 250);
-    });
-  })();
+  ${roomListString}
+  `;
 }
 
-const livereloadScript = (application_uid: string, wsServer: string) => `
+const livereloadScript = (application_uids: string[], wsServer: string) => `
 <script src="${wsServer}/socket.io/socket.io.js"></script>
 <script defer type="application/javascript">
   (function () {
-    ${livereload_template.toString()
+    ${livereload_template(application_uids, wsServer)
   .replace('function livereload_template() {\n', '')
   .replace(new RegExp(/;[^)}]+}$/), '')
   .replace('${wsServer}', wsServer)
-  .replace('${application_uid}', application_uid)
 }
   })();
 </script>
@@ -53,11 +58,15 @@ function ws_server_url(livereload: string) {
 
 export class AppendLivereloadHandler {
   wsServer: string;
-  constructor(private readonly app_uid: string, livereload: string) {
+  constructor(
+    private readonly remoteList: string[],
+    livereload: string
+  ) {
     this.wsServer = ws_server_url(livereload);
   }
 
   element(element: any) {
-    element.append(livereloadScript(this.app_uid, this.wsServer), { html: true });
+    const script = livereloadScript(this.remoteList, this.wsServer);
+    element.append(script, { html: true });
   }
 }

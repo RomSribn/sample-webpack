@@ -58,9 +58,10 @@ export async function getWildcard(request: Request, env: Env) {
   }
 
   const livereload = url.searchParams.get('livereload');
+  const remoteList = url.searchParams.getAll('remote');
   if (isRootRequest && livereload) {
     return new HTMLRewriter().on('body',
-      new AppendLivereloadHandler(snapshot.application_uid, livereload))
+      new AppendLivereloadHandler(remoteList, livereload))
       .transform(new Response(file, request));
   }
 
