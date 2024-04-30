@@ -1,4 +1,3 @@
-import { AppendLivereloadHandler } from '../utility/util-attach-livereload';
 import { Env } from '../env';
 import { Snapshot } from 'zephyr-edge-contract';
 
@@ -55,14 +54,6 @@ export async function getWildcard(request: Request, env: Env) {
 
   if (!file) {
     return new Response('File Not Found', { status: 404 });
-  }
-
-  const livereload = url.searchParams.get('livereload');
-  const remoteList = url.searchParams.getAll('remote');
-  if (isRootRequest && livereload) {
-    return new HTMLRewriter().on('body',
-      new AppendLivereloadHandler(remoteList, livereload))
-      .transform(new Response(file, request));
   }
 
   return new Response(file, {

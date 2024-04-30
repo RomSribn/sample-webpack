@@ -27,9 +27,13 @@ import {
 
 import { router } from './router';
 
-import { getActiveTabUrl } from './utils/get-active-tab-url';
-import { tabsOnUpdated } from './utils/chrome-tabs-on-updated';
-import { AxiosInterceptor, AxiosResponseError } from './utils/axios';
+import {
+  getActiveTabUrl,
+  tabsOnUpdated,
+  AxiosInterceptor,
+  AxiosResponseError,
+  livereloadSocket,
+} from './utils';
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -107,6 +111,8 @@ export function App() {
       }
     });
   }, []);
+
+  useEffect(() => livereloadSocket.dispose, []);
 
   return (
     <ProviderComposer

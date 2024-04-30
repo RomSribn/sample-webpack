@@ -11,7 +11,7 @@ import {
   DataContextType,
 } from '../context/data-context';
 
-import { getActiveTabId } from '../utils/get-active-tab-id';
+import { getActiveTabId } from '../utils';
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
 
 import { ApplicationVersionSelector } from './application-version-selector';

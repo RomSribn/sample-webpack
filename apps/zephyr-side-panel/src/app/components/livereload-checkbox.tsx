@@ -3,7 +3,8 @@ import classnames from 'classnames';
 
 // components
 import Checkbox from './checkbox';
-import { getActiveTabUrl, navigate } from '../utils';
+// utils
+import { getActiveTabUrl, navigate, livereloadSocket } from '../utils';
 
 const DEFAULT_LABEL = 'Live reload / HMR';
 
@@ -32,12 +33,11 @@ export function LivereloadCheckbox({
 
   const handleCheckedChange = useCallback(async () => {
     const activeTabUrl = await getActiveTabUrl({ fullUrl: true });
+
     if (!activeTabUrl) return;
 
     const currentUrl = new URL(activeTabUrl);
-    const isRemoteExist = currentUrl.searchParams
-      .getAll('remote')
-      .includes(value);
+    const isRemoteExist = await chrome.cookies.get({ url: activeTabUrl, name: value });
 
     if (checked === undefined && isRemoteExist) {
       setChecked(true);
@@ -45,11 +45,13 @@ export function LivereloadCheckbox({
     }
 
     if (checked && !isRemoteExist) {
-      currentUrl.searchParams.append('remote', value);
+      await chrome.cookies.set({ url: activeTabUrl, name: value, value });
+      livereloadSocket.join(value);
     }
 
     if (!checked && isRemoteExist) {
-      currentUrl.searchParams.delete('remote', value);
+      await chrome.cookies.remove({ url: activeTabUrl, name: value });
+      livereloadSocket.leave(value);
     }
 
     await navigate(currentUrl.toString());

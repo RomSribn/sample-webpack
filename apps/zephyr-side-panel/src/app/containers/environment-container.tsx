@@ -6,7 +6,7 @@ import { ApplicationSelector } from './application-selector';
 import { AppContext } from '../context/app-context';
 import { DataContext, PublishDataKeys } from '../context/data-context';
 
-import { navigate } from '../utils/navigate';
+import { navigate } from '../utils';
 import { useFetchAppVersionQuery } from '../hooks/queries/use-fetch-app-version';
 
 import { ApplicationVersionSelector } from './application-version-selector';
