@@ -2,6 +2,7 @@ import { useContext, useMemo } from 'react';
 // @mui
 import { Autocomplete, Popper } from '@mui/material';
 // elements, components
+import LivereloadCheckbox from '../../components/livereload-checkbox';
 import { SelectorSkeleton } from '../../components/selector-skeleton';
 import { Input, Option } from './_elements';
 // context
@@ -107,6 +108,7 @@ export function RemotesSelector({
         renderInput={(params) => <Input {...params} isDeployed={isDeployed} />}
         key={remoteKey}
       />
+      <LivereloadCheckbox value={remoteKey} />
     </fieldset>
   );
 }

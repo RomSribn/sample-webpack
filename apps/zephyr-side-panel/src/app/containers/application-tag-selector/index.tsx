@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react';
 // @mui
 import { Autocomplete, TextField } from '@mui/material';
 // components, elements
+import LivereloadCheckbox from '../../components/livereload-checkbox';
 import { SelectorSkeleton } from '../../components/selector-skeleton';
 import { CustomOption } from './custom-option';
 import { CustomPopper } from './custom-popper';
@@ -104,6 +105,7 @@ const ApplicationTagSelector = ({
         // reset autocomplete on application change
         key={application.application_uid}
       />
+      <LivereloadCheckbox value={tag.application_uid} />
     </fieldset>
   );
 };

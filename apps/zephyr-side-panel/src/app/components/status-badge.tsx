@@ -1,15 +1,9 @@
 import classnames from 'classnames';
 // icons
-import { WarningIcon } from '../../assets/icons/warning-icon';
+import { WarningIcon, CheckMarkIcon } from '../../assets/icons';
 
 const badgeIcon = {
-  success: (
-    <img
-      src={'../assets/icons/green-check.png'}
-      alt="success-status-icon"
-      className="badge-box__badge-icon"
-    />
-  ),
+  success: <CheckMarkIcon className="badge-box__badge-icon" color='#54c752' width={20}/>,
   warning: <WarningIcon className="badge-box__badge-icon" />,
   disabled: '',
   error: '',

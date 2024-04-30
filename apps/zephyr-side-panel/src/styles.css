@@ -5,7 +5,7 @@
   --color__error--500: #ff7b7b;
   --color__midnight--300: #a4aab9;
   --color__midnight--400: #73768f;
-  --color__midnight--500: #7b84a3;
+  --color__midnight--500: #424960;
   --color__midnight--600: #30374e;
   --color__midnight--700: #1c1f2b;
   --color__midnight--800: #171923;
@@ -95,6 +95,58 @@ h4 {
 .error path {
   fill: var(--color__error--500);
 }
+
+/* Livereload checkbox */
+.livereload-checkbox {
+  display: block;
+  position: relative;
+  padding-left: 28px;
+  margin-top: 8px;
+  color: var(--color__white--0);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+  -moz-user-select: none; /* mozilla browsers */
+  -khtml-user-select: none; /* webkit (konqueror) browsers */
+  -ms-user-select: none; /* IE10+ */
+}
+
+.livereload-checkbox .input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.livereload-checkbox .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  border: 2px solid var(--color__midnight--500);
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.livereload-checkbox .input:checked ~ .checkmark {
+  background-color: var(--color__blue--500);
+  border: none;
+}
+
+.livereload-checkbox .input ~ .checkmark .checkmark-icon {
+  display: none;
+}
+
+.livereload-checkbox .input:checked ~ .checkmark .checkmark-icon {
+  display: inline-block;
+}
+
+/* Livereload checkbox */
 
 /* Status badge */
 .badge-box {

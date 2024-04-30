@@ -1,14 +1,25 @@
-export async function getActiveTabUrl(
-  url?: string
-): Promise<string | undefined> {
+interface GetActiveTabUrlParams {
+  url?: string;
+  /**
+   * If true, returns the full URL, otherwise just the origin
+   */
+  fullUrl?: boolean;
+}
+
+export async function getActiveTabUrl({
+  url,
+  fullUrl
+}: GetActiveTabUrlParams = {}): Promise<string | undefined> {
   try {
     if (url) {
-      return new URL(url).origin;
+      const tabUrl = new URL(url);
+      return fullUrl ? tabUrl.href : tabUrl.origin;
     }
 
     const tabs = await chrome.tabs.query({ currentWindow: true, active: true });
+    const tabUrl = new URL(tabs[0]?.url ?? '');
 
-    return new URL(tabs[0]?.url ?? '').origin;
+    return fullUrl ? tabUrl.href : tabUrl.origin;
   } catch (e) {
     console.error(e);
     return undefined;
